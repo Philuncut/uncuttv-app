@@ -74,7 +74,7 @@ export default function Hero() {
         maxWidth: isMobile ? '100%' : '680px',
         display: 'flex', flexDirection: 'column',
         justifyContent: 'flex-start',
-        paddingTop: isMobile ? '72px' : '72px',
+        paddingTop: isMobile ? '72px' : '96px',
         width: '100%',
       }}>
 
