@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import {
+  sendWillkommenEmail,
   sendZahlungFehlgeschlagenEmail,
   sendAboGekuendigtEmail,
   sendTestphaseEndetEmail,
@@ -36,6 +37,18 @@ export async function POST(req: NextRequest) {
       await supabase.from('profiles').update({
         subscription_status: 'trialing',
       }).eq('id', userId)
+
+      // Willkommen-Email nur einmalig nach Checkout
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, welcome_email_sent')
+        .eq('id', userId)
+        .single()
+
+      if (profile?.email && !profile.welcome_email_sent) {
+        await sendWillkommenEmail(profile.email)
+        await supabase.from('profiles').update({ welcome_email_sent: true }).eq('id', userId)
+      }
       break
     }
 

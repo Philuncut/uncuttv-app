@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendWillkommenEmail } from '@/lib/emails'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -29,14 +28,9 @@ export async function GET(request: NextRequest) {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('age_verified, welcome_email_sent')
+      .select('age_verified')
       .eq('id', user.id)
       .single()
-
-    if (!profile?.welcome_email_sent && user.email) {
-      await sendWillkommenEmail(user.email)
-      await supabase.from('profiles').update({ welcome_email_sent: true }).eq('id', user.id)
-    }
 
     if (!profile?.age_verified) {
       return NextResponse.redirect(`${origin}/de/auth/verify-age`)
