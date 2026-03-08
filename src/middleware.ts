@@ -4,6 +4,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 const locales = ['de', 'en']
 const defaultLocale = 'de'
 
+// Filme die in Deutschland gesperrt sind – wird serverseitig geprüft
+// Die blocked_in_de Flag pro Film wird auf der Detailseite zusätzlich geprüft
+const GEO_BLOCKED_COUNTRY = 'DE'
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
@@ -19,6 +23,12 @@ export async function middleware(request: NextRequest) {
   if (!pathnameHasLocale) {
     const locale = request.headers.get('accept-language')?.startsWith('en') ? 'en' : defaultLocale
     return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url))
+  }
+
+  // Geo-Block: Deutschland kann keine Filme schauen
+  const country = request.geo?.country
+  if (country === GEO_BLOCKED_COUNTRY && pathname.includes('/films/')) {
+    return NextResponse.redirect(new URL(`/${defaultLocale}/geo-blocked`, request.url))
   }
 
   // Auth session refresh
