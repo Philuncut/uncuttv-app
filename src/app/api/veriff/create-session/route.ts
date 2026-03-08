@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const payload = {
     verification: {
-      callback: `${process.env.NEXT_PUBLIC_APP_URL}/api/veriff/webhook`,
+      callback: `${process.env.NEXT_PUBLIC_APP_URL}/de/auth/verify-age?status=submitted`,
       person: { idNumber: user.id },
       vendorData: user.id,
       timestamp: new Date().toISOString(),
