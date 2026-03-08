@@ -1,3 +1,7 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
 const FEATURES = [
   { title: 'Weltweites Indie-Kino', desc: 'Unabhängige Filme aus aller Welt' },
   { title: 'HD & 4K Streaming', desc: 'Adaptives Bitrate-Streaming für jede Verbindung' },
@@ -6,30 +10,40 @@ const FEATURES = [
 ]
 
 export default function UspSection() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   return (
     <>
       <div className="red-divider" />
       <section style={{
-        padding: '100px 48px',
+        padding: isMobile ? '48px 20px' : '100px 48px',
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '80px',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: isMobile ? '32px' : '80px',
         alignItems: 'center',
       }}>
         {/* Price visual */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(6rem, 12vw, 14rem)',
+            fontSize: isMobile ? 'clamp(5rem, 20vw, 8rem)' : 'clamp(6rem, 12vw, 14rem)',
             lineHeight: 0.9,
             color: 'var(--warm-white)',
             letterSpacing: '-0.02em',
             userSelect: 'none',
             background: 'var(--anthrazit2)',
             border: '1px solid rgba(229,9,20,0.15)',
-            padding: '48px 56px 40px',
+            padding: isMobile ? '24px 32px 20px' : '48px 56px 40px',
             textAlign: 'center',
             position: 'relative',
+            width: isMobile ? '100%' : 'auto',
           }}>
             <sup style={{ fontSize: '0.35em', color: 'var(--red)', verticalAlign: 'super' }}>€</sup>
             19,90
@@ -37,7 +51,7 @@ export default function UspSection() {
               fontFamily: 'var(--font-body)', fontWeight: 300,
               fontSize: '0.85rem', letterSpacing: '0.18em',
               textTransform: 'uppercase', color: 'var(--grey)',
-              marginTop: '12px', textAlign: 'center',
+              marginTop: '8px', textAlign: 'center',
             }}>
               pro Monat
             </div>
@@ -48,22 +62,22 @@ export default function UspSection() {
         <div>
           <h2 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.5rem, 4vw, 4rem)',
+            fontSize: isMobile ? 'clamp(2rem, 8vw, 3rem)' : 'clamp(2.5rem, 4vw, 4rem)',
             letterSpacing: '0.04em', lineHeight: 1.05,
-            marginBottom: '24px', color: 'var(--warm-white)',
+            marginBottom: '16px', color: 'var(--warm-white)',
           }}>
             Film wie er sein sollte.<br />KEIN KOMPROMISS.
           </h2>
 
           <p style={{
-            fontSize: '1rem', lineHeight: 1.8,
-            color: 'var(--grey-light)', marginBottom: '40px', maxWidth: '480px',
+            fontSize: '0.92rem', lineHeight: 1.8,
+            color: 'var(--grey-light)', marginBottom: '24px', maxWidth: '480px',
           }}>
             UncutTV ist die Streaming-Plattform für Independent-Film. Keine Mainstream-Produktionen,
             kein Studio-Diktat – nur echtes, unabhängiges Kino aus aller Welt.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {FEATURES.map((f) => (
               <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                 <div style={{
