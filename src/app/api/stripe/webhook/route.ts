@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
         subscription_status: sub.status,
       }).eq('id', userId)
 
+      const subAny = sub as any
       await supabase.from('subscriptions').upsert({
         user_id: userId,
         stripe_subscription_id: sub.id,
@@ -58,8 +59,8 @@ export async function POST(req: NextRequest) {
         status: sub.status,
         trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
         trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
-        current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+        current_period_start: subAny.current_period_start ? new Date(subAny.current_period_start * 1000).toISOString() : null,
+        current_period_end: subAny.current_period_end ? new Date(subAny.current_period_end * 1000).toISOString() : null,
       }, { onConflict: 'stripe_subscription_id' })
       break
     }
@@ -79,7 +80,6 @@ export async function POST(req: NextRequest) {
         canceled_at: new Date().toISOString(),
       }).eq('stripe_subscription_id', sub.id)
 
-      // Email: Abo gekündigt
       const { data: profile } = await supabase
         .from('profiles')
         .select('email')
@@ -87,9 +87,12 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (profile?.email) {
-        const endDate = new Date(sub.current_period_end * 1000).toLocaleDateString('de-AT', {
-          day: '2-digit', month: '2-digit', year: 'numeric'
-        })
+        const subAny = sub as any
+        const endDate = subAny.current_period_end
+          ? new Date(subAny.current_period_end * 1000).toLocaleDateString('de-AT', {
+              day: '2-digit', month: '2-digit', year: 'numeric'
+            })
+          : ''
         await sendAboGekuendigtEmail(profile.email, endDate)
       }
       break
@@ -105,7 +108,6 @@ export async function POST(req: NextRequest) {
         subscription_status: 'past_due',
       }).eq('id', userId)
 
-      // Email: Zahlung fehlgeschlagen
       const { data: profile } = await supabase
         .from('profiles')
         .select('email')
@@ -124,7 +126,6 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      // Email: Testphase endet bald (Stripe sendet dies 3 Tage vor Ende)
       const { data: profile } = await supabase
         .from('profiles')
         .select('email')
