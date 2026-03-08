@@ -23,7 +23,6 @@ export default function PaymentFailedPage() {
       padding: '48px 24px',
     }}>
 
-      {/* Logo */}
       <Link href="/de/films" style={{
         fontFamily: 'var(--font-display)', fontSize: '2rem',
         letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
@@ -32,7 +31,6 @@ export default function PaymentFailedPage() {
         UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
       </Link>
 
-      {/* Card */}
       <div style={{
         width: '100%', maxWidth: '480px',
         border: '1px solid rgba(229,9,20,0.3)',
@@ -41,14 +39,12 @@ export default function PaymentFailedPage() {
         boxShadow: '0 0 60px rgba(229,9,20,0.06)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Red top bar */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           height: '3px', background: 'var(--red)',
           boxShadow: '0 0 20px rgba(229,9,20,0.8)',
         }} />
 
-        {/* Icon */}
         <div style={{
           width: '56px', height: '56px', borderRadius: '50%',
           background: 'rgba(229,9,20,0.12)',
@@ -85,7 +81,6 @@ export default function PaymentFailedPage() {
 
         {!email && <div style={{ marginBottom: '32px' }} />}
 
-        {/* Was passiert jetzt */}
         <div style={{
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -101,10 +96,9 @@ export default function PaymentFailedPage() {
           <div>③ Nach erfolgreicher Zahlung wird dein Zugang sofort wiederhergestellt</div>
         </div>
 
-        {/* Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
-            <a href="https://billing.stripe.com/p/login/test_00000000"
+            href="https://billing.stripe.com/p/login/test_00000000"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
@@ -112,13 +106,15 @@ export default function PaymentFailedPage() {
           >
             Zahlungsmethode aktualisieren
           </a>
-          <Link href="/de/auth/login" style={{
-            textAlign: 'center', padding: '12px',
-            fontSize: '0.82rem', color: 'var(--grey)',
-            textDecoration: 'none', letterSpacing: '0.06em',
-            border: '1px solid rgba(255,255,255,0.08)',
-            transition: 'color 0.2s',
-          }}
+          <Link
+            href="/de/auth/login"
+            style={{
+              textAlign: 'center', padding: '12px',
+              fontSize: '0.82rem', color: 'var(--grey)',
+              textDecoration: 'none', letterSpacing: '0.06em',
+              border: '1px solid rgba(255,255,255,0.08)',
+              transition: 'color 0.2s',
+            }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey)')}
           >
