@@ -30,20 +30,27 @@ export default function RegisterPage() {
 
     setLoading(true)
 
-    const { error } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName },
-      },
+      options: { data: { full_name: fullName } },
     })
 
-    if (error) {
-      setError(error.message)
+    if (signUpError) {
+      setError(signUpError.message)
       setLoading(false)
-    } else {
-      router.push('/de/auth/verify-age')
+      return
     }
+
+    // Direkt einloggen nach Registrierung
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
+    if (loginError) {
+      setError(loginError.message)
+      setLoading(false)
+      return
+    }
+
+    router.push('/de/auth/verify-age')
   }
 
   async function handleGoogleRegister() {
