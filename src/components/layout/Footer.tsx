@@ -1,9 +1,25 @@
 import Link from 'next/link'
 
 const LINKS = {
-  Plattform: ['Alle Filme', 'Neuheiten', 'Genres', 'Suche'],
-  Entdecken: ['Neue Filme', 'Genres', 'Länder', 'FAQ'],
-  Rechtliches: ['Impressum', 'Datenschutz', 'AGB', 'Jugendschutz'],
+  Plattform: [
+    { label: 'Alle Filme', href: '/de/films' },
+    { label: 'Neuheiten', href: '/de/films' },
+    { label: 'Genres', href: '/de/films' },
+    { label: 'Suche', href: '/de/films' },
+  ],
+
+  Entdecken: [
+    { label: 'Neue Filme', href: '/de/films' },
+    { label: 'Genres', href: '/de/films' },
+    { label: 'Länder', href: '/de/films' },
+    { label: 'FAQ', href: '/de/faq' },
+  ],
+  Rechtliches: [
+    { label: 'Impressum', href: '/de/impressum' },
+    { label: 'Datenschutz', href: '/de/datenschutz' },
+    { label: 'AGB', href: '/de/agb' },
+    { label: 'Jugendschutz', href: '/de/jugendschutz' },
+  ],
 }
 
 export default function Footer() {
@@ -42,13 +58,17 @@ export default function Footer() {
             }}>
               {title}
             </h4>
-            <ul style={{ listStyle: 'none' }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {items.map((item) => (
-                <li key={item} style={{ marginBottom: '10px' }}>
-                  <Link href="#" style={{
+                <li key={item.label} style={{ marginBottom: '10px' }}>
+                  <Link href={item.href} style={{
                     color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.85rem',
-                  }}>
-                    {item}
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}
+                  >
+                    {item.label}
                   </Link>
                 </li>
               ))}
