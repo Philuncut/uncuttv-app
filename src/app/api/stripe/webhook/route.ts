@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
         status: sub.status,
         trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
         trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
-        current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+        current_period_start: new Date((sub as any).current_period_start * 1000).toISOString(),
+        current_period_end: new Date((sub as any).current_period_end * 1000).toISOString(),
       }, { onConflict: 'stripe_subscription_id' })
       break
     }
