@@ -12,6 +12,7 @@ const FEATURES = [
 ]
 
 export default function PricingSection() {
+  const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly')
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -20,6 +21,19 @@ export default function PricingSection() {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
+
+  const isYearly = plan === 'yearly'
+
+  async function handleCheckout() {
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan }),
+    })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+    else window.location.href = '/de/auth/register'
+  }
 
   return (
     <section id="pricing" style={{
@@ -44,10 +58,49 @@ export default function PricingSection() {
       <p style={{
         fontFamily: 'var(--font-body)', fontWeight: 300,
         fontSize: '1rem', letterSpacing: '0.08em',
-        color: 'var(--grey)', marginBottom: isMobile ? '32px' : '64px',
+        color: 'var(--grey)', marginBottom: '32px',
       }}>
         Ein Abo. Alles drin. Jeden Monat kündbar.
       </p>
+
+      {/* Toggle */}
+      <div style={{
+        display: 'inline-flex', marginBottom: isMobile ? '32px' : '48px',
+        border: '1px solid rgba(255,255,255,0.12)',
+        overflow: 'hidden',
+      }}>
+        <button
+          onClick={() => setPlan('monthly')}
+          style={{
+            padding: '10px 24px', border: 'none', cursor: 'pointer',
+            fontSize: '0.82rem', letterSpacing: '0.08em',
+            background: !isYearly ? 'var(--red)' : 'transparent',
+            color: !isYearly ? 'white' : 'var(--grey)',
+            transition: 'all 0.2s',
+          }}
+        >
+          Monatlich
+        </button>
+        <button
+          onClick={() => setPlan('yearly')}
+          style={{
+            padding: '10px 24px', border: 'none', cursor: 'pointer',
+            fontSize: '0.82rem', letterSpacing: '0.08em',
+            background: isYearly ? 'var(--red)' : 'transparent',
+            color: isYearly ? 'white' : 'var(--grey)',
+            transition: 'all 0.2s',
+            display: 'flex', alignItems: 'center', gap: '8px',
+          }}
+        >
+          Jährlich
+          <span style={{
+            fontSize: '0.65rem', background: 'rgba(255,255,255,0.15)',
+            padding: '2px 6px', letterSpacing: '0.06em',
+          }}>
+            -16%
+          </span>
+        </button>
+      </div>
 
       <div style={{
         maxWidth: '480px', margin: '0 auto',
@@ -61,8 +114,35 @@ export default function PricingSection() {
           background: 'linear-gradient(to right, transparent, var(--red), transparent)',
         }} />
 
+        {/* Price display */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: isMobile ? '3rem' : '4rem',
+            letterSpacing: '0.02em', color: 'var(--warm-white)',
+            lineHeight: 1,
+          }}>
+            <sup style={{ fontSize: '0.4em', color: 'var(--red)', verticalAlign: 'super' }}>€</sup>
+            {isYearly ? '199,90' : '19,90'}
+          </div>
+          <div style={{
+            fontSize: '0.8rem', color: 'var(--grey)',
+            letterSpacing: '0.1em', marginTop: '6px',
+          }}>
+            {isYearly ? 'PRO JAHR · entspricht 16,66€/Monat' : 'PRO MONAT · 7 Tage kostenlos testen'}
+          </div>
+          {isYearly && (
+            <div style={{
+              marginTop: '8px', fontSize: '0.75rem',
+              color: '#22c55e', letterSpacing: '0.06em',
+            }}>
+              Du sparst 38,90€ im Vergleich zum Monatsabo
+            </div>
+          )}
+        </div>
+
         <div style={{
-          fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
+          fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.3rem' : '1.6rem',
           letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '24px',
         }}>
           Bereit für echtes Kino?
@@ -82,11 +162,13 @@ export default function PricingSection() {
           ))}
         </ul>
 
-        <a href="/de/auth/register" className="btn-primary" style={{
-          width: '100%', textAlign: 'center', display: 'block',
-        }}>
-          Jetzt 7 Tage kostenlos testen
-        </a>
+        <button
+          onClick={handleCheckout}
+          className="btn-primary"
+          style={{ width: '100%', textAlign: 'center', display: 'block', cursor: 'pointer' }}
+        >
+          {isYearly ? 'Jetzt Jahresabo starten' : 'Jetzt 7 Tage kostenlos testen'}
+        </button>
 
         <p style={{
           fontSize: '0.72rem', color: 'var(--grey)',

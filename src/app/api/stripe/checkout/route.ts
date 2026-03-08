@@ -12,6 +12,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 })
   }
 
+  const { plan } = await req.json().catch(() => ({ plan: 'monthly' }))
+  const isYearly = plan === 'yearly'
+
   // Check age verification
   const { data: profile } = await supabase
     .from('profiles')
@@ -40,20 +43,17 @@ export async function POST(req: NextRequest) {
       .eq('id', user.id)
   }
 
+  const priceId = isYearly
+    ? process.env.STRIPE_YEARLY_PRICE_ID!
+    : process.env.STRIPE_PRICE_ID!
+
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
-    line_items: [
-      {
-        price: process.env.STRIPE_PRICE_ID!,
-        quantity: 1,
-      },
-    ],
+    line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
-    subscription_data: {
-      trial_period_days: 7,
-    },
+    subscription_data: isYearly ? {} : { trial_period_days: 7 },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/de/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/de/subscribe`,
     locale: 'de',
