@@ -1,0 +1,43 @@
+{
+  "nav": {
+    "films": "Films",
+    "new": "New Releases",
+    "genres": "Genres",
+    "login": "Sign In",
+    "start": "Get Started"
+  },
+  "hero": {
+    "eyebrow": "Indie Film Platform",
+    "tagline": "Cinema without compromise. Independent.",
+    "tagline2": "The way film was meant to be.",
+    "cta_primary": "Watch Now",
+    "cta_secondary": "Learn More",
+    "price_label": "/ month · Unlimited · Cancel anytime"
+  },
+  "pricing": {
+    "eyebrow": "Membership",
+    "title": "SIMPLE. FAIR. UNCUT.",
+    "subtitle": "One subscription. Everything included. Cancel anytime.",
+    "headline": "Ready for real cinema?",
+    "cta": "Start your 7-day free trial",
+    "disclaimer": "UncutTV is exclusively for persons aged 18 and over. Age verification required.",
+    "features": {
+      "streaming": "Unlimited streaming of all films",
+      "quality": "HD & 4K streaming on all devices",
+      "new": "New films every month",
+      "devices": "iOS, Android, Smart TV, Web",
+      "cancel": "Cancel monthly – no commitment",
+      "content": "Exclusive indie content from around the world"
+    }
+  },
+  "manifesto": {
+    "quote": "Independent cinema has the boldest voices in the world — they deserve a stage without filters.",
+    "source": "The UncutTV Manifesto"
+  },
+  "footer": {
+    "description": "The streaming platform for independent film. Unfiltered. Uncensored. Fair.",
+    "platform": "Platform",
+    "discover": "Discover",
+    "legal": "Legal"
+  }
+}

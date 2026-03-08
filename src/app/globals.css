@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --black: #0a0a0a;
+  --anthrazit: #141414;
+  --anthrazit2: #1c1c1c;
+  --anthrazit3: #242424;
+  --red: #E50914;
+  --red-dark: #b0060f;
+  --warm-white: #f0ece4;
+  --grey: #888;
+  --grey-light: #bbb;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-serif: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--warm-white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Red scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--red); }
+::-webkit-scrollbar-thumb:hover { background: var(--red-dark); }
+* { scrollbar-width: thin; scrollbar-color: var(--red) var(--black); }
+
+/* Noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Carousel animation */
+@keyframes carouselScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.carousel-track {
+  animation: carouselScroll 50s linear infinite;
+}
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+/* Scroll hint animation */
+@keyframes scrollline {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  50%  { transform: scaleY(1); transform-origin: top; }
+  51%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* Button glow */
+.btn-primary {
+  background: var(--red);
+  color: white;
+  padding: 16px 40px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover {
+  background: var(--red-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px rgba(229,9,20,0.5), 0 0 48px rgba(229,9,20,0.2);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--warm-white);
+  border: 1px solid rgba(240,236,228,0.25);
+  padding: 16px 32px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  border-color: var(--warm-white);
+  background: rgba(240,236,228,0.05);
+  box-shadow: 0 0 20px rgba(240,236,228,0.08);
+}
+
+/* Red divider */
+.red-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--red), transparent);
+  margin: 0 48px;
+  opacity: 0.4;
+}
+
+/* Fade in animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
