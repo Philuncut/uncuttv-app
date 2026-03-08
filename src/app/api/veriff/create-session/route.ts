@@ -40,9 +40,10 @@ export async function POST(req: NextRequest) {
   })
 
   const data = await response.json()
+  console.log('Veriff API response:', response.status, JSON.stringify(data))
 
   if (!response.ok) {
-    return NextResponse.json({ error: 'Veriff Fehler' }, { status: 500 })
+    return NextResponse.json({ error: 'Veriff Fehler', detail: data, status: response.status }, { status: 500 })
   }
 
   return NextResponse.json({ url: data.verification.url })
