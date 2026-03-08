@@ -73,7 +73,7 @@ export default function Hero() {
         position: 'relative', zIndex: 2,
         maxWidth: isMobile ? '100%' : '680px',
         display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         paddingTop: isMobile ? '72px' : '88px',
         width: '100%',
       }}>
