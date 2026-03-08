@@ -16,6 +16,17 @@ export default function PaymentFailedPage() {
     getUser()
   }, [])
 
+  async function handleBillingPortal() {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/stripe/portal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session?.access_token}` },
+    })
+    const { url, error } = await res.json()
+    if (url) window.location.href = url
+    else alert('Fehler beim Öffnen des Portals: ' + (error || 'Unbekannter Fehler'))
+  }
+
   return (
     <div style={{
       minHeight: '100vh', background: 'var(--black)',
@@ -97,15 +108,13 @@ export default function PaymentFailedPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          
-            <a href="https://billing.stripe.com/p/login/test_00000000"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={handleBillingPortal}
             className="btn-primary"
-            style={{ textAlign: 'center', display: 'block' }}
+            style={{ textAlign: 'center', display: 'block', width: '100%', cursor: 'pointer' }}
           >
             Zahlungsmethode aktualisieren
-          </a>
+          </button>
           <Link
             href="/de/auth/login"
             style={{

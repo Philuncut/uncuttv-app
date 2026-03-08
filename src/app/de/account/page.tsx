@@ -35,6 +35,17 @@ export default function AccountPage() {
     router.push('/de/auth/login')
   }
 
+  async function handleBillingPortal() {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/stripe/portal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session?.access_token}` },
+    })
+    const { url, error } = await res.json()
+    if (url) window.location.href = url
+    else alert('Fehler beim Öffnen des Portals: ' + (error || 'Unbekannter Fehler'))
+  }
+
   function getStatusLabel(status: string) {
     switch (status) {
       case 'active': return { label: 'Aktiv', color: '#22c55e' }
@@ -258,16 +269,16 @@ export default function AccountPage() {
           }}>Aktionen</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            
-              <a href="https://billing.stripe.com/p/login/test_00000000"
-              target="_blank"
-              rel="noopener noreferrer"
+
+            <button
+              onClick={handleBillingPortal}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: '14px 16px',
                 border: `1px solid ${hoverPayment ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
-                color: 'var(--warm-white)', textDecoration: 'none',
-                fontSize: '0.85rem', letterSpacing: '0.04em',
+                background: 'transparent',
+                color: 'var(--warm-white)',
+                fontSize: '0.85rem', letterSpacing: '0.04em', cursor: 'pointer',
                 transition: 'border-color 0.2s',
               }}
               onMouseEnter={() => setHoverPayment(true)}
@@ -275,13 +286,13 @@ export default function AccountPage() {
             >
               <span>Zahlungsmethode verwalten</span>
               <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>{'→'}</span>
-            </a>
+            </button>
 
             {profile?.subscription_status !== 'canceled' && (
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm('Möchtest du dein Abo wirklich kündigen? Du hast bis zum Ende der Laufzeit weiter Zugang.')) {
-                    window.open('https://billing.stripe.com/p/login/test_00000000', '_blank')
+                    await handleBillingPortal()
                   }
                 }}
                 style={{
