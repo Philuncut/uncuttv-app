@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
 
     case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.CheckoutSession
+      const session = event.data.object as Stripe.Checkout.Session
       const userId = session.metadata?.supabase_user_id
       if (!userId) break
       await supabase.from('profiles').update({
@@ -74,7 +74,6 @@ export async function POST(req: NextRequest) {
       break
     }
 
-    // Zahlung fehlgeschlagen → Zugang sperren, Email geht automatisch von Stripe
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice
       const customerId = invoice.customer as string
@@ -82,7 +81,6 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      // Stripe versucht es automatisch nochmal – wir setzen Status auf past_due
       await supabase.from('profiles').update({
         subscription_status: 'past_due',
       }).eq('id', userId)
@@ -90,14 +88,11 @@ export async function POST(req: NextRequest) {
       await supabase.from('subscriptions').update({
         status: 'past_due',
       }).eq('user_id', userId)
-
       break
     }
 
-    // Zahlung erfolgreich (auch nach fehlgeschlagenem Versuch) → Zugang wiederherstellen
     case 'invoice.payment_succeeded': {
       const invoice = event.data.object as Stripe.Invoice
-      // Nur bei wiederkehrenden Zahlungen, nicht beim ersten Checkout
       if (invoice.billing_reason === 'subscription_create') break
 
       const customerId = invoice.customer as string
@@ -112,7 +107,6 @@ export async function POST(req: NextRequest) {
       await supabase.from('subscriptions').update({
         status: 'active',
       }).eq('user_id', userId)
-
       break
     }
 
