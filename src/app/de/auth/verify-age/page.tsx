@@ -8,10 +8,10 @@ import { useRouter } from 'next/navigation'
 export default function VerifyAgePage() {
   const router = useRouter()
   const supabase = createClient()
-  const [status, setStatus] = useState<'pending' | 'approved' | 'checking'>('checking')
+  const [status, setStatus] = useState<'checking' | 'pending' | 'approved' | 'starting' | 'error'>('checking')
 
   useEffect(() => {
-    async function checkVerification() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/de/auth/login'); return }
 
@@ -24,16 +24,45 @@ export default function VerifyAgePage() {
       if (profile?.age_verified) {
         setStatus('approved')
         setTimeout(() => router.push('/de/subscribe'), 1500)
-      } else {
+        return
+      }
+
+      // Check if we're returning from Veriff (query param)
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('status') === 'submitted') {
         setStatus('pending')
+        // Poll for approval
+        const interval = setInterval(async () => {
+          const { data: p } = await supabase
+            .from('profiles')
+            .select('age_verified')
+            .eq('id', user.id)
+            .single()
+          if (p?.age_verified) {
+            clearInterval(interval)
+            setStatus('approved')
+            setTimeout(() => router.push('/de/subscribe'), 1500)
+          }
+        }, 3000)
+        return
+      }
+
+      // Auto-start Veriff session
+      setStatus('starting')
+      try {
+        const res = await fetch('/api/veriff/create-session', { method: 'POST' })
+        const data = await res.json()
+        if (data.url) {
+          window.location.href = data.url
+        } else {
+          setStatus('error')
+        }
+      } catch {
+        setStatus('error')
       }
     }
 
-    checkVerification()
-
-    // Poll every 3 seconds
-    const interval = setInterval(checkVerification, 3000)
-    return () => clearInterval(interval)
+    init()
   }, [])
 
   return (
@@ -61,13 +90,16 @@ export default function VerifyAgePage() {
             background: 'linear-gradient(to right, transparent, var(--red), transparent)',
           }} />
 
-          {status === 'checking' && (
+          {(status === 'checking' || status === 'starting') && (
             <>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⏳</div>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛡️</div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px' }}>
-                WIRD GEPRÜFT...
+                ALTERSVERIFIKATION
               </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', lineHeight: 1.7, marginBottom: '8px' }}>
+                Du wirst zu unserem Verifikationspartner weitergeleitet...
+              </p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--grey)' }}>
                 Einen Moment bitte.
               </p>
             </>
@@ -75,7 +107,7 @@ export default function VerifyAgePage() {
 
           {status === 'pending' && (
             <>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛡️</div>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⏳</div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px' }}>
                 VERIFIKATION LÄUFT
               </h2>
@@ -98,6 +130,25 @@ export default function VerifyAgePage() {
               <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)' }}>
                 Du wirst weitergeleitet...
               </p>
+            </>
+          )}
+
+          {status === 'error' && (
+            <>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px' }}>
+                FEHLER
+              </h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '24px' }}>
+                Verifikation konnte nicht gestartet werden.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary"
+                style={{ width: '100%', cursor: 'pointer' }}
+              >
+                Nochmal versuchen
+              </button>
             </>
           )}
         </div>
