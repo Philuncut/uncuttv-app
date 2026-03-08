@@ -55,18 +55,6 @@ export default function RegisterPage() {
     })
   }
 
-  async function startVeriff() {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/veriff/create-session', { method: 'POST' })
-      const { url } = await res.json()
-      window.location.href = url
-    } catch {
-      setError('Veriff konnte nicht gestartet werden. Bitte versuche es erneut.')
-      setLoading(false)
-    }
-  }
-
   if (step === 'veriff') {
     return (
       <div style={{
@@ -110,29 +98,27 @@ export default function RegisterPage() {
               ))}
             </div>
 
-            {/* Shield icon */}
-            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛡️</div>
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✉️</div>
 
             <h2 style={{
               fontFamily: 'var(--font-display)', fontSize: '1.8rem',
               letterSpacing: '0.06em', marginBottom: '12px', color: 'var(--warm-white)',
             }}>
-              ALTERSVERIFIKATION
+              EMAIL BESTÄTIGEN
             </h2>
 
             <p style={{
               fontSize: '0.85rem', color: 'var(--grey-light)',
               lineHeight: 1.7, marginBottom: '12px',
             }}>
-              UncutTV ist ausschließlich für Personen ab 18 Jahren.
-              Bitte verifiziere dein Alter mit einem gültigen Ausweis.
+              Wir haben eine Bestätigungs-Email an <strong style={{ color: 'var(--warm-white)' }}>{email}</strong> geschickt.
             </p>
 
             <p style={{
               fontSize: '0.78rem', color: 'var(--grey)',
               lineHeight: 1.6, marginBottom: '32px',
             }}>
-              ⏱ Dauert nur 60–90 Sekunden · Einmalig · Sicher durch Veriff
+              Klicke auf den Link in der Email – danach startet die Altersverifikation automatisch.
             </p>
 
             {error && (
@@ -145,14 +131,8 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <button onClick={startVeriff} disabled={loading} className="btn-primary" style={{
-              width: '100%', textAlign: 'center', opacity: loading ? 0.7 : 1,
-            }}>
-              {loading ? 'Wird gestartet...' : 'Jetzt Alter verifizieren →'}
-            </button>
-
             <p style={{ marginTop: '16px', fontSize: '0.72rem', color: 'var(--grey)' }}>
-              Deine Daten werden sicher verarbeitet und nicht gespeichert.
+              Keine Email erhalten? Prüfe deinen Spam-Ordner.
             </p>
           </div>
         </div>
@@ -249,7 +229,6 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleRegister}>
-            {/* Full Name */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{
                 display: 'block', fontSize: '0.72rem', letterSpacing: '0.14em',
@@ -269,7 +248,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Email */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{
                 display: 'block', fontSize: '0.72rem', letterSpacing: '0.14em',
@@ -289,7 +267,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Password */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{
                 display: 'block', fontSize: '0.72rem', letterSpacing: '0.14em',
@@ -309,7 +286,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Confirm Password */}
             <div style={{ marginBottom: '24px' }}>
               <label style={{
                 display: 'block', fontSize: '0.72rem', letterSpacing: '0.14em',
@@ -339,7 +315,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* AGB */}
             <p style={{ fontSize: '0.72rem', color: 'var(--grey)', marginBottom: '20px', lineHeight: 1.6 }}>
               Mit der Registrierung stimmst du unseren{' '}
               <Link href="/de/agb" style={{ color: 'var(--red)' }}>AGB</Link>{' '}
