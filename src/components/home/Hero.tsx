@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 const POSTER_GRADIENTS = [
   'linear-gradient(160deg, #1a0a0a 0%, #3d1010 30%, #0a0505 70%, #050505 100%)',
   'linear-gradient(200deg, #080815 0%, #10183d 30%, #050510 70%, #050505 100%)',
@@ -11,7 +13,6 @@ const POSTER_GRADIENTS = [
   'linear-gradient(160deg, #050510 0%, #0a102a 40%, #0a0a0a 100%)',
 ]
 
-// Duplicate for seamless infinite loop
 const ALL_POSTERS = [...POSTER_GRADIENTS, ...POSTER_GRADIENTS]
 
 const BG_COLS = [
@@ -23,11 +24,22 @@ const BG_COLS = [
 ]
 
 export default function Hero() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   return (
     <section style={{
-      position: 'relative', minHeight: '100vh',
+      position: 'relative',
+      minHeight: isMobile ? 'calc(100svh - 0px)' : '100vh',
       display: 'flex', alignItems: 'stretch',
-      padding: '0 48px 80px', overflow: 'hidden',
+      padding: isMobile ? '0 20px 48px' : '0 48px 80px',
+      overflow: 'hidden',
     }}>
       {/* Background film strip */}
       <div style={{
@@ -58,16 +70,20 @@ export default function Hero() {
 
       {/* Content */}
       <div style={{
-        position: 'relative', zIndex: 2, maxWidth: '680px',
+        position: 'relative', zIndex: 2,
+        maxWidth: isMobile ? '100%' : '680px',
         display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between', paddingTop: '88px', width: '100%',
+        justifyContent: 'space-between',
+        paddingTop: isMobile ? '72px' : '88px',
+        width: '100%',
       }}>
 
         {/* Auto-scroll Carousel */}
-        <div style={{ marginBottom: '28px' }}>
+        <div style={{ marginBottom: isMobile ? '20px' : '28px' }}>
           <div style={{
             fontSize: '0.68rem', letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: 'var(--grey)', marginBottom: '12px',
+            textTransform: 'uppercase', color: 'var(--grey)',
+            marginBottom: '12px',
           }}>
             Neu auf UncutTV
           </div>
@@ -77,28 +93,25 @@ export default function Hero() {
             WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
           }}>
             <div className="carousel-track" style={{
-              display: 'flex', gap: '10px', width: 'max-content',
+              display: 'flex', gap: '8px', width: 'max-content',
             }}>
               {ALL_POSTERS.map((grad, i) => (
                 <div key={i} style={{
-                  flexShrink: 0, width: '180px',
+                  flexShrink: 0,
+                  width: isMobile ? '100px' : '180px',
                   transition: 'transform 0.3s ease',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.06)')}
-                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                >
+                }}>
                   <div style={{
                     width: '100%', aspectRatio: '2/3',
                     background: grad,
                     outline: '1px solid rgba(255,255,255,0.06)',
                     position: 'relative', overflow: 'hidden',
                   }}>
-                    {/* 18+ badge */}
                     <div style={{
-                      position: 'absolute', top: '8px', right: '8px',
+                      position: 'absolute', top: '6px', right: '6px',
                       background: 'rgba(229,9,20,0.9)', color: 'white',
-                      fontSize: '0.6rem', fontWeight: 700,
-                      padding: '2px 5px', letterSpacing: '0.06em',
+                      fontSize: '0.55rem', fontWeight: 700,
+                      padding: '2px 4px', letterSpacing: '0.06em',
                     }}>18+</div>
                   </div>
                 </div>
@@ -111,7 +124,8 @@ export default function Hero() {
         <div>
           {/* Eyebrow */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px',
+            display: 'flex', alignItems: 'center', gap: '12px',
+            marginBottom: isMobile ? '12px' : '20px',
           }}>
             <div style={{ width: '32px', height: '1px', background: 'var(--red)' }} />
             <span style={{
@@ -125,8 +139,9 @@ export default function Hero() {
           {/* Title */}
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(5rem, 10vw, 9rem)',
-            lineHeight: 0.9, letterSpacing: '0.02em', marginBottom: '8px',
+            fontSize: isMobile ? 'clamp(4rem, 22vw, 6rem)' : 'clamp(5rem, 10vw, 9rem)',
+            lineHeight: 0.9, letterSpacing: '0.02em',
+            marginBottom: isMobile ? '12px' : '8px',
             color: 'var(--warm-white)',
           }}>
             UNCUT<br />
@@ -136,8 +151,9 @@ export default function Hero() {
           {/* Tagline */}
           <p style={{
             fontFamily: 'var(--font-body)', fontWeight: 300,
-            fontSize: 'clamp(1rem, 1.8vw, 1.3rem)',
-            color: 'var(--grey-light)', marginBottom: '32px',
+            fontSize: isMobile ? '0.92rem' : 'clamp(1rem, 1.8vw, 1.3rem)',
+            color: 'var(--grey-light)',
+            marginBottom: isMobile ? '24px' : '32px',
             letterSpacing: '0.04em', lineHeight: 1.7,
           }}>
             Kino ohne Kompromisse. Unabhängig.<br />
@@ -145,7 +161,13 @@ export default function Hero() {
           </p>
 
           {/* CTA Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '48px' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? '12px' : '24px',
+            marginBottom: isMobile ? '24px' : '48px',
+          }}>
             <a href="/de/auth/register" className="btn-primary">Jetzt ansehen</a>
             <a href="#pricing" className="btn-secondary">Mehr erfahren</a>
           </div>
@@ -161,20 +183,22 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll hint */}
-      <div style={{
-        position: 'absolute', bottom: '32px', right: '48px', zIndex: 2,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-        color: 'var(--grey)', fontSize: '0.7rem', letterSpacing: '0.2em',
-        textTransform: 'uppercase', writingMode: 'vertical-rl',
-      }}>
-        Entdecken
+      {/* Scroll hint – nur Desktop */}
+      {!isMobile && (
         <div style={{
-          width: '1px', height: '64px',
-          background: 'linear-gradient(to bottom, var(--grey), transparent)',
-          animation: 'scrollline 2s ease-in-out infinite',
-        }} />
-      </div>
+          position: 'absolute', bottom: '32px', right: '48px', zIndex: 2,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+          color: 'var(--grey)', fontSize: '0.7rem', letterSpacing: '0.2em',
+          textTransform: 'uppercase', writingMode: 'vertical-rl',
+        }}>
+          Entdecken
+          <div style={{
+            width: '1px', height: '64px',
+            background: 'linear-gradient(to bottom, var(--grey), transparent)',
+            animation: 'scrollline 2s ease-in-out infinite',
+          }} />
+        </div>
+      )}
     </section>
   )
 }
