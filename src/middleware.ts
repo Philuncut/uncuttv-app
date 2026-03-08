@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Geo-Block: Deutschland kann keine Filme schauen
-  const country = request.geo?.country
+  const country = (request as any).geo?.country
   if (country === GEO_BLOCKED_COUNTRY && pathname.includes('/films/')) {
     return NextResponse.redirect(new URL(`/${defaultLocale}/geo-blocked`, request.url))
   }
