@@ -98,7 +98,7 @@ export default function PaymentFailedPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
-            href="https://billing.stripe.com/p/login/test_00000000"
+            <a href="https://billing.stripe.com/p/login/test_00000000"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
