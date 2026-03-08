@@ -36,7 +36,7 @@ export default function Hero() {
   return (
     <section style={{
       position: 'relative',
-      minHeight: isMobile ? 'calc(100svh - 0px)' : '100vh',
+      minHeight: isMobile ? 'auto' : 'auto',
       display: 'flex', alignItems: 'stretch',
       padding: isMobile ? '0 20px 48px' : '0 48px 80px',
       overflow: 'hidden',
