@@ -73,13 +73,13 @@ export default function Hero() {
         position: 'relative', zIndex: 2,
         maxWidth: isMobile ? '100%' : '680px',
         display: 'flex', flexDirection: 'column',
-        justifyContent: 'flex-end',
-        paddingTop: isMobile ? '72px' : '88px',
+        justifyContent: 'flex-start',
+        paddingTop: isMobile ? '72px' : '72px',
         width: '100%',
       }}>
 
         {/* Auto-scroll Carousel */}
-        <div style={{ marginBottom: isMobile ? '20px' : '28px' }}>
+        <div style={{ marginBottom: isMobile ? '20px' : '16px',}}>
           <div style={{
             fontSize: '0.68rem', letterSpacing: '0.2em',
             textTransform: 'uppercase', color: 'var(--grey)',
