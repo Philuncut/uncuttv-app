@@ -9,6 +9,7 @@ export default function VerifyAgePage() {
   const router = useRouter()
   const supabase = createClient()
   const [status, setStatus] = useState<'checking' | 'pending' | 'approved' | 'starting' | 'error'>('checking')
+  const [errorDetail, setErrorDetail] = useState('')
 
   useEffect(() => {
     async function init() {
@@ -27,11 +28,9 @@ export default function VerifyAgePage() {
         return
       }
 
-      // Check if we're returning from Veriff (query param)
       const params = new URLSearchParams(window.location.search)
       if (params.get('status') === 'submitted') {
         setStatus('pending')
-        // Poll for approval
         const interval = setInterval(async () => {
           const { data: p } = await supabase
             .from('profiles')
@@ -52,12 +51,15 @@ export default function VerifyAgePage() {
       try {
         const res = await fetch('/api/veriff/create-session', { method: 'POST' })
         const data = await res.json()
+        console.log('Veriff response:', res.status, data)
         if (data.url) {
           window.location.href = data.url
         } else {
+          setErrorDetail(`Status: ${res.status} – ${JSON.stringify(data)}`)
           setStatus('error')
         }
-      } catch {
+      } catch (e: any) {
+        setErrorDetail(e?.message || 'Unbekannter Fehler')
         setStatus('error')
       }
     }
@@ -99,9 +101,7 @@ export default function VerifyAgePage() {
               <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', lineHeight: 1.7, marginBottom: '8px' }}>
                 Du wirst zu unserem Verifikationspartner weitergeleitet...
               </p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--grey)' }}>
-                Einen Moment bitte.
-              </p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--grey)' }}>Einen Moment bitte.</p>
             </>
           )}
 
@@ -112,12 +112,9 @@ export default function VerifyAgePage() {
                 VERIFIKATION LÄUFT
               </h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', lineHeight: 1.7, marginBottom: '24px' }}>
-                Deine Altersverifikation wird gerade verarbeitet.
-                Das dauert normalerweise weniger als eine Minute.
+                Deine Altersverifikation wird gerade verarbeitet. Das dauert normalerweise weniger als eine Minute.
               </p>
-              <p style={{ fontSize: '0.78rem', color: 'var(--grey)' }}>
-                Diese Seite aktualisiert sich automatisch...
-              </p>
+              <p style={{ fontSize: '0.78rem', color: 'var(--grey)' }}>Diese Seite aktualisiert sich automatisch...</p>
             </>
           )}
 
@@ -127,9 +124,7 @@ export default function VerifyAgePage() {
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px' }}>
                 VERIFIZIERT!
               </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)' }}>
-                Du wirst weitergeleitet...
-              </p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)' }}>Du wirst weitergeleitet...</p>
             </>
           )}
 
@@ -139,9 +134,14 @@ export default function VerifyAgePage() {
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px' }}>
                 FEHLER
               </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '24px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '12px' }}>
                 Verifikation konnte nicht gestartet werden.
               </p>
+              {errorDetail && (
+                <p style={{ fontSize: '0.72rem', color: 'var(--grey)', marginBottom: '24px', wordBreak: 'break-all' }}>
+                  {errorDetail}
+                </p>
+              )}
               <button
                 onClick={() => window.location.reload()}
                 className="btn-primary"
