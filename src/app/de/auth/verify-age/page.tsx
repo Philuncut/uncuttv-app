@@ -12,8 +12,20 @@ export default function VerifyAgePage() {
   const [errorDetail, setErrorDetail] = useState('')
 
   useEffect(() => {
-    async function init() {
+    const params = new URLSearchParams(window.location.search)
+    const isReturningFromVeriff = params.get('status') === 'submitted'
+
+    async function getUser() {
       const { data: { user } } = await supabase.auth.getUser()
+      if (user) return user
+      // Session möglicherweise abgelaufen – kurz warten und retry
+      await new Promise(r => setTimeout(r, 2000))
+      const { data: { user: retryUser } } = await supabase.auth.getUser()
+      return retryUser
+    }
+
+    async function init() {
+      const user = await getUser()
       if (!user) { router.push('/de/auth/login'); return }
 
       const { data: profile } = await supabase
@@ -28,20 +40,25 @@ export default function VerifyAgePage() {
         return
       }
 
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('status') === 'submitted') {
+      if (isReturningFromVeriff) {
         setStatus('pending')
+        // Poll alle 3 Sekunden für max. 5 Minuten
+        let attempts = 0
         const interval = setInterval(async () => {
+          attempts++
+          const u = await getUser()
+          if (!u) return
           const { data: p } = await supabase
             .from('profiles')
             .select('age_verified')
-            .eq('id', user.id)
+            .eq('id', u.id)
             .single()
           if (p?.age_verified) {
             clearInterval(interval)
             setStatus('approved')
             setTimeout(() => router.push('/de/subscribe'), 1500)
           }
+          if (attempts > 100) clearInterval(interval) // max 5 Min
         }, 3000)
         return
       }
@@ -51,7 +68,6 @@ export default function VerifyAgePage() {
       try {
         const res = await fetch('/api/veriff/create-session', { method: 'POST' })
         const data = await res.json()
-        console.log('Veriff response:', res.status, data)
         if (data.url) {
           window.location.href = data.url
         } else {
@@ -142,11 +158,7 @@ export default function VerifyAgePage() {
                   {errorDetail}
                 </p>
               )}
-              <button
-                onClick={() => window.location.reload()}
-                className="btn-primary"
-                style={{ width: '100%', cursor: 'pointer' }}
-              >
+              <button onClick={() => window.location.reload()} className="btn-primary" style={{ width: '100%', cursor: 'pointer' }}>
                 Nochmal versuchen
               </button>
             </>
