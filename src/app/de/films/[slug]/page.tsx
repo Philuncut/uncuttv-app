@@ -218,10 +218,7 @@ export default function FilmDetailPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 0 40px rgba(229,9,20,0.6)',
               }}>
-                {false
-                  ? <span style={{ fontSize: '1rem' }}>⏳</span>
-                  : <span style={{ fontSize: '2rem', marginLeft: '6px' }}>▶</span>
-                }
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="white" style={{marginLeft: "4px"}}><polygon points="5,3 19,12 5,21" /></svg>
               </div>
               <span style={{ fontSize: '0.8rem', letterSpacing: '0.2em', color: 'rgba(240,236,228,0.7)', textTransform: 'uppercase' }}>
                 {'Film abspielen'}
@@ -337,7 +334,8 @@ export default function FilmDetailPage() {
 
         {!blocked && (
           <button onClick={handlePlay} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '64px' }}>
-            ▶ JETZT ANSEHEN
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21" /></svg>
+            JETZT ANSEHEN
           </button>
         )}
       </div>
