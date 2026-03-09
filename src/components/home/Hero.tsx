@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from 'react'
 
-const POSTER_GRADIENTS = [
-  'linear-gradient(160deg, #1a0a0a 0%, #3d1010 30%, #0a0505 70%, #050505 100%)',
-  'linear-gradient(200deg, #080815 0%, #10183d 30%, #050510 70%, #050505 100%)',
-  'linear-gradient(140deg, #0a0a05 0%, #252510 30%, #0a0a05 70%, #050505 100%)',
-  'linear-gradient(170deg, #0f050f 0%, #251025 30%, #100510 70%, #050505 100%)',
-  'linear-gradient(150deg, #050f05 0%, #102510 30%, #050a05 70%, #050505 100%)',
-  'linear-gradient(180deg, #0f0a05 0%, #251a0a 30%, #0f0805 70%, #050505 100%)',
-  'linear-gradient(160deg, #1a0505 0%, #3d0a0a 40%, #0a0a0a 100%)',
-  'linear-gradient(160deg, #050510 0%, #0a102a 40%, #0a0a0a 100%)',
+const POSTERS = [
+  { src: '/thumbnails/agp1.jpg', label: 'KULT' },
+  { src: '/thumbnails/agp2.jpg', label: 'SCHOCKER' },
+  { src: '/thumbnails/agp3.jpg', label: 'INKL. PREQUEL' },
+  { src: '/thumbnails/ato4s.jpg', label: 'DRAMA' },
+  { src: '/thumbnails/backwood.jpg', label: 'DAS ORIGINAL' },
+  { src: '/thumbnails/nn9.jpg', label: 'MADE IN AUSTRIA' },
+  { src: '/thumbnails/vermaehlung.jpg', label: 'UNCUTTV PRODUCTION' },
+  { src: '/thumbnails/wam.jpg', label: 'REVENGE' },
 ]
 
-const ALL_POSTERS = [...POSTER_GRADIENTS, ...POSTER_GRADIENTS]
+const ALL_POSTERS = [...POSTERS, ...POSTERS]
 
 const BG_COLS = [
   'linear-gradient(160deg, #1a0505 0%, #3d0a0a 40%, #0a0a0a 100%)',
@@ -95,7 +95,7 @@ export default function Hero() {
             <div className="carousel-track" style={{
               display: 'flex', gap: '8px', width: 'max-content',
             }}>
-              {ALL_POSTERS.map((grad, i) => (
+              {ALL_POSTERS.map((poster, i) => (
                 <div key={i} style={{
                   flexShrink: 0,
                   width: isMobile ? '100px' : '180px',
@@ -103,16 +103,26 @@ export default function Hero() {
                 }}>
                   <div style={{
                     width: '100%', aspectRatio: '2/3',
-                    background: grad,
                     outline: '1px solid rgba(255,255,255,0.06)',
                     position: 'relative', overflow: 'hidden',
                   }}>
+                    <img
+                      src={poster.src}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
                     <div style={{
-                      position: 'absolute', top: '6px', right: '6px',
-                      background: 'rgba(229,9,20,0.9)', color: 'white',
-                      fontSize: '0.55rem', fontWeight: 700,
-                      padding: '2px 4px', letterSpacing: '0.06em',
-                    }}>18+</div>
+                      position: 'absolute', bottom: '0', left: '0', right: '0',
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                      padding: '16px 6px 6px',
+                      textAlign: 'center',
+                    }}>
+                      <span style={{
+                        color: 'var(--red, #c0392b)',
+                        fontSize: '0.5rem', fontWeight: 700,
+                        letterSpacing: '0.12em', textTransform: 'uppercase',
+                      }}>{poster.label}</span>
+                    </div>
                   </div>
                 </div>
               ))}
