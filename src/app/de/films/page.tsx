@@ -5,13 +5,13 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 type Film = {
-  uuid: string
+  id: string
   title: string
   slug: string
   short_description: string
   director: string
   year: number
-  country: string
+  country: string[]
   duration_minutes: number
   genres: string[]
   poster_url: string | null
@@ -99,7 +99,6 @@ function FilmCard({ film }: { film: Film }) {
 function ContinueCard({ entry }: { entry: WatchEntry }) {
   const [hovered, setHovered] = useState(false)
   const film = entry.film
-  // Estimate progress: last_position in seconds vs duration_minutes
   const totalSeconds = (film.duration_minutes || 90) * 60
   const progress = Math.min(Math.round((entry.last_position / totalSeconds) * 100), 99)
 
@@ -119,11 +118,7 @@ function ContinueCard({ entry }: { entry: WatchEntry }) {
           position: 'relative', overflow: 'hidden',
         }}>
           {film.backdrop_url && (
-            <img
-              src={film.backdrop_url}
-              alt={film.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
+            <img src={film.backdrop_url} alt={film.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           )}
           {hovered && (
             <div style={{
@@ -169,13 +164,11 @@ export default function FilmsPage() {
 
   useEffect(() => {
     async function loadData() {
-      // User
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const name = user.user_metadata?.full_name || user.email?.split('@')[0] || ''
         setUserName(name.split(' ')[0])
 
-        // Continue watching
         const { data: watchData } = await supabase
           .from('watchtime')
           .select('film_id, last_position, seconds_watched')
@@ -189,35 +182,30 @@ export default function FilmsPage() {
           const filmIds = watchData.map((w: any) => w.film_id)
           const { data: watchFilms } = await supabase
             .from('films')
-            .select('uuid, title, slug, director, year, country, duration_minutes, genres, poster_url, backdrop_url, is_featured, age_rating, short_description')
-            .in('uuid', filmIds)
+            .select('id, title, slug, director, year, country, duration_minutes, genres, poster_url, backdrop_url, is_featured, age_rating, short_description')
+            .in('id', filmIds)
             .eq('is_published', true)
 
           if (watchFilms) {
             const entries = watchData.map((w: any) => ({
               ...w,
-              film: watchFilms.find((f: any) => f.uuid === w.film_id),
+              film: watchFilms.find((f: any) => f.id === w.film_id),
             })).filter((e: any) => e.film)
             setContinueWatching(entries)
           }
         }
       }
 
-      // All published films
       const { data: filmsData } = await supabase
         .from('films')
-        .select('uuid, title, slug, short_description, director, year, country, duration_minutes, genres, poster_url, backdrop_url, is_featured, age_rating')
+        .select('id, title, slug, short_description, director, year, country, duration_minutes, genres, poster_url, backdrop_url, is_featured, age_rating')
         .eq('is_published', true)
         .order('created_at', { ascending: false })
 
       if (filmsData) {
         setFilms(filmsData)
-
-        // Featured
         const featured = filmsData.find((f: Film) => f.is_featured) || filmsData[0]
         setFeaturedFilm(featured || null)
-
-        // Genres
         const genreSet = new Set<string>()
         filmsData.forEach((f: Film) => f.genres?.forEach((g: string) => genreSet.add(g)))
         setAllGenres(['Alle', ...Array.from(genreSet)])
@@ -229,7 +217,6 @@ export default function FilmsPage() {
     loadData()
   }, [])
 
-  // Build categories from genres
   const categories = activeGenre === 'Alle'
     ? allGenres
         .filter(g => g !== 'Alle')
@@ -249,7 +236,6 @@ export default function FilmsPage() {
         ),
       }].filter(cat => cat.films.length > 0)
 
-  // If searching, flat list across all genres
   const searchResults = search !== ''
     ? films.filter(f => f.title.toLowerCase().includes(search.toLowerCase()))
     : []
@@ -308,7 +294,6 @@ export default function FilmsPage() {
         </div>
       ) : (
         <>
-          {/* Greeting */}
           <div style={{ padding: '92px 48px 0' }}>
             <div style={{ marginBottom: '32px' }}>
               <h2 style={{
@@ -322,7 +307,6 @@ export default function FilmsPage() {
               </p>
             </div>
 
-            {/* Continue Watching */}
             {continueWatching.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{
@@ -344,132 +328,76 @@ export default function FilmsPage() {
             )}
           </div>
 
-          {/* Featured Film */}
           {featuredFilm && (
             <div style={{
-              position: 'relative',
-              margin: '16px 48px',
-              overflow: 'hidden',
+              position: 'relative', margin: '16px 48px', overflow: 'hidden',
               border: '1px solid rgba(229,9,20,0.25)',
               boxShadow: '0 0 60px rgba(229,9,20,0.08), inset 0 0 60px rgba(0,0,0,0.4)',
             }}>
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: featuredFilm.backdrop_url ? undefined : FALLBACK_GRADIENT,
-              }}>
+              <div style={{ position: 'absolute', inset: 0, background: featuredFilm.backdrop_url ? undefined : FALLBACK_GRADIENT }}>
                 {featuredFilm.backdrop_url && (
-                  <img
-                    src={featuredFilm.backdrop_url}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+                  <img src={featuredFilm.backdrop_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 )}
               </div>
               <div style={{
                 position: 'absolute', inset: 0,
                 background: 'linear-gradient(105deg, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.85) 45%, rgba(10,10,10,0.3) 100%)',
               }} />
-              <div style={{
-                position: 'absolute', left: 0, top: 0, bottom: 0,
-                width: '3px', background: 'var(--red)',
-                boxShadow: '0 0 20px rgba(229,9,20,0.8)',
-              }} />
+              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: 'var(--red)', boxShadow: '0 0 20px rgba(229,9,20,0.8)' }} />
 
-              <div style={{
-                position: 'relative', zIndex: 1,
-                display: 'flex', alignItems: 'center', gap: '36px',
-                padding: '32px 40px',
-              }}>
-                {/* Poster */}
-                <div style={{ flexShrink: 0, position: 'relative' }}>
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '36px', padding: '32px 40px' }}>
+                <div style={{ flexShrink: 0 }}>
                   <div style={{
                     width: '130px', aspectRatio: '2/3',
                     background: featuredFilm.poster_url ? undefined : 'linear-gradient(160deg, #2a0808 0%, #4d1515 40%, #0d0d0d 100%)',
-                    border: '1px solid rgba(229,9,20,0.4)',
-                    position: 'relative', overflow: 'hidden',
-                    boxShadow: '4px 4px 24px rgba(0,0,0,0.8), 0 0 20px rgba(229,9,20,0.12)',
+                    border: '1px solid rgba(229,9,20,0.4)', position: 'relative', overflow: 'hidden',
+                    boxShadow: '4px 4px 24px rgba(0,0,0,0.8)',
                   }}>
                     {featuredFilm.poster_url && (
-                      <img
-                        src={featuredFilm.poster_url}
-                        alt={featuredFilm.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                      />
+                      <img src={featuredFilm.poster_url} alt={featuredFilm.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     )}
                     {featuredFilm.age_rating && (
-                      <div style={{
-                        position: 'absolute', top: '8px', right: '8px',
-                        background: '#E50914', color: 'white',
-                        fontSize: '0.5rem', fontWeight: 800, padding: '2px 5px',
-                      }}>{featuredFilm.age_rating}</div>
+                      <div style={{ position: 'absolute', top: '8px', right: '8px', background: '#E50914', color: 'white', fontSize: '0.5rem', fontWeight: 800, padding: '2px 5px' }}>
+                        {featuredFilm.age_rating}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px',
-                  }}>
-                    <span style={{
-                      fontSize: '0.62rem', letterSpacing: '0.25em',
-                      textTransform: 'uppercase', color: 'var(--red)', fontWeight: 700,
-                    }}>★ Film des Monats</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.62rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'var(--red)', fontWeight: 700 }}>★ Film des Monats</span>
                     <span style={{ width: '32px', height: '1px', background: 'rgba(229,9,20,0.4)' }} />
                     {featuredFilm.genres?.map(g => (
-                      <span key={g} style={{
-                        fontSize: '0.58rem', padding: '2px 8px',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        color: 'var(--grey)', letterSpacing: '0.1em', textTransform: 'uppercase',
-                      }}>{g}</span>
+                      <span key={g} style={{ fontSize: '0.58rem', padding: '2px 8px', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--grey)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{g}</span>
                     ))}
                   </div>
 
-                  <h1 style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(2.4rem, 4.5vw, 5rem)',
-                    letterSpacing: '0.03em', lineHeight: 0.92,
-                    color: 'var(--warm-white)', marginBottom: '14px',
-                  }}>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 4.5vw, 5rem)', letterSpacing: '0.03em', lineHeight: 0.92, color: 'var(--warm-white)', marginBottom: '14px' }}>
                     {featuredFilm.title.toUpperCase()}
                   </h1>
 
                   {featuredFilm.short_description && (
-                    <p style={{
-                      fontSize: '0.88rem', color: 'rgba(240,236,228,0.75)',
-                      lineHeight: 1.65, marginBottom: '10px', maxWidth: '460px',
-                      fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                    }}>
+                    <p style={{ fontSize: '0.88rem', color: 'rgba(240,236,228,0.75)', lineHeight: 1.65, marginBottom: '10px', maxWidth: '460px', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
                       „{featuredFilm.short_description}"
                     </p>
                   )}
 
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    fontSize: '0.73rem', color: 'var(--grey)', marginBottom: '22px',
-                    letterSpacing: '0.05em',
-                  }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.73rem', color: 'var(--grey)', marginBottom: '22px', letterSpacing: '0.05em' }}>
                     <span>{featuredFilm.director}</span>
                     <span style={{ color: 'var(--red)', fontSize: '0.5rem' }}>◆</span>
                     <span>{featuredFilm.year}</span>
                     <span style={{ color: 'var(--red)', fontSize: '0.5rem' }}>◆</span>
-                    <span>{featuredFilm.country}</span>
+                    <span>{Array.isArray(featuredFilm.country) ? featuredFilm.country[0] : featuredFilm.country}</span>
                     <span style={{ color: 'var(--red)', fontSize: '0.5rem' }}>◆</span>
                     <span>{featuredFilm.duration_minutes} Min</span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                    <Link href={`/de/films/${featuredFilm.slug}`} className="btn-primary" style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      fontSize: '0.85rem', padding: '12px 28px', letterSpacing: '0.1em',
-                    }}>
+                    <Link href={`/de/films/${featuredFilm.slug}`} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', padding: '12px 28px', letterSpacing: '0.1em' }}>
                       ▶ JETZT ANSEHEN
                     </Link>
-                    <Link href={`/de/films/${featuredFilm.slug}`} style={{
-                      fontSize: '0.78rem', color: 'rgba(240,236,228,0.5)',
-                      textDecoration: 'none', letterSpacing: '0.1em',
-                      borderBottom: '1px solid rgba(240,236,228,0.2)', paddingBottom: '2px',
-                    }}>
+                    <Link href={`/de/films/${featuredFilm.slug}`} style={{ fontSize: '0.78rem', color: 'rgba(240,236,228,0.5)', textDecoration: 'none', letterSpacing: '0.1em', borderBottom: '1px solid rgba(240,236,228,0.2)', paddingBottom: '2px' }}>
                       MEHR INFO
                     </Link>
                   </div>
@@ -478,25 +406,19 @@ export default function FilmsPage() {
             </div>
           )}
 
-          {/* Genre Filter */}
-          <div style={{
-            padding: '24px 48px 0',
-            display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none',
-          }}>
+          <div style={{ padding: '24px 48px 0', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
             {allGenres.map(genre => (
               <button key={genre} onClick={() => setActiveGenre(genre)} style={{
                 padding: '8px 20px', flexShrink: 0,
                 background: activeGenre === genre ? 'var(--red)' : 'rgba(255,255,255,0.06)',
                 border: activeGenre === genre ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--warm-white)', fontSize: '0.82rem',
-                letterSpacing: '0.08em', cursor: 'pointer', transition: 'all 0.2s',
+                color: 'var(--warm-white)', fontSize: '0.82rem', letterSpacing: '0.08em', cursor: 'pointer', transition: 'all 0.2s',
               }}>
                 {genre}
               </button>
             ))}
           </div>
 
-          {/* Search Results or Categories */}
           <div style={{ padding: '16px 0 64px' }}>
             {search !== '' ? (
               searchResults.length === 0 ? (
@@ -505,41 +427,22 @@ export default function FilmsPage() {
                 </div>
               ) : (
                 <div style={{ marginBottom: '24px' }}>
-                  <h2 style={{
-                    fontFamily: 'var(--font-display)', fontSize: '1.4rem',
-                    letterSpacing: '0.06em', color: 'var(--warm-white)',
-                    padding: '0 48px', marginBottom: '20px',
-                  }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.06em', color: 'var(--warm-white)', padding: '0 48px', marginBottom: '20px' }}>
                     SUCHERGEBNISSE
                   </h2>
-                  <div style={{
-                    display: 'flex', gap: '16px', flexWrap: 'wrap',
-                    padding: '8px 48px',
-                  }}>
-                    {searchResults.map(film => (
-                      <FilmCard key={film.uuid} film={film} />
-                    ))}
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '8px 48px' }}>
+                    {searchResults.map(film => <FilmCard key={film.id} film={film} />)}
                   </div>
                 </div>
               )
             ) : (
               categories.map(category => (
                 <div key={category.title} style={{ marginBottom: '24px' }}>
-                  <h2 style={{
-                    fontFamily: 'var(--font-display)', fontSize: '1.4rem',
-                    letterSpacing: '0.06em', color: 'var(--warm-white)',
-                    padding: '0 48px', marginBottom: '20px',
-                  }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.06em', color: 'var(--warm-white)', padding: '0 48px', marginBottom: '20px' }}>
                     {category.title.toUpperCase()}
                   </h2>
-                  <div style={{
-                    display: 'flex', gap: '16px',
-                    overflowX: 'auto', padding: '8px 48px',
-                    scrollbarWidth: 'thin', scrollbarColor: 'var(--red) transparent',
-                  }}>
-                    {category.films.map(film => (
-                      <FilmCard key={film.uuid} film={film} />
-                    ))}
+                  <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '8px 48px', scrollbarWidth: 'thin', scrollbarColor: 'var(--red) transparent' }}>
+                    {category.films.map(film => <FilmCard key={film.id} film={film} />)}
                   </div>
                 </div>
               ))
