@@ -60,6 +60,8 @@ export default function FilmDetailPage() {
   const [playing, setPlaying] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [watchSeconds, setWatchSeconds] = useState(0)
+  const [sessionBlocked, setSessionBlocked] = useState(false)
+  const sessionIdRef = useRef<string>(Math.random().toString(36).slice(2))
   const playerRef = useRef<any>(null)
   const supabase = createClient()
 
@@ -109,6 +111,32 @@ export default function FilmDetailPage() {
 
   async function handlePlay() {
     if (!film || blocked) return
+
+    // Check for active sessions from other devices
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const cutoff = new Date(Date.now() - 60000).toISOString() // 60 seconds
+      const { data: sessions } = await supabase
+        .from('active_sessions')
+        .select('session_id')
+        .eq('user_id', user.id)
+        .gt('last_ping', cutoff)
+        .neq('session_id', sessionIdRef.current)
+
+      if (sessions && sessions.length > 0) {
+        setSessionBlocked(true)
+        return
+      }
+
+      // Register this session
+      await supabase.from('active_sessions').upsert({
+        user_id: user.id,
+        session_id: sessionIdRef.current,
+        film_id: film.id,
+        last_ping: new Date().toISOString(),
+      }, { onConflict: 'session_id' })
+    }
+
     setPlaying(true)
     window.scrollTo({ top: 72, behavior: 'smooth' })
   }
@@ -132,10 +160,29 @@ export default function FilmDetailPage() {
         watched_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,film_id' })
+
+      // Update session ping
+      await supabase.from('active_sessions').upsert({
+        user_id: user.id,
+        session_id: sessionIdRef.current,
+        film_id: film.id,
+        last_ping: new Date().toISOString(),
+      }, { onConflict: 'session_id' })
+
       setWatchSeconds(currentTime)
     }, 10000)
     return () => clearInterval(interval)
   }, [playing, film])
+
+  // Cleanup session on unmount
+  useEffect(() => {
+    return () => {
+      supabase.from('active_sessions')
+        .delete()
+        .eq('session_id', sessionIdRef.current)
+        .then(() => {})
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -199,6 +246,23 @@ export default function FilmDetailPage() {
             <div style={{ fontSize: '0.82rem', color: 'var(--grey)', maxWidth: '400px', textAlign: 'center', lineHeight: 1.6 }}>
               Dieser Film ist in Deutschland aufgrund gesetzlicher Bestimmungen nicht abrufbar.
             </div>
+          </div>
+        ) : sessionBlocked ? (
+          <div style={{
+            width: '100%', aspectRatio: '16/9', maxHeight: '70vh',
+            background: '#0a0a0a',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: '16px', border: '1px solid rgba(229,9,20,0.2)',
+          }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '0.08em', color: 'var(--warm-white)', textAlign: 'center', padding: '0 24px' }}>
+              BEREITS AUF EINEM ANDEREN GERÄT AKTIV
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--grey)', maxWidth: '400px', textAlign: 'center', lineHeight: 1.6 }}>
+              Dein Account wird gerade auf einem anderen Gerät verwendet. Bitte beende die andere Session zuerst.
+            </div>
+            <button onClick={() => setSessionBlocked(false)} className="btn-primary" style={{ marginTop: '8px' }}>
+              Erneut versuchen
+            </button>
           </div>
         ) : !playing ? (
           <div style={{
