@@ -160,7 +160,15 @@ export default function FilmsPage() {
   const [continueWatching, setContinueWatching] = useState<WatchEntry[]>([])
   const [allGenres, setAllGenres] = useState<string[]>(['Alle'])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     async function loadData() {
@@ -247,7 +255,7 @@ export default function FilmsPage() {
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '20px 48px',
+        padding: isMobile ? '16px 20px' : '20px 48px',
         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
@@ -294,7 +302,7 @@ export default function FilmsPage() {
         </div>
       ) : (
         <>
-          <div style={{ padding: '92px 48px 0' }}>
+          <div style={{ padding: isMobile ? '80px 16px 0' : '92px 48px 0' }}>
             <div style={{ marginBottom: '32px' }}>
               <h2 style={{
                 fontFamily: 'var(--font-display)', fontSize: '1.8rem',
@@ -330,7 +338,7 @@ export default function FilmsPage() {
 
           {featuredFilm && (
             <div style={{
-              position: 'relative', margin: '16px 48px', overflow: 'hidden',
+              position: 'relative', margin: isMobile ? '16px' : '16px 48px', overflow: 'hidden',
               border: '1px solid rgba(229,9,20,0.25)',
               boxShadow: '0 0 60px rgba(229,9,20,0.08), inset 0 0 60px rgba(0,0,0,0.4)',
             }}>
@@ -345,10 +353,10 @@ export default function FilmsPage() {
               }} />
               <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: 'var(--red)', boxShadow: '0 0 20px rgba(229,9,20,0.8)' }} />
 
-              <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '36px', padding: '32px 40px' }}>
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? '16px' : '36px', padding: isMobile ? '20px 16px' : '32px 40px' }}>
                 <div style={{ flexShrink: 0 }}>
                   <div style={{
-                    width: '130px', aspectRatio: '2/3',
+                    width: isMobile ? '90px' : '130px', aspectRatio: '2/3',
                     background: featuredFilm.poster_url ? undefined : 'linear-gradient(160deg, #2a0808 0%, #4d1515 40%, #0d0d0d 100%)',
                     border: '1px solid rgba(229,9,20,0.4)', position: 'relative', overflow: 'hidden',
                     boxShadow: '4px 4px 24px rgba(0,0,0,0.8)',
@@ -373,7 +381,7 @@ export default function FilmsPage() {
                     ))}
                   </div>
 
-                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 4.5vw, 5rem)', letterSpacing: '0.03em', lineHeight: 0.92, color: 'var(--warm-white)', marginBottom: '14px' }}>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 'clamp(1.6rem, 7vw, 2.4rem)' : 'clamp(2.4rem, 4.5vw, 5rem)', letterSpacing: '0.03em', lineHeight: 0.92, color: 'var(--warm-white)', marginBottom: '14px' }}>
                     {featuredFilm.title.toUpperCase()}
                   </h1>
 
@@ -406,7 +414,7 @@ export default function FilmsPage() {
             </div>
           )}
 
-          <div style={{ padding: '24px 48px 0', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <div style={{ padding: isMobile ? '16px 16px 0' : '24px 48px 0', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
             {allGenres.map(genre => (
               <button key={genre} onClick={() => setActiveGenre(genre)} style={{
                 padding: '8px 20px', flexShrink: 0,
