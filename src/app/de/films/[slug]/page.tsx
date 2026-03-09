@@ -58,8 +58,6 @@ export default function FilmDetailPage() {
   const [related, setRelated] = useState<RelatedFilm[]>([])
   const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState(false)
-  const [muxToken, setMuxToken] = useState<string | null>(null)
-  const [tokenLoading, setTokenLoading] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [watchSeconds, setWatchSeconds] = useState(0)
   const playerRef = useRef<any>(null)
@@ -111,21 +109,8 @@ export default function FilmDetailPage() {
 
   async function handlePlay() {
     if (!film || blocked) return
-    setTokenLoading(true)
-    try {
-      const res = await fetch(`/api/mux/token?playbackId=${film.mux_playback_id}`)
-      const data = await res.json()
-      if (data.token) {
-        setMuxToken(data.token)
-        setPlaying(true)
-        window.scrollTo({ top: 72, behavior: 'smooth' })
-      } else {
-        console.error('Token error:', data.error)
-      }
-    } catch (e) {
-      console.error('Failed to get token:', e)
-    }
-    setTokenLoading(false)
+    setPlaying(true)
+    window.scrollTo({ top: 72, behavior: 'smooth' })
   }
 
   useEffect(() => {
@@ -215,7 +200,7 @@ export default function FilmDetailPage() {
               Dieser Film ist in Deutschland aufgrund gesetzlicher Bestimmungen nicht abrufbar.
             </div>
           </div>
-        ) : !playing || !muxToken ? (
+        ) : !playing ? (
           <div style={{
             position: 'relative', width: '100%', aspectRatio: '16/9',
             background: posterBg, cursor: 'pointer',
@@ -233,7 +218,7 @@ export default function FilmDetailPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 0 40px rgba(229,9,20,0.6)',
               }}>
-                {tokenLoading
+                {false
                   ? <span style={{ fontSize: '1rem' }}>⏳</span>
                   : <span style={{ fontSize: '2rem', marginLeft: '6px' }}>▶</span>
                 }
@@ -257,7 +242,6 @@ export default function FilmDetailPage() {
             <MuxPlayer
               ref={playerRef}
               playbackId={film.mux_playback_id}
-              tokens={{ playback: muxToken }}
               metadata={{ video_title: film.title }}
               autoPlay
               style={{ width: '100%', height: '100%' }}
