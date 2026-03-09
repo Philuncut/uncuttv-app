@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   // Start – prüfen ob bereits aktive Session existiert
   if (action === 'start') {
     const cutoff = new Date(Date.now() - SESSION_TIMEOUT_SECONDS * 1000).toISOString()
-    
+
     const { data: activeSessions } = await supabase
       .from('active_sessions')
       .select('id, session_id')
@@ -40,3 +40,29 @@ export async function POST(req: NextRequest) {
     await supabase
       .from('active_sessions')
       .delete()
+      .eq('user_id', user.id)
+      .lt('last_ping', cutoff)
+
+    // Neue Session registrieren
+    await supabase.from('active_sessions').upsert({
+      user_id: user.id,
+      session_id,
+      film_id,
+      last_ping: new Date().toISOString(),
+    }, { onConflict: 'session_id' })
+
+    return NextResponse.json({ ok: true })
+  }
+
+  // End – Session beenden
+  if (action === 'end') {
+    await supabase
+      .from('active_sessions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('session_id', session_id)
+    return NextResponse.json({ ok: true })
+  }
+
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+}
