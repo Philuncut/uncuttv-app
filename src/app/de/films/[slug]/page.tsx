@@ -224,7 +224,7 @@ export default function FilmDetailPage() {
                 }
               </div>
               <span style={{ fontSize: '0.8rem', letterSpacing: '0.2em', color: 'rgba(240,236,228,0.7)', textTransform: 'uppercase' }}>
-                {tokenLoading ? 'Wird geladen...' : 'Film abspielen'}
+                {'Film abspielen'}
               </span>
             </div>
             <div style={{
