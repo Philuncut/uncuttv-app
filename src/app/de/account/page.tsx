@@ -56,8 +56,16 @@ export default function AccountPage() {
     }
   }
 
+  function getPlanLabel(priceId: string) {
+    if (priceId === process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID) {
+      return '199,90€ / Jahr'
+    }
+    return '19,90€ / Monat'
+  }
+
   const sub = profile?.subscriptions?.[0]
   const statusInfo = getStatusLabel(profile?.subscription_status)
+  const hasNoSubscription = !profile?.subscription_status || profile?.subscription_status === 'canceled'
 
   if (loading) return (
     <div style={{
@@ -135,7 +143,7 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Email/Passwort ändern Card */}
+        {/* Zugangsdaten Card */}
         <div style={{
           border: '1px solid rgba(255,255,255,0.08)',
           background: 'rgba(255,255,255,0.02)',
@@ -157,18 +165,15 @@ export default function AccountPage() {
               }}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 16px',
-                border: '1px solid rgba(255,255,255,0.08)',
-                background: 'transparent',
-                color: 'var(--warm-white)', fontSize: '0.85rem',
-                letterSpacing: '0.04em', cursor: 'pointer',
-                transition: 'border-color 0.2s',
+                padding: '14px 16px', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'transparent', color: 'var(--warm-white)', fontSize: '0.85rem',
+                letterSpacing: '0.04em', cursor: 'pointer', transition: 'border-color 0.2s',
               }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
             >
               <span>Email-Adresse ändern</span>
-              <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>{'→'}</span>
+              <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>→</span>
             </button>
 
             <button
@@ -182,18 +187,15 @@ export default function AccountPage() {
               }}
               style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 16px',
-                border: '1px solid rgba(255,255,255,0.08)',
-                background: 'transparent',
-                color: 'var(--warm-white)', fontSize: '0.85rem',
-                letterSpacing: '0.04em', cursor: 'pointer',
-                transition: 'border-color 0.2s',
+                padding: '14px 16px', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'transparent', color: 'var(--warm-white)', fontSize: '0.85rem',
+                letterSpacing: '0.04em', cursor: 'pointer', transition: 'border-color 0.2s',
               }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')}
             >
               <span>Passwort ändern</span>
-              <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>{'→'}</span>
+              <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>→</span>
             </button>
           </div>
         </div>
@@ -215,104 +217,121 @@ export default function AccountPage() {
             color: 'var(--grey)', marginBottom: '16px', textTransform: 'uppercase',
           }}>Mitgliedschaft</div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Status</span>
-              <span style={{
-                fontSize: '0.78rem', padding: '3px 10px',
-                background: `${statusInfo.color}18`,
-                border: `1px solid ${statusInfo.color}40`,
-                color: statusInfo.color, letterSpacing: '0.08em',
-              }}>{statusInfo.label}</span>
+          {hasNoSubscription ? (
+            <div>
+              <p style={{ fontSize: '0.88rem', color: 'var(--grey)', marginBottom: '20px', lineHeight: 1.6 }}>
+                Du hast derzeit kein aktives Abo.
+              </p>
+              <Link href="/de/subscribe" style={{
+                display: 'inline-block', background: 'var(--red)',
+                color: 'white', padding: '12px 24px', textDecoration: 'none',
+                fontSize: '0.85rem', letterSpacing: '0.1em', fontWeight: 700,
+              }}>
+                JETZT ABONNIEREN →
+              </Link>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Plan</span>
-              <span style={{ fontSize: '0.88rem', color: 'var(--warm-white)' }}>19,90€ / Monat</span>
-            </div>
-
-            {sub?.current_period_end && (
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>
-                  {profile?.subscription_status === 'canceled' ? 'Endet am' : 'Nächste Abbuchung'}
-                </span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Status</span>
+                <span style={{
+                  fontSize: '0.78rem', padding: '3px 10px',
+                  background: `${statusInfo.color}18`,
+                  border: `1px solid ${statusInfo.color}40`,
+                  color: statusInfo.color, letterSpacing: '0.08em',
+                }}>{statusInfo.label}</span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Plan</span>
                 <span style={{ fontSize: '0.88rem', color: 'var(--warm-white)' }}>
-                  {new Date(sub.current_period_end).toLocaleDateString('de-AT', {
-                    day: '2-digit', month: '2-digit', year: 'numeric'
-                  })}
+                  {sub?.stripe_price_id ? getPlanLabel(sub.stripe_price_id) : '19,90€ / Monat'}
                 </span>
               </div>
-            )}
 
-            {sub?.trial_end && profile?.subscription_status === 'trialing' && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Testphase endet</span>
-                <span style={{ fontSize: '0.88rem', color: '#f0ece4' }}>
-                  {new Date(sub.trial_end).toLocaleDateString('de-AT', {
-                    day: '2-digit', month: '2-digit', year: 'numeric'
-                  })}
-                </span>
-              </div>
-            )}
-          </div>
+              {sub?.current_period_end && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>
+                    {profile?.subscription_status === 'canceled' ? 'Endet am' : 'Nächste Abbuchung'}
+                  </span>
+                  <span style={{ fontSize: '0.88rem', color: 'var(--warm-white)' }}>
+                    {new Date(sub.current_period_end).toLocaleDateString('de-AT', {
+                      day: '2-digit', month: '2-digit', year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {sub?.trial_end && profile?.subscription_status === 'trialing' && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>Testphase endet</span>
+                  <span style={{ fontSize: '0.88rem', color: '#f0ece4' }}>
+                    {new Date(sub.trial_end).toLocaleDateString('de-AT', {
+                      day: '2-digit', month: '2-digit', year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Aktionen Card */}
-        <div style={{
-          border: '1px solid rgba(255,255,255,0.08)',
-          background: 'rgba(255,255,255,0.02)',
-          padding: '28px 32px', marginBottom: '32px',
-        }}>
+        {/* Aktionen Card – nur wenn Abo vorhanden */}
+        {!hasNoSubscription && (
           <div style={{
-            fontSize: '0.68rem', letterSpacing: '0.15em',
-            color: 'var(--grey)', marginBottom: '16px', textTransform: 'uppercase',
-          }}>Aktionen</div>
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.02)',
+            padding: '28px 32px', marginBottom: '32px',
+          }}>
+            <div style={{
+              fontSize: '0.68rem', letterSpacing: '0.15em',
+              color: 'var(--grey)', marginBottom: '16px', textTransform: 'uppercase',
+            }}>Aktionen</div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-            <button
-              onClick={handleBillingPortal}
-              style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '14px 16px',
-                border: `1px solid ${hoverPayment ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
-                background: 'transparent',
-                color: 'var(--warm-white)',
-                fontSize: '0.85rem', letterSpacing: '0.04em', cursor: 'pointer',
-                transition: 'border-color 0.2s',
-              }}
-              onMouseEnter={() => setHoverPayment(true)}
-              onMouseLeave={() => setHoverPayment(false)}
-            >
-              <span>Zahlungsmethode verwalten</span>
-              <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>{'→'}</span>
-            </button>
-
-            {profile?.subscription_status !== 'canceled' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
-                onClick={async () => {
-                  if (confirm('Möchtest du dein Abo wirklich kündigen? Du hast bis zum Ende der Laufzeit weiter Zugang.')) {
-                    await handleBillingPortal()
-                  }
-                }}
+                onClick={handleBillingPortal}
                 style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   padding: '14px 16px',
-                  border: `1px solid ${hoverCancel ? 'rgba(229,9,20,0.5)' : 'rgba(229,9,20,0.2)'}`,
-                  background: 'transparent',
-                  color: hoverCancel ? 'var(--red)' : 'rgba(229,9,20,0.7)',
+                  border: `1px solid ${hoverPayment ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                  background: 'transparent', color: 'var(--warm-white)',
                   fontSize: '0.85rem', letterSpacing: '0.04em', cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  transition: 'border-color 0.2s',
                 }}
-                onMouseEnter={() => setHoverCancel(true)}
-                onMouseLeave={() => setHoverCancel(false)}
+                onMouseEnter={() => setHoverPayment(true)}
+                onMouseLeave={() => setHoverPayment(false)}
               >
-                <span>Abo kündigen</span>
-                <span style={{ fontSize: '0.75rem' }}>{'→'}</span>
+                <span>Zahlungsmethode verwalten</span>
+                <span style={{ color: 'var(--grey)', fontSize: '0.75rem' }}>→</span>
               </button>
-            )}
+
+              {profile?.subscription_status !== 'canceled' && (
+                <button
+                  onClick={async () => {
+                    if (confirm('Möchtest du dein Abo wirklich kündigen? Du hast bis zum Ende der Laufzeit weiter Zugang.')) {
+                      await handleBillingPortal()
+                    }
+                  }}
+                  style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '14px 16px',
+                    border: `1px solid ${hoverCancel ? 'rgba(229,9,20,0.5)' : 'rgba(229,9,20,0.2)'}`,
+                    background: 'transparent',
+                    color: hoverCancel ? 'var(--red)' : 'rgba(229,9,20,0.7)',
+                    fontSize: '0.85rem', letterSpacing: '0.04em', cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={() => setHoverCancel(true)}
+                  onMouseLeave={() => setHoverCancel(false)}
+                >
+                  <span>Abo kündigen</span>
+                  <span style={{ fontSize: '0.75rem' }}>→</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Abmelden */}
         <button
@@ -324,6 +343,7 @@ export default function AccountPage() {
             color: 'var(--grey)', fontSize: '0.82rem',
             letterSpacing: '0.1em', cursor: 'pointer',
             transition: 'color 0.2s',
+            marginTop: hasNoSubscription ? '16px' : '0',
           }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey)')}
