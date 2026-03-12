@@ -1,19 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-const FEATURES = [
-  'Unbegrenztes Streaming aller Filme',
-  'HD & 4K Streaming auf allen Geräten',
-  'Neue Filme jeden Monat',
-  'iOS, Android, Smart TV, Web',
-  'Monatlich kündbar – keine Bindung',
-  'Exklusiver Indie-Content aus aller Welt',
-]
+import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function PricingSection() {
+  const t = useTranslations('pricing')
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly')
   const [isMobile, setIsMobile] = useState(false)
+
+  const FEATURES = [
+    t('features.streaming'),
+    t('features.quality'),
+    t('features.new'),
+    t('features.devices'),
+    t('features.cancel'),
+    t('features.content'),
+  ]
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -32,7 +37,7 @@ export default function PricingSection() {
     })
     const { url } = await res.json()
     if (url) window.location.href = url
-    else window.location.href = '/de/auth/register'
+    else window.location.href = `/${locale}/auth/register`
   }
 
   return (
@@ -44,7 +49,7 @@ export default function PricingSection() {
         fontSize: '0.72rem', letterSpacing: '0.22em',
         textTransform: 'uppercase', color: 'var(--red)', marginBottom: '16px',
       }}>
-        Mitgliedschaft
+        {t('eyebrow')}
       </div>
 
       <h2 style={{
@@ -52,7 +57,7 @@ export default function PricingSection() {
         fontSize: isMobile ? 'clamp(2rem, 8vw, 3.5rem)' : 'clamp(3rem, 6vw, 6rem)',
         letterSpacing: '0.04em', marginBottom: '16px',
       }}>
-        EINFACH. FAIR. UNCUT.
+        {t('title')}
       </h2>
 
       <p style={{
@@ -60,7 +65,7 @@ export default function PricingSection() {
         fontSize: '1rem', letterSpacing: '0.08em',
         color: 'var(--grey)', marginBottom: '32px',
       }}>
-        Ein Abo. Alles drin. Jeden Monat kündbar.
+        {t('subtitle')}
       </p>
 
       {/* Toggle */}
@@ -145,7 +150,7 @@ export default function PricingSection() {
           fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.3rem' : '1.6rem',
           letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '24px',
         }}>
-          Bereit für echtes Kino?
+          {t('headline')}
         </div>
 
         <ul style={{ listStyle: 'none', marginBottom: '32px', textAlign: 'left' }}>
@@ -167,14 +172,14 @@ export default function PricingSection() {
           className="btn-primary"
           style={{ width: '100%', textAlign: 'center', display: 'block', cursor: 'pointer' }}
         >
-          {isYearly ? 'Jetzt Jahresabo starten' : 'Jetzt 7 Tage kostenlos testen'}
+          {t('cta')}
         </button>
 
         <p style={{
           fontSize: '0.72rem', color: 'var(--grey)',
           letterSpacing: '0.08em', marginTop: '24px',
         }}>
-          ⚠ UncutTV ist ausschließlich für Personen ab 18 Jahren. Altersverifikation erforderlich.
+          ⚠ {t('disclaimer')}
         </p>
       </div>
     </section>

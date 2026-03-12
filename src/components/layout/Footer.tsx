@@ -2,29 +2,37 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-
-const LINKS = {
-  Plattform: [
-    { label: 'Alle Filme', href: '/de/films' },
-    { label: 'Neuheiten', href: '/de/films' },
-    { label: 'Genres', href: '/de/films' },
-    { label: 'Suche', href: '/de/films' },
-  ],
-  Entdecken: [
-    { label: 'Neue Filme', href: '/de/films' },
-    { label: 'Genres', href: '/de/films' },
-    { label: 'Länder', href: '/de/films' },
-    { label: 'FAQ', href: '/de/faq' },
-  ],
-  Rechtliches: [
-    { label: 'Impressum', href: '/de/impressum' },
-    { label: 'Datenschutz', href: '/de/datenschutz' },
-    { label: 'AGB', href: '/de/agb' },
-    { label: 'Jugendschutz', href: '/de/jugendschutz' },
-  ],
-}
+import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function Footer() {
+  const t = useTranslations('footer')
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
+  const base = `/${locale}`
+
+  const linkGroups = [
+    [
+      { label: t('allFilms'), href: `${base}/films` },
+      { label: t('newReleases'), href: `${base}/films` },
+      { label: t('genres'), href: `${base}/films` },
+      { label: t('search'), href: `${base}/films` },
+    ],
+    [
+      { label: t('newReleases'), href: `${base}/films` },
+      { label: t('genres'), href: `${base}/films` },
+      { label: t('genres'), href: `${base}/films` },
+      { label: t('faq'), href: `${base}/faq` },
+    ],
+    [
+      { label: t('imprint'), href: `${base}/impressum` },
+      { label: t('privacy'), href: `${base}/datenschutz` },
+      { label: t('terms'), href: `${base}/agb` },
+      { label: t('youthProtection'), href: `${base}/jugendschutz` },
+    ],
+  ]
+  const titles = [t('platform'), t('discover'), t('legal')]
+
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -42,7 +50,7 @@ export default function Footer() {
     }}>
       {/* Brand */}
       <div style={{ marginBottom: '32px' }}>
-        <Link href="/de" style={{
+        <Link href={base} style={{
           fontFamily: 'var(--font-display)', fontSize: '1.8rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)',
           textDecoration: 'none', display: 'inline-flex', marginBottom: '12px',
@@ -53,31 +61,28 @@ export default function Footer() {
           fontSize: '0.82rem', color: 'var(--grey)', lineHeight: 1.7,
           maxWidth: isMobile ? '100%' : '280px',
         }}>
-          Die Streaming-Plattform für Independent-Film. Unabhängig. Ungefiltert. Fair.
+          {t('description')}
         </p>
       </div>
 
-      {/* Link columns */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr',
         gap: isMobile ? '32px 24px' : '48px',
         marginBottom: '40px',
       }}>
-        {Object.entries(LINKS).map(([title, items]) => (
-          <div key={title}>
+        {linkGroups.map((items, i) => (
+          <div key={i}>
             <h4 style={{
               fontSize: '0.72rem', letterSpacing: '0.18em',
               textTransform: 'uppercase', color: 'var(--grey)', marginBottom: '16px',
             }}>
-              {title}
+              {titles[i]}
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {items.map((item) => (
-                <li key={item.label} style={{ marginBottom: '10px' }}>
-                  <Link href={item.href} style={{
-                    color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.85rem',
-                  }}>
+                <li key={item.href + item.label} style={{ marginBottom: '10px' }}>
+                  <Link href={item.href} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.85rem' }}>
                     {item.label}
                   </Link>
                 </li>
@@ -87,20 +92,19 @@ export default function Footer() {
         ))}
       </div>
 
-      {/* Bottom bar */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.06)',
         flexWrap: 'wrap', gap: '12px',
       }}>
         <p style={{ fontSize: '0.75rem', color: 'var(--grey)', letterSpacing: '0.06em' }}>
-          © 2026 UncutTV GmbH · Alle Rechte vorbehalten
+          {t('copyright')}
         </p>
         <span style={{
           background: 'var(--red)', color: 'white',
           fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', letterSpacing: '0.06em',
         }}>
-          18+
+          {t('ageBadge')}
         </span>
       </div>
     </footer>

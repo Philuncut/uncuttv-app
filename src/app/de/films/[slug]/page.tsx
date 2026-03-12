@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 
@@ -52,6 +52,8 @@ async function getCountry(): Promise<string> {
 
 export default function FilmDetailPage() {
   const params = useParams()
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const slug = params?.slug as string
 
   const [film, setFilm] = useState<Film | null>(null)
@@ -196,7 +198,7 @@ export default function FilmDetailPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--black)', color: 'var(--grey)', gap: '16px' }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--warm-white)' }}>FILM NICHT GEFUNDEN</div>
-        <Link href="/de/films" className="btn-primary">Zur Bibliothek</Link>
+        <Link href={`/${locale}/films`} className="btn-primary">Zur Bibliothek</Link>
       </div>
     )
   }
@@ -215,13 +217,13 @@ export default function FilmDetailPage() {
         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <Link href="/de/films" style={{
+        <Link href={`/${locale}/films`} style={{
           fontFamily: 'var(--font-display)', fontSize: '1.8rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
         }}>
           UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
         </Link>
-        <Link href="/de/films" style={{
+        <Link href={`/${locale}/films`} style={{
           fontSize: '0.82rem', color: 'var(--grey)',
           textDecoration: 'none', letterSpacing: '0.06em',
           display: 'flex', alignItems: 'center', gap: '8px',
@@ -422,7 +424,7 @@ export default function FilmDetailPage() {
             scrollbarWidth: 'thin', scrollbarColor: 'var(--red) transparent',
           }}>
             {related.map(r => (
-              <Link key={r.id} href={`/de/films/${r.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+              <Link key={r.id} href={`/${locale}/films/${r.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                 <div style={{ width: '160px' }}>
                   <div style={{
                     width: '160px', aspectRatio: '2/3',

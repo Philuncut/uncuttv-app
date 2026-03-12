@@ -38,6 +38,31 @@
     "description": "Die Streaming-Plattform für Independent-Film. Unabhängig. Ungefiltert. Fair.",
     "platform": "Plattform",
     "discover": "Entdecken",
-    "legal": "Rechtliches"
+    "legal": "Rechtliches",
+    "allFilms": "Alle Filme",
+    "newReleases": "Neuheiten",
+    "genres": "Genres",
+    "search": "Suche",
+    "faq": "FAQ",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "youthProtection": "Jugendschutz",
+    "copyright": "© 2026 UncutTV GmbH · Alle Rechte vorbehalten",
+    "ageBadge": "18+"
+  },
+  "auth": {
+    "welcomeBack": "WILLKOMMEN ZURÜCK",
+    "signInSubtitle": "Meld dich an und schau los.",
+    "signInWithGoogle": "Mit Google anmelden",
+    "or": "ODER",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signIn": "Anmelden",
+    "loading": "Einen Moment...",
+    "loginError": "E-Mail oder Passwort falsch.",
+    "noAccount": "Noch kein Konto?",
+    "registerNow": "Jetzt registrieren",
+    "ageWarning": "⚠ Nur für Personen ab 18 Jahren"
   }
 }

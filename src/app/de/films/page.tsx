@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 type Film = {
@@ -36,10 +37,10 @@ function getGreeting() {
   return 'Guten Abend'
 }
 
-function FilmCard({ film }: { film: Film }) {
+function FilmCard({ film, locale }: { film: Film; locale: string }) {
   const [hovered, setHovered] = useState(false)
   return (
-    <Link href={`/de/films/${film.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+    <Link href={`/${locale}/films/${film.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
       <div
         style={{ width: '160px', cursor: 'pointer' }}
         onMouseEnter={() => setHovered(true)}
@@ -96,14 +97,14 @@ function FilmCard({ film }: { film: Film }) {
   )
 }
 
-function ContinueCard({ entry }: { entry: WatchEntry }) {
+function ContinueCard({ entry, locale }: { entry: WatchEntry; locale: string }) {
   const [hovered, setHovered] = useState(false)
   const film = entry.film
   const totalSeconds = (film.duration_minutes || 90) * 60
   const progress = Math.min(Math.round((entry.last_position / totalSeconds) * 100), 99)
 
   return (
-    <Link href={`/de/films/${film.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+    <Link href={`/${locale}/films/${film.slug}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
       <div
         style={{ width: '240px', cursor: 'pointer' }}
         onMouseEnter={() => setHovered(true)}
@@ -152,6 +153,8 @@ function ContinueCard({ entry }: { entry: WatchEntry }) {
 }
 
 export default function FilmsPage() {
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [search, setSearch] = useState('')
   const [activeGenre, setActiveGenre] = useState('Alle')
   const [userName, setUserName] = useState('')
@@ -259,7 +262,7 @@ export default function FilmsPage() {
         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <Link href="/de/films" style={{
+        <Link href={`/${locale}/films`} style={{
           fontFamily: 'var(--font-display)', fontSize: '1.8rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
         }}>
@@ -285,7 +288,7 @@ export default function FilmsPage() {
           />
         </div>
 
-        <Link href="/de/account" style={{
+        <Link href={`/${locale}/account`} style={{
           color: 'var(--grey-light)', fontSize: '0.82rem',
           letterSpacing: '0.06em', textDecoration: 'none',
         }}>
@@ -329,7 +332,7 @@ export default function FilmsPage() {
                   paddingBottom: '8px',
                 }}>
                   {continueWatching.map(entry => (
-                    <ContinueCard key={entry.film_id} entry={entry} />
+                    <ContinueCard key={entry.film_id} entry={entry} locale={locale} />
                   ))}
                 </div>
               </div>
@@ -402,10 +405,10 @@ export default function FilmsPage() {
                   </div>
 
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                    <Link href={`/de/films/${featuredFilm.slug}`} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', padding: '12px 28px', letterSpacing: '0.1em' }}>
+                    <Link href={`/${locale}/films/${featuredFilm.slug}`} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', padding: '12px 28px', letterSpacing: '0.1em' }}>
                       ▶ JETZT ANSEHEN
                     </Link>
-                    <Link href={`/de/films/${featuredFilm.slug}`} style={{ fontSize: '0.78rem', color: 'rgba(240,236,228,0.5)', textDecoration: 'none', letterSpacing: '0.1em', borderBottom: '1px solid rgba(240,236,228,0.2)', paddingBottom: '2px' }}>
+                    <Link href={`/${locale}/films/${featuredFilm.slug}`} style={{ fontSize: '0.78rem', color: 'rgba(240,236,228,0.5)', textDecoration: 'none', letterSpacing: '0.1em', borderBottom: '1px solid rgba(240,236,228,0.2)', paddingBottom: '2px' }}>
                       MEHR INFO
                     </Link>
                   </div>
@@ -439,7 +442,7 @@ export default function FilmsPage() {
                     SUCHERGEBNISSE
                   </h2>
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '8px 48px' }}>
-                    {searchResults.map(film => <FilmCard key={film.id} film={film} />)}
+                    {searchResults.map(film => <FilmCard key={film.id} film={film} locale={locale} />)}
                   </div>
                 </div>
               )
@@ -450,7 +453,7 @@ export default function FilmsPage() {
                     {category.title.toUpperCase()}
                   </h2>
                   <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '8px 48px', scrollbarWidth: 'thin', scrollbarColor: 'var(--red) transparent' }}>
-                    {category.films.map(film => <FilmCard key={film.id} film={film} />)}
+                    {category.films.map(film => <FilmCard key={film.id} film={film} locale={locale} />)}
                   </div>
                 </div>
               ))

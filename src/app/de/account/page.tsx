@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function AccountPage() {
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -17,7 +19,7 @@ export default function AccountPage() {
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/de/auth/login'); return }
+      if (!user) { router.push(`/${locale}/auth/login`); return }
       setUser(user)
       const { data: profile } = await supabase
         .from('profiles')
@@ -32,7 +34,7 @@ export default function AccountPage() {
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    router.push('/de/auth/login')
+    router.push(`/${locale}/auth/login`)
   }
 
   async function handleBillingPortal() {
@@ -88,13 +90,13 @@ export default function AccountPage() {
         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <Link href="/de/films" style={{
+        <Link href={`/${locale}/films`} style={{
           fontFamily: 'var(--font-display)', fontSize: '1.8rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
         }}>
           UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
         </Link>
-        <Link href="/de/films" style={{
+        <Link href={`/${locale}/films`} style={{
           fontSize: '0.82rem', color: 'var(--grey)',
           textDecoration: 'none', letterSpacing: '0.06em',
         }}>
@@ -180,7 +182,7 @@ export default function AccountPage() {
               onClick={async () => {
                 if (!confirm('Soll ein Passwort-Reset-Link an ' + user?.email + ' gesendet werden?')) return
                 const { error } = await supabase.auth.resetPasswordForEmail(user?.email, {
-                  redirectTo: window.location.origin + '/de/auth/login',
+                  redirectTo: window.location.origin + `/${locale}/auth/login`,
                 })
                 if (error) alert('Fehler: ' + error.message)
                 else alert('Passwort-Reset-Link wurde gesendet!')
@@ -222,7 +224,7 @@ export default function AccountPage() {
               <p style={{ fontSize: '0.88rem', color: 'var(--grey)', marginBottom: '20px', lineHeight: 1.6 }}>
                 Du hast derzeit kein aktives Abo.
               </p>
-              <Link href="/de/subscribe" style={{
+              <Link href={`/${locale}/subscribe`} style={{
                 display: 'inline-block', background: 'var(--red)',
                 color: 'white', padding: '12px 24px', textDecoration: 'none',
                 fontSize: '0.85rem', letterSpacing: '0.1em', fontWeight: 700,

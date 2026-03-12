@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -50,7 +52,7 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/de/auth/verify-age')
+    router.push(`/${locale}/auth/verify-age`)
   }
 
   async function handleGoogleRegister() {
@@ -67,7 +69,7 @@ export default function RegisterPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
-        <Link href="/de" style={{
+        <Link href={`/${locale}`} style={{
           fontFamily: 'var(--font-display)', fontSize: '2.2rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)',
           textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: '48px',
@@ -172,9 +174,9 @@ export default function RegisterPage() {
 
             <p style={{ fontSize: '0.72rem', color: 'var(--grey)', marginBottom: '20px', lineHeight: 1.6 }}>
               Mit der Registrierung stimmst du unseren{' '}
-              <Link href="/de/agb" style={{ color: 'var(--red)' }}>AGB</Link>{' '}
+              <Link href={`/${locale}/agb`} style={{ color: 'var(--red)' }}>AGB</Link>{' '}
               und der{' '}
-              <Link href="/de/datenschutz" style={{ color: 'var(--red)' }}>Datenschutzerklärung</Link>{' '}
+              <Link href={`/${locale}/datenschutz`} style={{ color: 'var(--red)' }}>Datenschutzerklärung</Link>{' '}
               zu. Du bestätigst, 18 Jahre oder älter zu sein.
             </p>
 
@@ -185,7 +187,7 @@ export default function RegisterPage() {
 
           <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.82rem', color: 'var(--grey)' }}>
             Bereits ein Konto?{' '}
-            <Link href="/de/auth/login" style={{ color: 'var(--red)', textDecoration: 'none' }}>Anmelden</Link>
+            <Link href={`/${locale}/auth/login`} style={{ color: 'var(--red)', textDecoration: 'none' }}>Anmelden</Link>
           </div>
         </div>
 

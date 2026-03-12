@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 const POSTERS = [
   { src: '/thumbnails/agp1.jpg', label: 'KULT' },
@@ -24,6 +27,9 @@ const BG_COLS = [
 ]
 
 export default function Hero() {
+  const t = useTranslations('hero')
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -142,7 +148,7 @@ export default function Hero() {
               fontSize: '0.72rem', letterSpacing: '0.22em',
               textTransform: 'uppercase', color: 'var(--red)', fontWeight: 500,
             }}>
-              Indie Film Plattform
+              {t('eyebrow')}
             </span>
           </div>
 
@@ -166,11 +172,10 @@ export default function Hero() {
             marginBottom: isMobile ? '24px' : '32px',
             letterSpacing: '0.04em', lineHeight: 1.7,
           }}>
-            Kino ohne Kompromisse. Unabhängig.<br />
-            So wie Film sein sollte.
+            {t('tagline')}<br />
+            {t('tagline2')}
           </p>
 
-          {/* CTA Buttons */}
           <div style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
@@ -178,17 +183,16 @@ export default function Hero() {
             gap: isMobile ? '12px' : '24px',
             marginBottom: isMobile ? '24px' : '48px',
           }}>
-            <a href="/de/auth/register" className="btn-primary">Jetzt ansehen</a>
-            <a href="#pricing" className="btn-secondary">Mehr erfahren</a>
+            <Link href={`/${locale}/auth/register`} className="btn-primary">{t('cta_primary')}</Link>
+            <a href="#pricing" className="btn-secondary">{t('cta_secondary')}</a>
           </div>
 
-          {/* Price hint */}
           <div style={{
             display: 'flex', alignItems: 'baseline', gap: '8px',
             color: 'var(--grey)', fontSize: '0.82rem', letterSpacing: '0.06em',
           }}>
             <strong style={{ color: 'var(--warm-white)', fontSize: '1.1rem' }}>19,90€</strong>
-            <span>/ Monat · Unbegrenzt · Keine Bindung</span>
+            <span>{t('price_label')}</span>
           </div>
         </div>
       </div>
@@ -201,7 +205,7 @@ export default function Hero() {
           color: 'var(--grey)', fontSize: '0.7rem', letterSpacing: '0.2em',
           textTransform: 'uppercase', writingMode: 'vertical-rl',
         }}>
-          Entdecken
+          {t('cta_secondary')}
           <div style={{
             width: '1px', height: '64px',
             background: 'linear-gradient(to bottom, var(--grey), transparent)',

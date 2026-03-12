@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const FEATURES = [
   'Unbegrenztes Streaming aller Filme',
@@ -12,6 +13,8 @@ const FEATURES = [
 ]
 
 export default function SubscribePage() {
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -50,7 +53,7 @@ export default function SubscribePage() {
     }}>
       <div style={{ width: '100%', maxWidth: '480px' }}>
 
-        <Link href="/de" style={{
+        <Link href={`/${locale}`} style={{
           fontFamily: 'var(--font-display)', fontSize: '2.2rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)',
           textDecoration: 'none', display: 'block', textAlign: 'center', marginBottom: '48px',

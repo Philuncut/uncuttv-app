@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function VerifyAgePage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const supabase = createClient()
   const [status, setStatus] = useState<'checking' | 'pending' | 'approved' | 'starting' | 'error'>('checking')
   const [errorDetail, setErrorDetail] = useState('')
@@ -26,7 +28,7 @@ export default function VerifyAgePage() {
 
     async function init() {
       const user = await getUser()
-      if (!user) { router.push('/de/auth/login'); return }
+      if (!user) { router.push(`/${locale}/auth/login`); return }
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -36,7 +38,7 @@ export default function VerifyAgePage() {
 
       if (profile?.age_verified) {
         setStatus('approved')
-        setTimeout(() => router.push('/de/subscribe'), 1500)
+        setTimeout(() => router.push(`/${locale}/subscribe`), 1500)
         return
       }
 
@@ -56,7 +58,7 @@ export default function VerifyAgePage() {
           if (p?.age_verified) {
             clearInterval(interval)
             setStatus('approved')
-            setTimeout(() => router.push('/de/subscribe'), 1500)
+            setTimeout(() => router.push(`/${locale}/subscribe`), 1500)
           }
           if (attempts > 100) clearInterval(interval) // max 5 Min
         }, 3000)
@@ -90,7 +92,7 @@ export default function VerifyAgePage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px', textAlign: 'center' }}>
 
-        <Link href="/de" style={{
+        <Link href={`/${locale}`} style={{
           fontFamily: 'var(--font-display)', fontSize: '2.2rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)',
           textDecoration: 'none', display: 'block', marginBottom: '48px',

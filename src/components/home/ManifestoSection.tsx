@@ -1,4 +1,9 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 export default function ManifestoSection() {
+  const t = useTranslations('manifesto')
   return (
     <section style={{
       padding: '120px 48px',
@@ -20,17 +25,13 @@ export default function ManifestoSection() {
           lineHeight: 1.2, letterSpacing: '0.06em',
           color: 'var(--warm-white)', marginBottom: '32px',
         }}>
-          DAS INDEPENDENT KINO HAT DIE MUTIGSTEN
-          STIMMEN DER WELT —{' '}
-          <span style={{ color: 'var(--red)' }}>
-            SIE VERDIENEN EINE BÜHNE OHNE FILTER.
-          </span>
+          {t('quote')}
         </blockquote>
         <div style={{
           fontSize: '0.78rem', letterSpacing: '0.18em',
           textTransform: 'uppercase', color: 'var(--grey)',
         }}>
-          — Das UncutTV Manifest
+          — {t('source')}
         </div>
       </div>
     </section>
