@@ -1,1 +1,7 @@
-export { default } from '../../de/payment-failed/page'
+export default function PaymentFailedPage() {
+  return (
+    <main>
+      <p>Payment failed.</p>
+    </main>
+  )
+}
