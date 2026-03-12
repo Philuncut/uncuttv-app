@@ -1,9 +1,14 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import LanguageSwitch from './LanguageSwitch'
+import type { Locale } from '@/i18n/config'
 
 export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false)
+  const pathname = usePathname()
+  const locale: Locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1] as Locale) ?? 'de'
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -20,7 +25,7 @@ export default function Navbar() {
       background: 'linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%)',
       backdropFilter: 'blur(2px)',
     }}>
-      <Link href="/de" style={{
+      <Link href={`/${locale}`} style={{
         fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
         letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
         display: 'flex', alignItems: 'center',
@@ -48,15 +53,16 @@ export default function Navbar() {
         </ul>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link href="/de/auth/login" style={{
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <LanguageSwitch currentLocale={locale} />
+        <Link href={`/${locale}/auth/login`} style={{
           color: 'var(--grey-light)', textDecoration: 'none',
           fontSize: '0.82rem', letterSpacing: '0.08em',
         }}>
           Anmelden
         </Link>
         {!isMobile && (
-          <Link href="/de/auth/register" className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.82rem' }}>
+          <Link href={`/${locale}/auth/register`} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.82rem' }}>
             Jetzt starten
           </Link>
         )}
