@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
+import { userHasVoucherForFilm } from '@/lib/vouchers'
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -8,7 +9,6 @@ const mux = new Mux({
 })
 
 export async function GET(req: NextRequest) {
-  // Nur eingeloggte User mit aktivem Abo
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,16 +23,25 @@ export async function GET(req: NextRequest) {
     .single()
 
   const activeStatuses = ['active', 'trialing']
-  if (!profile || !activeStatuses.includes(profile.subscription_status)) {
-    return NextResponse.json({ error: 'No active subscription' }, { status: 403 })
-  }
+  const hasSubscription = profile && activeStatuses.includes(profile.subscription_status)
 
   const playbackId = req.nextUrl.searchParams.get('playbackId')
+  const filmId = req.nextUrl.searchParams.get('filmId')
+
   if (!playbackId) {
     return NextResponse.json({ error: 'Missing playbackId' }, { status: 400 })
   }
 
-  // Signed Token generieren – gültig für 6 Stunden
+  if (!hasSubscription) {
+    if (!filmId) {
+      return NextResponse.json({ error: 'No active subscription' }, { status: 403 })
+    }
+    const hasVoucher = await userHasVoucherForFilm(user.id, filmId)
+    if (!hasVoucher) {
+      return NextResponse.json({ error: 'No access' }, { status: 403 })
+    }
+  }
+
   const token = await mux.jwt.signPlaybackId(playbackId, {
     keyId: process.env.MUX_SIGNING_KEY_ID!,
     keySecret: process.env.MUX_SIGNING_PRIVATE_KEY!,
