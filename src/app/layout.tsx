@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   description: 'Kino ohne Kompromisse. Unabhängig. So wie Film sein sollte.',
   keywords: ['independent film', 'indie kino', 'streaming', 'arthouse'],
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/apple-icon.svg',
   },
   openGraph: {
@@ -31,6 +33,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
+      <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+      </head>
       <body>{children}</body>
     </html>
   )
