@@ -1,5 +1,1 @@
-import { redirect } from 'next/navigation'
-
-export default function DeHomePage() {
-  redirect('/de')
-}
+export { default } from '../[locale]/page'

@@ -1,5 +1,1 @@
-import { redirect } from 'next/navigation'
-
-export default function DeLoginPage() {
-  redirect('/de/auth/login')
-}
+export { default } from '../../[locale]/auth/login/page'
