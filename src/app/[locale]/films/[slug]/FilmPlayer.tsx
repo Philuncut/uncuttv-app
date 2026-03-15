@@ -72,7 +72,7 @@ export default function FilmPlayer({ playbackId, filmId, title }: FilmPlayerProp
       <MuxPlayer
         streamType="on-demand"
         playbackId={playbackId}
-        tokens={[{ type: 'jwt', token }]}
+        tokens={{ playback: token }}
         metadata={{ video_title: title }}
         style={{ aspectRatio: '16/9', width: '100%' }}
         primaryColor="#C8102E"
