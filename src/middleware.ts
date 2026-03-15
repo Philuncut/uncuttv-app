@@ -25,13 +25,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Root locale paths: pass through to avoid redirect loop
+  if (pathname === '/de' || pathname === '/en' || pathname === '/de/' || pathname === '/en/') {
+    return NextResponse.next()
+  }
+
   // i18n redirect: keine Locale im Pfad → Locale ermitteln und redirecten
   const pathnameHasLocale = (locales as readonly string[]).some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   )
   if (!pathnameHasLocale) {
     const locale = getLocaleFromRequest(request)
-    return NextResponse.redirect(new URL(`/${locale}${pathname === '/' ? '' : pathname}`, request.url))
+    return NextResponse.redirect(new URL(`/${locale}/${pathname === '/' ? '' : pathname}`, request.url))
   }
 
   // Aktuelle Locale aus Pfad (z. B. /de/ oder /en/)
