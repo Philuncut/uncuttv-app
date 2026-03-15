@@ -17,7 +17,7 @@ function getLocaleFromRequest(request: NextRequest): string {
   return 'en'
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // API Routes nie redirecten
