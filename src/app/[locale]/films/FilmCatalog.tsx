@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 export interface FilmCardData {
@@ -22,11 +23,15 @@ function formatDuration(min: number | null): string {
 
 export default function FilmCatalog({
   films,
-  locale,
+  title = 'Filme',
+  subtitle,
 }: {
   films: FilmCardData[]
-  locale: string
+  title?: string
+  subtitle?: string
 }) {
+  const pathname = usePathname()
+  const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
   const [genreFilter, setGenreFilter] = useState<string | null>(null)
 
   const allGenres = useMemo(() => {
@@ -50,8 +55,11 @@ export default function FilmCatalog({
           color: 'var(--warm-white)',
           marginBottom: '8px',
         }}>
-          Filme
+          {genreFilter ?? title}
         </h1>
+        {subtitle && !genreFilter && (
+          <p style={{ color: 'var(--grey)', fontSize: '0.9rem', marginBottom: '20px' }}>{subtitle}</p>
+        )}
 
         {allGenres.length > 0 && (
           <div style={{

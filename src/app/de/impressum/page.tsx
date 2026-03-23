@@ -129,15 +129,31 @@ function Row({ label, value, link }: { label: string; value: string; link?: stri
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      gap: '12px',
       padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)',
     }}>
-      <span style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>{label}</span>
+      <span style={{ fontSize: '0.82rem', color: 'var(--grey)', flexShrink: 0 }}>{label}</span>
       {link ? (
-        <a href={link} style={{ fontSize: '0.88rem', color: 'var(--warm-white)', textDecoration: 'none' }}>
+        <a href={link} style={{
+          fontSize: '0.88rem',
+          color: 'var(--warm-white)',
+          textDecoration: 'none',
+          textAlign: 'right',
+          minWidth: 0,
+          overflowWrap: 'anywhere',
+          wordBreak: 'break-word',
+        }}>
           {value}
         </a>
       ) : (
-        <span style={{ fontSize: '0.88rem', color: 'var(--warm-white)' }}>{value}</span>
+        <span style={{
+          fontSize: '0.88rem',
+          color: 'var(--warm-white)',
+          textAlign: 'right',
+          minWidth: 0,
+          overflowWrap: 'anywhere',
+          wordBreak: 'break-word',
+        }}>{value}</span>
       )}
     </div>
   )

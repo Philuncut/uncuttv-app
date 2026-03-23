@@ -19,9 +19,8 @@ export default function Footer() {
       { label: t('search'), href: `${base}/films` },
     ],
     [
-      { label: t('newReleases'), href: `${base}/films` },
-      { label: t('genres'), href: `${base}/films` },
-      { label: t('genres'), href: `${base}/films` },
+      { label: t('newReleases'), href: `${base}/neuheiten` },
+      { label: t('genres'), href: `${base}/genres` },
       { label: t('faq'), href: `${base}/faq` },
     ],
     [
