@@ -7,7 +7,7 @@ export default async function FilmsPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params
+  await params
   const headersList = await headers()
   const country = headersList.get('x-vercel-ip-country') ?? ''
 
@@ -44,7 +44,7 @@ export default async function FilmsPage({
 
   return (
     <main style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-      <FilmCatalog films={films} locale={locale} />
+      <FilmCatalog films={films} />
     </main>
   )
 }
