@@ -205,12 +205,6 @@ export default function Footer() {
         <p style={{ fontSize: '0.75rem', color: 'var(--grey)', letterSpacing: '0.06em' }}>
           {t('copyright')}
         </p>
-        <span style={{
-          background: 'var(--red)', color: 'white',
-          fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', letterSpacing: '0.06em',
-        }}>
-          {t('ageBadge')}
-        </span>
       </div>
     </footer>
   )
