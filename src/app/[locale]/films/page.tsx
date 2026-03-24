@@ -1,27 +1,134 @@
 import { headers } from 'next/headers'
+import Link from 'next/link'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
-import FilmCatalog, { type FilmCardData } from './FilmCatalog'
+import FilmCatalog, { FilmRow, type FilmCardData } from './FilmCatalog'
+
+function rowToCard(row: {
+  id: string
+  title: string | null
+  slug: string | null
+  poster_url: string | null
+  year: number | null
+  duration_minutes: number | null
+  genres: unknown
+}): FilmCardData {
+  return {
+    id: row.id,
+    title: row.title ?? '',
+    slug: row.slug ?? '',
+    poster_url: row.poster_url ?? null,
+    year: row.year ?? null,
+    duration_minutes: row.duration_minutes ?? null,
+    genres: Array.isArray(row.genres) ? row.genres : [],
+  }
+}
+
+const CARD_SELECT =
+  'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in'
 
 export default async function FilmsPage({
   params,
 }: {
   params: Promise<{ locale: string }>
 }) {
-  await params
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('filmsPage')
+
   const headersList = await headers()
   const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
-  let query = supabase
-    .from('films')
-    .select('id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in')
-    .eq('is_published', true)
 
+  // Featured (Movie of the Month)
+  let featuredQuery = supabase
+    .from('films')
+    .select(
+      'id, title, slug, poster_url, backdrop_url, short_description, genres, is_published, blocked_in, is_featured'
+    )
+    .eq('is_published', true)
+    .eq('is_featured', true)
+    .limit(1)
   if (country) {
-    query = query.not('blocked_in', 'cs', `{${country}}`)
+    featuredQuery = featuredQuery.not('blocked_in', 'cs', `{${country}}`)
+  }
+  const { data: featuredRow } = await featuredQuery.maybeSingle()
+
+  const featured = featuredRow
+    ? {
+        id: featuredRow.id,
+        title: featuredRow.title ?? '',
+        slug: featuredRow.slug ?? '',
+        poster_url: featuredRow.poster_url as string | null,
+        backdrop_url: featuredRow.backdrop_url as string | null,
+        short_description: featuredRow.short_description as string | null,
+        genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
+      }
+    : null
+
+  // New (last 6 by created_at)
+  let newQuery = supabase
+    .from('films')
+    .select(`${CARD_SELECT}, created_at`)
+    .eq('is_published', true)
+  if (country) {
+    newQuery = newQuery.not('blocked_in', 'cs', `{${country}}`)
+  }
+  const { data: newRows, error: newErr } = await newQuery
+    .order('created_at', { ascending: false })
+    .limit(6)
+
+  if (newErr) console.error('Films new row fetch error:', newErr)
+
+  const newFilms: FilmCardData[] = (newRows ?? []).map((row) => rowToCard(row))
+
+  // Trending: sum watchtime per film
+  let trendingFilms: FilmCardData[] = []
+  try {
+    const admin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { data: wtRows, error: wtErr } = await admin
+      .from('watchtime')
+      .select('film_id, watched_seconds')
+
+    if (!wtErr && wtRows?.length) {
+      const sums = new Map<string, number>()
+      for (const row of wtRows) {
+        const fid = row.film_id as string
+        const sec = Number((row as { watched_seconds?: number }).watched_seconds ?? 0)
+        sums.set(fid, (sums.get(fid) ?? 0) + sec)
+      }
+      const topIds = [...sums.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([id]) => id)
+
+      if (topIds.length) {
+        let tq = supabase.from('films').select(CARD_SELECT).eq('is_published', true).in('id', topIds)
+        if (country) {
+          tq = tq.not('blocked_in', 'cs', `{${country}}`)
+        }
+        const { data: tr } = await tq
+        const orderMap = new Map(topIds.map((id, i) => [id, i]))
+        trendingFilms = (tr ?? [])
+          .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
+          .map((row) => rowToCard(row))
+      }
+    }
+  } catch (e) {
+    console.error('Trending watchtime error:', e)
   }
 
-  const { data: rows, error } = await query.order('title')
+  // All films (catalog grid)
+  let allQuery = supabase.from('films').select(CARD_SELECT).eq('is_published', true)
+  if (country) {
+    allQuery = allQuery.not('blocked_in', 'cs', `{${country}}`)
+  }
+  const { data: rows, error } = await allQuery.order('title')
 
   if (error) {
     console.error('Films fetch error:', error)
@@ -32,19 +139,127 @@ export default async function FilmsPage({
     )
   }
 
-  const films: FilmCardData[] = (rows ?? []).map((row) => ({
-    id: row.id,
-    title: row.title ?? '',
-    slug: row.slug ?? '',
-    poster_url: row.poster_url ?? null,
-    year: row.year ?? null,
-    duration_minutes: row.duration_minutes ?? null,
-    genres: Array.isArray(row.genres) ? row.genres : [],
-  }))
+  const allFilms: FilmCardData[] = (rows ?? []).map((row) => rowToCard(row))
+
+  const bgImage =
+    featured && (featured.backdrop_url?.trim() || featured.poster_url?.trim())
+      ? featured.backdrop_url?.trim() || featured.poster_url
+      : null
 
   return (
     <main style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-      <FilmCatalog films={films} />
+      {featured && bgImage ? (
+        <section
+          style={{
+            position: 'relative',
+            minHeight: 'min(56vh, 560px)',
+            width: '100%',
+          }}
+        >
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${bgImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(to top, #0A0A0A 0%, rgba(10,10,10,0.88) 38%, rgba(10,10,10,0.35) 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              paddingTop: 'clamp(88px, 14vw, 120px)',
+              paddingBottom: 'clamp(40px, 8vw, 64px)',
+              paddingLeft: 'clamp(16px, 4vw, 48px)',
+              paddingRight: 'clamp(16px, 4vw, 48px)',
+              maxWidth: '1100px',
+              margin: '0 auto',
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(1.75rem, 5vw, 2.75rem)',
+                letterSpacing: '0.04em',
+                color: 'var(--warm-white)',
+                margin: '0 0 12px',
+                lineHeight: 1.15,
+                maxWidth: '720px',
+              }}
+            >
+              {featured.title}
+            </h1>
+            {featured.short_description && String(featured.short_description).trim() ? (
+              <p
+                style={{
+                  fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+                  color: 'rgba(255,255,255,0.82)',
+                  lineHeight: 1.55,
+                  margin: '0 0 14px',
+                  maxWidth: '640px',
+                }}
+              >
+                {String(featured.short_description).trim()}
+              </p>
+            ) : null}
+            {featured.genres.length > 0 ? (
+              <p
+                style={{
+                  fontSize: '0.78rem',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.55)',
+                  margin: '0 0 24px',
+                }}
+              >
+                {featured.genres.join(' · ')}
+              </p>
+            ) : (
+              <div style={{ marginBottom: '24px' }} />
+            )}
+            <Link
+              href={`/${locale}/films/${featured.slug}`}
+              className="btn-primary"
+              style={{
+                display: 'inline-block',
+                padding: '16px 36px',
+                fontSize: '0.95rem',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                textDecoration: 'none',
+              }}
+            >
+              {t('featuredWatchNow')}
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 24px',
+          paddingTop: featured && bgImage ? 'clamp(24px, 5vw, 40px)' : 'clamp(88px, 12vw, 108px)',
+          paddingBottom: '8px',
+        }}
+      >
+        <FilmRow films={newFilms} title={t('sectionNew')} locale={locale} />
+        <FilmRow films={trendingFilms} title={t('sectionTrending')} locale={locale} />
+      </div>
+
+      <FilmCatalog films={allFilms} title={t('sectionAll')} topPadding={0} />
     </main>
   )
 }

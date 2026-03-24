@@ -69,6 +69,14 @@
     "registerNow": "Register now",
     "ageWarning": "⚠ For persons aged 18 and over only"
   },
+  "filmsPage": {
+    "featuredWatchNow": "Watch Now",
+    "sectionNew": "New on UncutTV",
+    "sectionTrending": "Trending Now",
+    "sectionAll": "All Films",
+    "filterAll": "All",
+    "emptyCategory": "No films in this category."
+  },
   "filmDetail": {
     "backToFilms": "Back to films",
     "voucherAccess": "Access via voucher",

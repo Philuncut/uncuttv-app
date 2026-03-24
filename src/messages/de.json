@@ -69,6 +69,14 @@
     "registerNow": "Jetzt registrieren",
     "ageWarning": "⚠ Nur für Personen ab 18 Jahren"
   },
+  "filmsPage": {
+    "featuredWatchNow": "Jetzt ansehen",
+    "sectionNew": "Neu bei UncutTV",
+    "sectionTrending": "Die Community schaut gerade",
+    "sectionAll": "Alle Filme",
+    "filterAll": "Alle",
+    "emptyCategory": "Keine Filme in dieser Kategorie."
+  },
   "filmDetail": {
     "backToFilms": "Zurück zu den Filmen",
     "voucherAccess": "Zugang per Gutschein",
