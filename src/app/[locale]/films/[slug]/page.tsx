@@ -28,6 +28,10 @@ export default async function FilmSlugPage({
     .eq('is_published', true)
     .maybeSingle()
 
+  console.log('[FilmSlugPage] slug:', JSON.stringify(slug))
+  console.log('[FilmSlugPage] filmError:', JSON.stringify(filmError))
+  console.log('[FilmSlugPage] film:', JSON.stringify(film))
+
   if (filmError || !film) {
     console.log('[FilmSlugPage] redirect → films (film not found, slug:', slug, 'error:', filmError?.message, ')')
     redirect(`/${locale}/films`)
