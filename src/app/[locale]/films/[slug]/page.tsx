@@ -14,8 +14,10 @@ export default async function FilmSlugPage({
   const { locale, slug } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('[FilmSlugPage] user.id:', user?.id, 'user.email:', user?.email)
 
   if (!user) {
+    console.log('[FilmSlugPage] redirect → login')
     redirect(`/${locale}/auth/login?redirect=/${locale}/films/${slug}`)
   }
 
@@ -27,6 +29,7 @@ export default async function FilmSlugPage({
     .maybeSingle()
 
   if (filmError || !film) {
+    console.log('[FilmSlugPage] redirect → films (film not found, slug:', slug, 'error:', filmError?.message, ')')
     redirect(`/${locale}/films`)
   }
 
@@ -36,10 +39,12 @@ export default async function FilmSlugPage({
     .eq('id', user.id)
     .single()
 
+  console.log('[FilmSlugPage] profile.subscription_status:', profile?.subscription_status)
   const hasSubscription = profile && ACTIVE_STATUSES.includes(profile.subscription_status)
   const hasVoucher = await userHasVoucherForFilm(user.id, film.id)
 
   if (!hasSubscription && !hasVoucher) {
+    console.log('[FilmSlugPage] redirect → subscribe (hasSubscription:', hasSubscription, 'hasVoucher:', hasVoucher, ')')
     redirect(`/${locale}/subscribe`)
   }
 
