@@ -23,7 +23,7 @@ export default async function FilmSlugPage({
 
   const { data: film, error: filmError } = await supabase
     .from('films')
-    .select('id, title, slug, mux_playback_id, thumbnail_url')
+    .select('id, title, slug, mux_playback_id, poster_url')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()

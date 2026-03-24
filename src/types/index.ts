@@ -10,7 +10,7 @@ export interface Film {
   duration_minutes: number
   mux_asset_id: string
   mux_playback_id: string
-  thumbnail_url: string
+  poster_url: string
   genres: string[]
   language: string
   subtitle_languages: string[]
