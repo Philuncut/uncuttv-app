@@ -65,5 +65,21 @@
     "noAccount": "Noch kein Konto?",
     "registerNow": "Jetzt registrieren",
     "ageWarning": "⚠ Nur für Personen ab 18 Jahren"
+  },
+  "filmDetail": {
+    "backToFilms": "Zurück zu Filmen",
+    "voucherAccess": "Zugang per Gutschein",
+    "originalTitle": "Originaltitel",
+    "descriptionHeading": "Beschreibung",
+    "director": "Regie",
+    "cast": "Besetzung",
+    "country": "Land",
+    "year": "Jahr",
+    "duration": "Laufzeit",
+    "durationMinutes": "{minutes} Min.",
+    "language": "Sprache",
+    "genres": "Genres",
+    "play": "Abspielen",
+    "playerLoading": "Wird geladen…"
   }
 }

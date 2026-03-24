@@ -65,5 +65,21 @@
     "noAccount": "Don't have an account?",
     "registerNow": "Register now",
     "ageWarning": "⚠ For persons aged 18 and over only"
+  },
+  "filmDetail": {
+    "backToFilms": "Back to films",
+    "voucherAccess": "Access via voucher",
+    "originalTitle": "Original title",
+    "descriptionHeading": "Description",
+    "director": "Director",
+    "cast": "Cast",
+    "country": "Country",
+    "year": "Year",
+    "duration": "Runtime",
+    "durationMinutes": "{minutes} min.",
+    "language": "Language",
+    "genres": "Genres",
+    "play": "Play",
+    "playerLoading": "Loading…"
   }
 }

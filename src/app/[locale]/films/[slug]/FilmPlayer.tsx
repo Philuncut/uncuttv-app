@@ -7,9 +7,20 @@ interface FilmPlayerProps {
   playbackId: string
   filmId: string
   title: string
+  /** Hero backdrop layout: tighter spacing for overlaid play control */
+  variant?: 'default' | 'hero'
+  playLabel?: string
+  loadingLabel?: string
 }
 
-export default function FilmPlayer({ playbackId, filmId, title }: FilmPlayerProps) {
+export default function FilmPlayer({
+  playbackId,
+  filmId,
+  title,
+  variant = 'default',
+  playLabel = 'Abspielen',
+  loadingLabel = 'Wird geladen…',
+}: FilmPlayerProps) {
   const [token, setToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -48,6 +59,9 @@ export default function FilmPlayer({ playbackId, filmId, title }: FilmPlayerProp
     )
   }
 
+  const btnMarginTop = variant === 'hero' ? 0 : 24
+  const wrapMarginTop = variant === 'hero' ? 16 : 24
+
   if (!token) {
     return (
       <button
@@ -56,19 +70,19 @@ export default function FilmPlayer({ playbackId, filmId, title }: FilmPlayerProp
         disabled={loading}
         className="btn-primary"
         style={{
-          marginTop: '24px',
+          marginTop: btnMarginTop,
           padding: '16px 32px',
           fontSize: '1rem',
           opacity: loading ? 0.7 : 1,
         }}
       >
-        {loading ? 'Wird geladen…' : 'Abspielen'}
+        {loading ? loadingLabel : playLabel}
       </button>
     )
   }
 
   return (
-    <div style={{ marginTop: '24px', maxWidth: '900px' }}>
+    <div style={{ marginTop: wrapMarginTop, maxWidth: variant === 'hero' ? '100%' : '900px', width: '100%' }}>
       <MuxPlayer
         streamType="on-demand"
         playbackId={playbackId}
