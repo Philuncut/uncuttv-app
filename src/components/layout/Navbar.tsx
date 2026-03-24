@@ -60,8 +60,15 @@ export default function Navbar() {
     setDropdownOpen(false)
     setBillingLoading(true)
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' })
-      const data = await res.json()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+      const data = await res.json().catch(() => ({}))
       if (data.url) window.location.href = data.url
     } finally {
       setBillingLoading(false)
