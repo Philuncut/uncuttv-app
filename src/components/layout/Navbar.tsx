@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import LanguageSwitch from './LanguageSwitch'
@@ -14,6 +14,9 @@ export default function Navbar() {
   const supabase = useMemo(() => createClient(), [])
   const [isMobile, setIsMobile] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const locale: Locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1] as Locale) ?? 'de'
 
@@ -34,9 +37,47 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [supabase])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [dropdownOpen])
+
   async function handleSignOut() {
+    setDropdownOpen(false)
     await supabase.auth.signOut()
     router.push(`/${locale}/auth/login`)
+  }
+
+  async function handleBilling() {
+    setDropdownOpen(false)
+    setBillingLoading(true)
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } finally {
+      setBillingLoading(false)
+    }
+  }
+
+  const displayName = user?.email ?? t('myAccount')
+  const shortName = displayName.length > 22 ? displayName.slice(0, 20) + '…' : displayName
+
+  const linkStyle: React.CSSProperties = {
+    color: 'var(--grey-light)',
+    textDecoration: 'none',
+    fontSize: '0.82rem',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    transition: 'color 0.2s',
   }
 
   return (
@@ -55,33 +96,75 @@ export default function Navbar() {
         UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
       </Link>
 
-      {/* Nav links – nur Desktop */}
+      {/* Nav links – Desktop only */}
       {!isMobile && (
         <ul style={{ display: 'flex', gap: '36px', listStyle: 'none' }}>
-          <li><Link href={`/${locale}/films`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('films')}</Link></li>
-          <li><Link href={`/${locale}/films`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('new')}</Link></li>
-          <li><Link href={`/${locale}/films`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('genres')}</Link></li>
+          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('films')}</Link></li>
+          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('new')}</Link></li>
+          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('genres')}</Link></li>
         </ul>
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <LanguageSwitch currentLocale={locale} />
+
         {user ? (
-          <button
-            type="button"
-            onClick={handleSignOut}
-            style={{
-              color: 'var(--grey-light)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.82rem',
-              letterSpacing: '0.08em',
-              padding: 0,
-            }}
-          >
-            {t('signOut')}
-          </button>
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            {/* Trigger button */}
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(o => !o)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                color: 'var(--grey-light)',
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: '0.82rem', letterSpacing: '0.08em',
+                padding: '6px 0',
+              }}
+            >
+              <span>{shortName}</span>
+              <span style={{
+                fontSize: '0.6rem',
+                transition: 'transform 0.2s',
+                transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                display: 'inline-block',
+              }}>▼</span>
+            </button>
+
+            {/* Dropdown */}
+            {dropdownOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                minWidth: '200px',
+                background: 'rgba(18, 18, 22, 0.98)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '4px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                overflow: 'hidden',
+                zIndex: 600,
+              }}>
+                <DropdownLink
+                  href={`/${locale}/account`}
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  {t('myAccount')}
+                </DropdownLink>
+                <DropdownLink
+                  href={`/${locale}/auth/change-password`}
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  {t('changePassword')}
+                </DropdownLink>
+                <DropdownButton onClick={handleBilling} disabled={billingLoading}>
+                  {billingLoading ? '…' : t('billing')}
+                </DropdownButton>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', margin: '4px 0' }} />
+                <DropdownButton onClick={handleSignOut}>
+                  {t('signOut')}
+                </DropdownButton>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <Link href={`/${locale}/auth/login`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.08em' }}>
@@ -96,5 +179,65 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+  )
+}
+
+function DropdownLink({ href, onClick, children }: { href: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      style={{
+        display: 'block',
+        padding: '11px 18px',
+        fontSize: '0.82rem',
+        letterSpacing: '0.06em',
+        color: 'var(--grey-light)',
+        textDecoration: 'none',
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+        e.currentTarget.style.color = 'var(--warm-white)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'transparent'
+        e.currentTarget.style.color = 'var(--grey-light)'
+      }}
+    >
+      {children}
+    </Link>
+  )
+}
+
+function DropdownButton({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        display: 'block', width: '100%', textAlign: 'left',
+        padding: '11px 18px',
+        fontSize: '0.82rem',
+        letterSpacing: '0.06em',
+        color: 'var(--grey-light)',
+        background: 'none', border: 'none', cursor: disabled ? 'default' : 'pointer',
+        transition: 'background 0.15s, color 0.15s',
+        opacity: disabled ? 0.5 : 1,
+      }}
+      onMouseEnter={e => {
+        if (!disabled) {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+          e.currentTarget.style.color = 'var(--warm-white)'
+        }
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'transparent'
+        e.currentTarget.style.color = 'var(--grey-light)'
+      }}
+    >
+      {children}
+    </button>
   )
 }

@@ -5,6 +5,9 @@
     "genres": "Genres",
     "login": "Anmelden",
     "start": "Jetzt starten",
+    "myAccount": "Mein Konto",
+    "changePassword": "Passwort ändern",
+    "billing": "Zahlungsmethode",
     "signOut": "Abmelden"
   },
   "hero": {

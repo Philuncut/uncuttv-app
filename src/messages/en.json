@@ -5,6 +5,9 @@
     "genres": "Genres",
     "login": "Sign In",
     "start": "Get Started",
+    "myAccount": "My Account",
+    "changePassword": "Change Password",
+    "billing": "Billing",
     "signOut": "Sign Out"
   },
   "hero": {
