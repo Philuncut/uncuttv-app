@@ -8,7 +8,8 @@
     "myAccount": "Mein Konto",
     "changePassword": "Passwort ändern",
     "billing": "Zahlungsmethode",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "openMenu": "Menü öffnen"
   },
   "hero": {
     "eyebrow": "Indie Film Plattform",

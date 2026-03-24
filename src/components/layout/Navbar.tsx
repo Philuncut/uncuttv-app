@@ -15,10 +15,21 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [billingLoading, setBillingLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const mobileNavRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const locale: Locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1] as Locale) ?? 'de'
+
+  const navLinks = useMemo(
+    () => [
+      { href: `/${locale}/films`, label: t('films') },
+      { href: `/${locale}/neuheiten`, label: t('new') },
+      { href: `/${locale}/genres`, label: t('genres') },
+    ],
+    [locale, t]
+  )
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -26,6 +37,10 @@ export default function Navbar() {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
+
+  useEffect(() => {
+    setMobileNavOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     let cancelled = false
@@ -45,7 +60,7 @@ export default function Navbar() {
     }
   }, [supabase])
 
-  // Close dropdown when clicking outside
+  // Close account dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -58,14 +73,29 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [dropdownOpen])
 
+  // Close mobile nav when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (mobileNavRef.current && !mobileNavRef.current.contains(e.target as Node)) {
+        setMobileNavOpen(false)
+      }
+    }
+    if (mobileNavOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [mobileNavOpen])
+
   async function handleSignOut() {
     setDropdownOpen(false)
+    setMobileNavOpen(false)
     await supabase.auth.signOut()
     router.push(`/${locale}/auth/login`)
   }
 
   async function handleBilling() {
     setDropdownOpen(false)
+    setMobileNavOpen(false)
     setBillingLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -98,94 +128,140 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0,
-      /* Above globals.css body::before noise layer (z-index 1000) */
       zIndex: 1100,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: isMobile ? '16px 20px' : '24px 48px',
       background: 'linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%)',
       backdropFilter: 'blur(2px)',
       overflow: 'visible',
+      gap: '12px',
     }}>
-      <Link href={`/${locale}`} style={{
-        fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
-        letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
-        display: 'flex', alignItems: 'center',
-        flexShrink: 0,
-      }}>
-        UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
-      </Link>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, minWidth: 0 }}>
+        <Link href={`/${locale}`} style={{
+          fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
+          letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
+          display: 'flex', alignItems: 'center',
+          flexShrink: 0,
+        }}>
+          UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
+        </Link>
 
-      <ul
-        style={{
-          display: 'flex',
-          flex: 1,
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          gap: isMobile ? '12px 16px' : '36px',
-          listStyle: 'none',
-          margin: '0 12px',
-          minWidth: 0,
-        }}
-      >
-        <li>
-          <Link
-            href={`/${locale}/films`}
-            style={linkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
-          >
-            {t('films')}
-          </Link>
-        </li>
-        <li>
-          <Link
-            href={`/${locale}/neuheiten`}
-            style={linkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
-          >
-            {t('new')}
-          </Link>
-        </li>
-        <li>
-          <Link
-            href={`/${locale}/genres`}
-            style={linkStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
-          >
-            {t('genres')}
-          </Link>
-        </li>
-      </ul>
+        {isMobile && (
+          <div ref={mobileNavRef} style={{ position: 'relative', flexShrink: 0 }}>
+            <button
+              type="button"
+              aria-expanded={mobileNavOpen}
+              aria-label={t('openMenu')}
+              onClick={() => {
+                setMobileNavOpen((o) => !o)
+                setDropdownOpen(false)
+              }}
+              style={{
+                color: 'var(--grey-light)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.4rem',
+                lineHeight: 1,
+                padding: '6px 10px',
+              }}
+            >
+              ☰
+            </button>
+            {mobileNavOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 8px)', left: 0,
+                minWidth: '200px',
+                background: 'rgba(18, 18, 22, 0.98)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '4px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                overflow: 'hidden',
+                zIndex: 1200,
+              }}>
+                {navLinks.map((item, i) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileNavOpen(false)}
+                    style={{
+                      display: 'block',
+                      padding: '12px 18px',
+                      fontSize: '0.82rem',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'var(--grey-light)',
+                      textDecoration: 'none',
+                      borderBottom: i < navLinks.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+      {!isMobile && (
+        <ul
+          style={{
+            display: 'flex',
+            flex: 1,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '36px',
+            listStyle: 'none',
+            margin: '0 12px',
+            minWidth: 0,
+          }}
+        >
+          {navLinks.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                style={linkStyle}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0, position: 'relative', zIndex: 1, marginLeft: 'auto' }}>
         <LanguageSwitch currentLocale={locale} />
 
         {user ? (
           <div ref={dropdownRef} style={{ position: 'relative', zIndex: 2 }}>
-            {/* Trigger button */}
             <button
               type="button"
-              onClick={() => setDropdownOpen(o => !o)}
+              onClick={() => {
+                setDropdownOpen((o) => !o)
+                setMobileNavOpen(false)
+              }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
                 color: 'var(--grey-light)',
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontSize: '0.82rem', letterSpacing: '0.08em',
                 padding: '6px 0',
+                maxWidth: isMobile ? '120px' : 'none',
               }}
             >
-              <span>{shortName}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shortName}</span>
               <span style={{
                 fontSize: '0.6rem',
                 transition: 'transform 0.2s',
                 transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 display: 'inline-block',
+                flexShrink: 0,
               }}>▼</span>
             </button>
 
-            {/* Dropdown */}
             {dropdownOpen && (
               <div style={{
                 position: 'absolute', top: 'calc(100% + 8px)', right: 0,
