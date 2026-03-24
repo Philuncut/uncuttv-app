@@ -1,14 +1,19 @@
 'use client'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import LanguageSwitch from './LanguageSwitch'
 import type { Locale } from '@/i18n/config'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
   const t = useTranslations('nav')
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
   const [isMobile, setIsMobile] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
   const pathname = usePathname()
   const locale: Locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1] as Locale) ?? 'de'
 
@@ -18,6 +23,21 @@ export default function Navbar() {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.push(`/${locale}/auth/login`)
+  }
 
   return (
     <nav style={{
@@ -46,13 +66,33 @@ export default function Navbar() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <LanguageSwitch currentLocale={locale} />
-        <Link href={`/${locale}/auth/login`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.08em' }}>
-          {t('login')}
-        </Link>
-        {!isMobile && (
-          <Link href={`/${locale}/auth/register`} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.82rem' }}>
-            {t('start')}
-          </Link>
+        {user ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            style={{
+              color: 'var(--grey-light)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.82rem',
+              letterSpacing: '0.08em',
+              padding: 0,
+            }}
+          >
+            {t('signOut')}
+          </button>
+        ) : (
+          <>
+            <Link href={`/${locale}/auth/login`} style={{ color: 'var(--grey-light)', textDecoration: 'none', fontSize: '0.82rem', letterSpacing: '0.08em' }}>
+              {t('login')}
+            </Link>
+            {!isMobile && (
+              <Link href={`/${locale}/auth/register`} className="btn-primary" style={{ padding: '10px 24px', fontSize: '0.82rem' }}>
+                {t('start')}
+              </Link>
+            )}
+          </>
         )}
       </div>
     </nav>

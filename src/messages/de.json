@@ -4,7 +4,8 @@
     "new": "Neuheiten",
     "genres": "Genres",
     "login": "Anmelden",
-    "start": "Jetzt starten"
+    "start": "Jetzt starten",
+    "signOut": "Abmelden"
   },
   "hero": {
     "eyebrow": "Indie Film Plattform",
