@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { getUserVouchers } from '@/lib/vouchers'
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -45,8 +44,13 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
-  const vouchers = await getUserVouchers(user.id)
-  if (vouchers.length > 0) {
+  const { data: vouchers } = await supabase
+    .from('vouchers')
+    .select('id')
+    .eq('used_by', user.id)
+    .limit(1)
+
+  if (vouchers && vouchers.length > 0) {
     return supabaseResponse
   }
 
