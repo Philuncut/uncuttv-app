@@ -23,7 +23,9 @@ export default async function FilmSlugPage({
 
   const { data: film, error: filmError } = await supabase
     .from('films')
-    .select('id, title, slug, mux_playback_id, poster_url')
+    .select(
+      'id, title, slug, mux_playback_id, poster_url, description, director, country, year'
+    )
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
@@ -51,6 +53,21 @@ export default async function FilmSlugPage({
     console.log('[FilmSlugPage] redirect → subscribe (hasSubscription:', hasSubscription, 'hasVoucher:', hasVoucher, ')')
     redirect(`/${locale}/subscribe`)
   }
+
+  const metaLabels =
+    locale === 'de'
+      ? {
+          description: 'Beschreibung',
+          director: 'Regie',
+          country: 'Land',
+          year: 'Jahr',
+        }
+      : {
+          description: 'Description',
+          director: 'Director',
+          country: 'Country',
+          year: 'Year',
+        }
 
   return (
     <main style={{
@@ -92,6 +109,40 @@ export default async function FilmSlugPage({
           filmId={film.id}
           title={film.title}
         />
+        <div style={{ marginTop: '28px', color: 'var(--grey)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          {film.description && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: '6px' }}>
+                {metaLabels.description}
+              </div>
+              <p style={{ margin: 0, color: 'var(--warm-white)', whiteSpace: 'pre-wrap' }}>
+                {film.description}
+              </p>
+            </div>
+          )}
+          {(film.director || film.country || film.year != null) && (
+            <dl style={{ margin: 0, display: 'grid', gap: '10px' }}>
+              {film.director ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', gap: '12px', alignItems: 'start' }}>
+                  <dt style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{metaLabels.director}</dt>
+                  <dd style={{ margin: 0, color: 'var(--warm-white)' }}>{film.director}</dd>
+                </div>
+              ) : null}
+              {film.country ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', gap: '12px', alignItems: 'start' }}>
+                  <dt style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{metaLabels.country}</dt>
+                  <dd style={{ margin: 0, color: 'var(--warm-white)' }}>{film.country}</dd>
+                </div>
+              ) : null}
+              {film.year != null ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(80px, 120px) 1fr', gap: '12px', alignItems: 'start' }}>
+                  <dt style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{metaLabels.year}</dt>
+                  <dd style={{ margin: 0, color: 'var(--warm-white)' }}>{film.year}</dd>
+                </div>
+              ) : null}
+            </dl>
+          )}
+        </div>
       </div>
     </main>
   )
