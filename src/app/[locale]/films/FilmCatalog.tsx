@@ -199,12 +199,15 @@ export default function FilmCatalog({
   title = 'Filme',
   subtitle,
   topPadding = 100,
+  showGenreFilter = true,
 }: {
   films: FilmCardData[]
   title?: string
   subtitle?: string
   /** Padding below fixed navbar; set 0 when parent provides spacing */
   topPadding?: number
+  /** When false, only the grid (no genre chip row) */
+  showGenreFilter?: boolean
 }) {
   const t = useTranslations('filmsPage')
   const pathname = usePathname()
@@ -240,7 +243,7 @@ export default function FilmCatalog({
           <p style={{ color: 'var(--grey)', fontSize: '0.9rem', marginBottom: '20px' }}>{subtitle}</p>
         )}
 
-        {allGenres.length > 0 && (
+        {showGenreFilter && allGenres.length > 0 && (
           <div
             style={{
               display: 'flex',

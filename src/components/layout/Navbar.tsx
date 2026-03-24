@@ -28,13 +28,21 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
+    let cancelled = false
+    async function syncAuth() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!cancelled) setUser(session?.user ?? null)
+      const { data: { user: u } } = await supabase.auth.getUser()
+      if (!cancelled && u) setUser(u)
+    }
+    void syncAuth()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [supabase])
 
   // Close dropdown when clicking outside
@@ -89,34 +97,73 @@ export default function Navbar() {
 
   return (
     <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500,
+      position: 'fixed', top: 0, left: 0, right: 0,
+      /* Above globals.css body::before noise layer (z-index 1000) */
+      zIndex: 1100,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: isMobile ? '16px 20px' : '24px 48px',
       background: 'linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%)',
       backdropFilter: 'blur(2px)',
+      overflow: 'visible',
     }}>
       <Link href={`/${locale}`} style={{
         fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
         letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
         display: 'flex', alignItems: 'center',
+        flexShrink: 0,
       }}>
         UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
       </Link>
 
-      {/* Nav links – Desktop only */}
-      {!isMobile && (
-        <ul style={{ display: 'flex', gap: '36px', listStyle: 'none' }}>
-          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('films')}</Link></li>
-          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('new')}</Link></li>
-          <li><Link href={`/${locale}/films`} style={linkStyle} onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey-light)')}>{t('genres')}</Link></li>
-        </ul>
-      )}
+      <ul
+        style={{
+          display: 'flex',
+          flex: 1,
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          gap: isMobile ? '12px 16px' : '36px',
+          listStyle: 'none',
+          margin: '0 12px',
+          minWidth: 0,
+        }}
+      >
+        <li>
+          <Link
+            href={`/${locale}/films`}
+            style={linkStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
+          >
+            {t('films')}
+          </Link>
+        </li>
+        <li>
+          <Link
+            href={`/${locale}/neuheiten`}
+            style={linkStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
+          >
+            {t('new')}
+          </Link>
+        </li>
+        <li>
+          <Link
+            href={`/${locale}/genres`}
+            style={linkStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--warm-white)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey-light)')}
+          >
+            {t('genres')}
+          </Link>
+        </li>
+      </ul>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0, position: 'relative', zIndex: 1 }}>
         <LanguageSwitch currentLocale={locale} />
 
         {user ? (
-          <div ref={dropdownRef} style={{ position: 'relative' }}>
+          <div ref={dropdownRef} style={{ position: 'relative', zIndex: 2 }}>
             {/* Trigger button */}
             <button
               type="button"
@@ -148,7 +195,7 @@ export default function Navbar() {
                 borderRadius: '4px',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
                 overflow: 'hidden',
-                zIndex: 600,
+                zIndex: 1200,
               }}>
                 <DropdownLink
                   href={`/${locale}/account`}

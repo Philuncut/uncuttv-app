@@ -75,7 +75,10 @@
     "sectionTrending": "Trending Now",
     "sectionAll": "All Films",
     "filterAll": "All",
-    "emptyCategory": "No films in this category."
+    "emptyCategory": "No films in this category.",
+    "newReleasesTitle": "New Releases",
+    "genresBrowseTitle": "Genres",
+    "uncategorized": "Other"
   },
   "filmDetail": {
     "backToFilms": "Back to films",

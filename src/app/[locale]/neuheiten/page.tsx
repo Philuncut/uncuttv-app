@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import FilmCatalog, { type FilmCardData } from '../films/FilmCatalog'
 
@@ -7,7 +8,10 @@ export default async function NeuheitenPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  await params
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('filmsPage')
+
   const headersList = await headers()
   const country = headersList.get('x-vercel-ip-country') ?? ''
 
@@ -24,6 +28,7 @@ export default async function NeuheitenPage({
   const { data: rows, error } = await query.order('created_at', { ascending: false })
 
   if (error) {
+    console.error('Neuheiten fetch error:', error)
     return (
       <main style={{ minHeight: '100vh', background: '#0A0A0A', padding: '48px', color: 'var(--warm-white)' }}>
         <p>Fehler beim Laden der Neuheiten.</p>
@@ -43,7 +48,7 @@ export default async function NeuheitenPage({
 
   return (
     <main style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-      <FilmCatalog films={films} title="Neuheiten" subtitle="Zuletzt hinzugefuegte Filme" />
+      <FilmCatalog films={films} title={t('newReleasesTitle')} showGenreFilter={false} />
     </main>
   )
 }

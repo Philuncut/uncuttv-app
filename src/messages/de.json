@@ -75,7 +75,10 @@
     "sectionTrending": "Die Community schaut gerade",
     "sectionAll": "Alle Filme",
     "filterAll": "Alle",
-    "emptyCategory": "Keine Filme in dieser Kategorie."
+    "emptyCategory": "Keine Filme in dieser Kategorie.",
+    "newReleasesTitle": "Neuheiten",
+    "genresBrowseTitle": "Genres",
+    "uncategorized": "Weitere"
   },
   "filmDetail": {
     "backToFilms": "Zurück zu den Filmen",
