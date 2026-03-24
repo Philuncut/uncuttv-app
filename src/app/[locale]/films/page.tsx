@@ -14,11 +14,11 @@ export default async function FilmsPage({
   const supabase = await createClient()
   let query = supabase
     .from('films')
-    .select('id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in_de')
+    .select('id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in')
     .eq('is_published', true)
 
-  if (country === 'DE') {
-    query = query.or('blocked_in_de.eq.false,blocked_in_de.is.null')
+  if (country) {
+    query = query.not('blocked_in', 'cs', `{${country}}`)
   }
 
   const { data: rows, error } = await query.order('title')
