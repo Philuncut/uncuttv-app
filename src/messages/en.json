@@ -52,18 +52,6 @@
     "copyright": "© 2026 UncutTV GmbH. All rights reserved.",
     "ageBadge": "18+"
   },
-  "film": {
-    "backToFilms": "Back to Films",
-    "voucherAccess": "Voucher access",
-    "description": "Description",
-    "director": "Director",
-    "cast": "Cast",
-    "year": "Year",
-    "country": "Country",
-    "genres": "Genres",
-    "ageRating": "Age Rating",
-    "blockedIn": "Not available in"
-  },
   "auth": {
     "welcomeBack": "WELCOME BACK",
     "signInSubtitle": "Sign in and start watching.",

@@ -52,18 +52,6 @@
     "copyright": "© 2026 UncutTV GmbH · Alle Rechte vorbehalten",
     "ageBadge": "18+"
   },
-  "film": {
-    "backToFilms": "Zurück zu den Filmen",
-    "voucherAccess": "Zugang per Gutschein",
-    "description": "Beschreibung",
-    "director": "Regie",
-    "cast": "Besetzung",
-    "year": "Jahr",
-    "country": "Land",
-    "genres": "Genres",
-    "ageRating": "Altersfreigabe",
-    "blockedIn": "Nicht verfügbar in"
-  },
   "auth": {
     "welcomeBack": "WILLKOMMEN ZURÜCK",
     "signInSubtitle": "Meld dich an und schau los.",
