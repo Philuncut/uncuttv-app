@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl'
 import type { Locale } from '@/i18n/config'
+import Navbar from '@/components/layout/Navbar'
 import deMessages from '@/messages/de.json'
 import enMessages from '@/messages/en.json'
 
@@ -18,6 +19,7 @@ export default async function LocaleLayout({
   const messages = locale === 'en' ? enMessages : deMessages
   return (
     <NextIntlClientProvider locale={locale as Locale} messages={messages}>
+      <Navbar />
       {children}
     </NextIntlClientProvider>
   )
