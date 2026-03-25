@@ -3,12 +3,8 @@ import { createServerClient } from '@supabase/ssr'
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-
-  if (!pathname.includes('/films')) {
-    return NextResponse.next()
-  }
-
   const pathLocale = (pathname.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
+
   let supabaseResponse = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,7 +23,21 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (pathname.match(/^\/(de|en)\/auth\/login(?:\/|$)/)) {
+    if (user) {
+      return NextResponse.redirect(new URL(`/${pathLocale}`, request.url))
+    }
+    return supabaseResponse
+  }
+
+  if (!pathname.includes('/films')) {
+    return supabaseResponse
+  }
+
   if (!user) {
     return NextResponse.redirect(new URL(`/${pathLocale}/auth/login`, request.url))
   }
@@ -55,8 +65,4 @@ export async function proxy(request: NextRequest) {
   }
 
   return NextResponse.redirect(new URL(`/${pathLocale}/subscribe`, request.url))
-}
-
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webco)$).*)'],
 }

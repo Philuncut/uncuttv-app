@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/de/auth/verify-age`)
     }
 
-    return NextResponse.redirect(`${origin}/de/films`)
+    return NextResponse.redirect(`${origin}/de`)
   }
 
   return NextResponse.redirect(`${origin}/de/auth/login?error=auth_failed`)

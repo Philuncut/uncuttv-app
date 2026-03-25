@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
-  const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? 'de'
   const t = useTranslations('auth')
@@ -25,9 +24,10 @@ export default function LoginPage() {
     if (error) {
       setError(t('loginError'))
       setLoading(false)
-    } else {
-      router.push(`/${locale}/films`)
+      return
     }
+    // Full navigation so Supabase session cookies are applied before the next request (client router.push can race middleware).
+    window.location.assign(`/${locale}`)
   }
 
   return (
