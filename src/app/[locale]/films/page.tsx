@@ -35,7 +35,6 @@ type ContinueWatchingFilmRow = {
         poster_url: string | null
         year: number | null
         duration_minutes: number | null
-        duration_seconds: number | null
         genres: unknown
         is_published: boolean | null
         blocked_in?: unknown
@@ -49,7 +48,6 @@ type ContinueWatchingFilmRow = {
         poster_url: string | null
         year: number | null
         duration_minutes: number | null
-        duration_seconds: number | null
         genres: unknown
         is_published: boolean | null
         blocked_in?: unknown
@@ -85,10 +83,11 @@ function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[], country: stri
     if (!f || !f.is_published) continue
     if (!isFilmAllowedForCountry(f, country)) continue
     const card = rowToCard(f)
-    const ds = f.duration_seconds
+    const dm = f.duration_minutes
+    const totalSeconds = typeof dm === 'number' && dm > 0 ? dm * 60 : 0
     const lp = row.last_position ?? 0
-    if (typeof ds === 'number' && ds > 0 && lp >= 0) {
-      card.progressPercent = Math.min(100, Math.max(0, (lp / ds) * 100))
+    if (totalSeconds > 0 && lp >= 0) {
+      card.progressPercent = Math.min(100, Math.max(0, (lp / totalSeconds) * 100))
     }
     out.push(card)
     if (out.length >= 6) break
@@ -128,7 +127,6 @@ export default async function FilmsPage({
           poster_url,
           year,
           duration_minutes,
-          duration_seconds,
           genres,
           is_published,
           blocked_in,
@@ -145,7 +143,9 @@ export default async function FilmsPage({
         .limit(24)
 
     let { data: cwRows, error: cwErr } = await continueBase().gt('seconds_watched', 0)
+    let usedLegacyWatchtimeColumn = false
     if (cwErr) {
+      usedLegacyWatchtimeColumn = true
       const legacy = await continueBase().gt('watched_seconds', 0)
       cwRows = legacy.data
       cwErr = legacy.error
@@ -155,6 +155,16 @@ export default async function FilmsPage({
     } else if (cwRows?.length) {
       continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[], country)
     }
+
+    // TEMP: debug Weiterschauen / watchtime (remove after diagnosing visibility)
+    console.info('[ContinueWatching] session user_id:', user.id)
+    console.info('[ContinueWatching] query filter: user_id=session, completed=false, seconds_watched>0 (or legacy watched_seconds>0)')
+    console.info('[ContinueWatching] used legacy watched_seconds column:', usedLegacyWatchtimeColumn)
+    console.info('[ContinueWatching] watchtime error:', cwErr ?? null)
+    console.info('[ContinueWatching] raw rows from DB:', cwRows?.length ?? 0, cwRows?.slice(0, 2))
+    console.info('[ContinueWatching] after geo/published map, continueFilms.length:', continueFilms.length)
+  } else {
+    console.info('[ContinueWatching] no session user — getUser() returned null (cookies / SSR session not visible to server client)')
   }
 
   // Featured (Movie of the Month)
