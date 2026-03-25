@@ -3,6 +3,12 @@ import Link from 'next/link'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+  applyWatchStateToFilm,
+  enrichFilmsWithWatchState,
+  fetchUserWatchFilmStateMap,
+  type UserWatchFilmState,
+} from '@/lib/watch-film-cards'
 import FilmCatalog, { FilmRow, type FilmCardData } from './FilmCatalog'
 
 function rowToCard(row: {
@@ -27,6 +33,7 @@ function rowToCard(row: {
 
 type ContinueWatchingFilmRow = {
   last_position: number | null
+  completed?: boolean | null
   films:
     | {
         id: string
@@ -86,8 +93,14 @@ function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[], country: stri
     const dm = f.duration_minutes
     const totalSeconds = typeof dm === 'number' && dm > 0 ? dm * 60 : 0
     const lp = row.last_position ?? 0
-    if (totalSeconds > 0 && lp >= 0) {
-      card.progressPercent = Math.min(100, Math.max(0, (lp / totalSeconds) * 100))
+    const completed = Boolean(row.completed)
+    const ratio = totalSeconds > 0 ? lp / totalSeconds : 0
+    card.alreadyWatched = completed || (totalSeconds > 0 && ratio >= 0.85)
+    card.watchCompleted = completed
+    if (card.watchCompleted) {
+      card.progressPercent = 100
+    } else if (totalSeconds > 0 && lp >= 0) {
+      card.progressPercent = Math.min(100, Math.max(0, ratio * 100))
     }
     out.push(card)
     if (out.length >= 6) break
@@ -115,10 +128,15 @@ export default async function FilmsPage({
     data: { user },
   } = await supabase.auth.getUser()
 
+  const watchMap: Map<string, UserWatchFilmState> = user
+    ? await fetchUserWatchFilmStateMap(supabase, user.id)
+    : new Map()
+
   let continueFilms: FilmCardData[] = []
   if (user) {
     const continueSelect = `
         last_position,
+        completed,
         updated_at,
         films (
           id,
@@ -143,9 +161,7 @@ export default async function FilmsPage({
         .limit(24)
 
     let { data: cwRows, error: cwErr } = await continueBase().gt('seconds_watched', 0)
-    let usedLegacyWatchtimeColumn = false
     if (cwErr) {
-      usedLegacyWatchtimeColumn = true
       const legacy = await continueBase().gt('watched_seconds', 0)
       cwRows = legacy.data
       cwErr = legacy.error
@@ -153,18 +169,10 @@ export default async function FilmsPage({
     if (cwErr) {
       console.error('Continue watching fetch error:', cwErr)
     } else if (cwRows?.length) {
-      continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[], country)
+      continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[], country).map((c) =>
+        applyWatchStateToFilm(c, watchMap.get(c.id))
+      )
     }
-
-    // TEMP: debug Weiterschauen / watchtime (remove after diagnosing visibility)
-    console.info('[ContinueWatching] session user_id:', user.id)
-    console.info('[ContinueWatching] query filter: user_id=session, completed=false, seconds_watched>0 (or legacy watched_seconds>0)')
-    console.info('[ContinueWatching] used legacy watched_seconds column:', usedLegacyWatchtimeColumn)
-    console.info('[ContinueWatching] watchtime error:', cwErr ?? null)
-    console.info('[ContinueWatching] raw rows from DB:', cwRows?.length ?? 0, cwRows?.slice(0, 2))
-    console.info('[ContinueWatching] after geo/published map, continueFilms.length:', continueFilms.length)
-  } else {
-    console.info('[ContinueWatching] no session user — getUser() returned null (cookies / SSR session not visible to server client)')
   }
 
   // Featured (Movie of the Month)
@@ -202,10 +210,13 @@ export default async function FilmsPage({
 
   if (newErr) console.error('Films new row fetch error:', newErr)
 
-  const newFilms: FilmCardData[] = (newRows ?? [])
-    .filter((row) => isFilmAllowedForCountry(row, country))
-    .slice(0, 6)
-    .map((row) => rowToCard(row))
+  const newFilms: FilmCardData[] = enrichFilmsWithWatchState(
+    (newRows ?? [])
+      .filter((row) => isFilmAllowedForCountry(row, country))
+      .slice(0, 6)
+      .map((row) => rowToCard(row)),
+    watchMap
+  )
 
   // Trending: sum watchtime per film
   let trendingFilms: FilmCardData[] = []
@@ -237,10 +248,13 @@ export default async function FilmsPage({
           .eq('is_published', true)
           .in('id', topIds)
         const orderMap = new Map(topIds.map((id, i) => [id, i]))
-        trendingFilms = (tr ?? [])
-          .filter((row) => isFilmAllowedForCountry(row, country))
-          .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
-          .map((row) => rowToCard(row))
+        trendingFilms = enrichFilmsWithWatchState(
+          (tr ?? [])
+            .filter((row) => isFilmAllowedForCountry(row, country))
+            .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
+            .map((row) => rowToCard(row)),
+          watchMap
+        )
       }
     }
   } catch (e) {
@@ -260,9 +274,12 @@ export default async function FilmsPage({
     )
   }
 
-  const allFilms: FilmCardData[] = (rows ?? [])
-    .filter((row) => isFilmAllowedForCountry(row, country))
-    .map((row) => rowToCard(row))
+  const allFilms: FilmCardData[] = enrichFilmsWithWatchState(
+    (rows ?? [])
+      .filter((row) => isFilmAllowedForCountry(row, country))
+      .map((row) => rowToCard(row)),
+    watchMap
+  )
 
   const bgImage =
     featured && (featured.backdrop_url?.trim() || featured.poster_url?.trim())

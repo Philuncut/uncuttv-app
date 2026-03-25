@@ -15,6 +15,10 @@ export interface FilmCardData {
   genres: string[]
   /** 0–100: optional progress for Continue Watching row */
   progressPercent?: number
+  /** completed OR last_position ≥ 85% of duration */
+  alreadyWatched?: boolean
+  /** DB completed — drives full green progress bar when a bar is shown */
+  watchCompleted?: boolean
 }
 
 function formatDuration(min: number | null): string {
@@ -83,6 +87,31 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
               No poster
             </div>
           )}
+          {film.alreadyWatched ? (
+            <div
+              aria-hidden
+              style={{
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'rgba(0,0,0,0.7)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 700,
+                lineHeight: 1,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.45)',
+                zIndex: 2,
+              }}
+            >
+              ✓
+            </div>
+          ) : null}
           <div
             style={{
               position: 'absolute',
@@ -137,7 +166,7 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
             film.progressPercent <= 100 && (
               <div
                 role="progressbar"
-                aria-valuenow={Math.round(film.progressPercent)}
+                aria-valuenow={Math.round(film.watchCompleted ? 100 : film.progressPercent)}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 style={{
@@ -150,11 +179,11 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
               >
                 <div
                   style={{
-                    width: `${film.progressPercent}%`,
+                    width: `${film.watchCompleted ? 100 : film.progressPercent}%`,
                     height: '100%',
-                    background: 'var(--red)',
+                    background: film.watchCompleted ? '#22c55e' : 'var(--red)',
                     borderRadius: '2px',
-                    transition: 'width 0.2s ease',
+                    transition: 'width 0.2s ease, background 0.2s ease',
                   }}
                 />
               </div>

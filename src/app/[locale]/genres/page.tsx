@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { enrichFilmsWithWatchState, fetchUserWatchFilmStateMap } from '@/lib/watch-film-cards'
 import { FilmRow, type FilmCardData } from '../films/FilmCatalog'
 
 function groupFilmsByGenre(films: FilmCardData[], uncategorizedLabel: string) {
@@ -59,6 +60,11 @@ export default async function GenresPage({
   const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const watchMap = user ? await fetchUserWatchFilmStateMap(supabase, user.id) : new Map()
+
   let query = supabase
     .from('films')
     .select('id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in')
@@ -75,17 +81,20 @@ export default async function GenresPage({
     )
   }
 
-  const films: FilmCardData[] = (rows ?? [])
-    .filter((row) => isFilmAllowedForCountry(row, country))
-    .map((row) => ({
-    id: row.id,
-    title: row.title ?? '',
-    slug: row.slug ?? '',
-    poster_url: row.poster_url ?? null,
-    year: row.year ?? null,
-    duration_minutes: row.duration_minutes ?? null,
-    genres: Array.isArray(row.genres) ? row.genres : [],
-  }))
+  const films: FilmCardData[] = enrichFilmsWithWatchState(
+    (rows ?? [])
+      .filter((row) => isFilmAllowedForCountry(row, country))
+      .map((row) => ({
+        id: row.id,
+        title: row.title ?? '',
+        slug: row.slug ?? '',
+        poster_url: row.poster_url ?? null,
+        year: row.year ?? null,
+        duration_minutes: row.duration_minutes ?? null,
+        genres: Array.isArray(row.genres) ? row.genres : [],
+      })),
+    watchMap
+  )
 
   const { byGenre, sortedKeys } = groupFilmsByGenre(films, t('uncategorized'))
 
