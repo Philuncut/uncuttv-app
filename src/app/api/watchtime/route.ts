@@ -1,10 +1,34 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+/** SSR Supabase client bound to this request’s cookies (read from Request; write via next/headers). */
+async function createSupabaseRouteHandlerClient(request: NextRequest) {
+  const cookieStore = await cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {}
+        },
+      },
+    }
+  )
+}
 
 /** Persist playback progress / completion. Client sends position every ~12s and at 90% / ended. */
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseRouteHandlerClient(request)
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -19,7 +43,7 @@ export async function POST(req: Request) {
       completed?: boolean
     }
     try {
-      body = await req.json()
+      body = await request.json()
     } catch {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
