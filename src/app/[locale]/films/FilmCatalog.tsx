@@ -13,6 +13,8 @@ export interface FilmCardData {
   year: number | null
   duration_minutes: number | null
   genres: string[]
+  /** 0–100: optional progress for Continue Watching row */
+  progressPercent?: number
 }
 
 function formatDuration(min: number | null): string {
@@ -130,6 +132,33 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
               {film.genres.join(' · ')}
             </p>
           )}
+          {typeof film.progressPercent === 'number' &&
+            film.progressPercent > 0 &&
+            film.progressPercent <= 100 && (
+              <div
+                role="progressbar"
+                aria-valuenow={Math.round(film.progressPercent)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                style={{
+                  marginTop: '12px',
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: 'rgba(255,255,255,0.12)',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${film.progressPercent}%`,
+                    height: '100%',
+                    background: 'var(--red)',
+                    borderRadius: '2px',
+                    transition: 'width 0.2s ease',
+                  }}
+                />
+              </div>
+            )}
         </div>
       </article>
     </Link>

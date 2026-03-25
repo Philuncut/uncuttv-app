@@ -25,6 +25,38 @@ function rowToCard(row: {
   }
 }
 
+type ContinueWatchingFilmRow = {
+  last_position: number | null
+  films:
+    | {
+        id: string
+        title: string | null
+        slug: string | null
+        poster_url: string | null
+        year: number | null
+        duration_minutes: number | null
+        duration_seconds: number | null
+        genres: unknown
+        is_published: boolean | null
+        blocked_in?: unknown
+        allowed_in?: unknown
+      }
+    | null
+    | Array<{
+        id: string
+        title: string | null
+        slug: string | null
+        poster_url: string | null
+        year: number | null
+        duration_minutes: number | null
+        duration_seconds: number | null
+        genres: unknown
+        is_published: boolean | null
+        blocked_in?: unknown
+        allowed_in?: unknown
+      }>
+}
+
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.map(String).map((v) => v.trim()).filter(Boolean)
@@ -45,6 +77,25 @@ function isFilmAllowedForCountry(film: { allowed_in?: unknown; blocked_in?: unkn
   return true
 }
 
+function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[], country: string): FilmCardData[] {
+  const out: FilmCardData[] = []
+  for (const row of rows) {
+    const raw = row.films
+    const f = Array.isArray(raw) ? raw[0] : raw
+    if (!f || !f.is_published) continue
+    if (!isFilmAllowedForCountry(f, country)) continue
+    const card = rowToCard(f)
+    const ds = f.duration_seconds
+    const lp = row.last_position ?? 0
+    if (typeof ds === 'number' && ds > 0 && lp >= 0) {
+      card.progressPercent = Math.min(100, Math.max(0, (lp / ds) * 100))
+    }
+    out.push(card)
+    if (out.length >= 6) break
+  }
+  return out
+}
+
 const CARD_SELECT =
   'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in'
 
@@ -61,6 +112,50 @@ export default async function FilmsPage({
   const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let continueFilms: FilmCardData[] = []
+  if (user) {
+    const continueSelect = `
+        last_position,
+        updated_at,
+        films (
+          id,
+          title,
+          slug,
+          poster_url,
+          year,
+          duration_minutes,
+          duration_seconds,
+          genres,
+          is_published,
+          blocked_in,
+          allowed_in
+        )
+      `
+    const continueBase = () =>
+      supabase
+        .from('watchtime')
+        .select(continueSelect)
+        .eq('user_id', user.id)
+        .eq('completed', false)
+        .order('updated_at', { ascending: false })
+        .limit(24)
+
+    let { data: cwRows, error: cwErr } = await continueBase().gt('seconds_watched', 0)
+    if (cwErr) {
+      const legacy = await continueBase().gt('watched_seconds', 0)
+      cwRows = legacy.data
+      cwErr = legacy.error
+    }
+    if (cwErr) {
+      console.error('Continue watching fetch error:', cwErr)
+    } else if (cwRows?.length) {
+      continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[], country)
+    }
+  }
 
   // Featured (Movie of the Month)
   let featuredQuery = supabase
@@ -273,6 +368,9 @@ export default async function FilmsPage({
           paddingBottom: '8px',
         }}
       >
+        {continueFilms.length > 0 ? (
+          <FilmRow films={continueFilms} title={t('sectionContinueWatching')} locale={locale} />
+        ) : null}
         <FilmRow films={newFilms} title={t('sectionNew')} locale={locale} />
         <FilmRow films={trendingFilms} title={t('sectionTrending')} locale={locale} />
       </div>
