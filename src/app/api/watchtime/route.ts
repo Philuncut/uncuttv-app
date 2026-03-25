@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     const { data: existing, error: selErr } = await supabase
       .from('watchtime')
-      .select('id, seconds_watched, watched_seconds, last_position, completed')
+      .select('id, seconds_watched, last_position, completed')
       .eq('user_id', user.id)
       .eq('film_id', filmId)
       .maybeSingle()
@@ -51,11 +51,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: selErr.message }, { status: 500 })
     }
 
-    const prevSeconds = Number(
-      (existing as { seconds_watched?: number; watched_seconds?: number } | null)?.seconds_watched ??
-        (existing as { watched_seconds?: number } | null)?.watched_seconds ??
-        0
-    )
+    const prevSeconds = Number((existing as { seconds_watched?: number } | null)?.seconds_watched ?? 0)
     const newSeconds = Math.max(prevSeconds, lp)
     const prevCompleted = Boolean((existing as { completed?: boolean } | null)?.completed)
     const finalCompleted = prevCompleted || markComplete
