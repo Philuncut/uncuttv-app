@@ -2,13 +2,35 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
   tokenSecret: process.env.MUX_TOKEN_SECRET!,
 })
 
+function normalizeCountryArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map(String).map((v) => v.trim()).filter(Boolean)
+}
+
+function isFilmAllowedForCountry(film: { allowed_in?: unknown; blocked_in?: unknown }, country: string): boolean {
+  if (!country) return true
+  const allowedIn = normalizeCountryArray(film.allowed_in)
+  const blockedIn = normalizeCountryArray(film.blocked_in)
+
+  // New logic:
+  // - If allowed_in is not empty AND country is NOT in allowed_in → block
+  // - If allowed_in is empty → fall back to blocked_in logic (country in blocked_in → block)
+  // - If both are empty → allow
+  if (allowedIn.length > 0) return allowedIn.includes(country)
+  if (blockedIn.length > 0) return !blockedIn.includes(country)
+  return true
+}
+
 export async function GET(req: NextRequest) {
+  const country = req.headers.get('x-vercel-ip-country') ?? ''
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -30,6 +52,28 @@ export async function GET(req: NextRequest) {
 
   if (!playbackId) {
     return NextResponse.json({ error: 'Missing playbackId' }, { status: 400 })
+  }
+
+  // Territory geoblocking (server-side, prevents geo bypass via direct token calls)
+  if (filmId && country) {
+    const admin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: film } = await admin
+      .from('films')
+      .select('id, allowed_in, blocked_in')
+      .eq('id', filmId)
+      .maybeSingle()
+
+    if (!film) {
+      return NextResponse.json({ error: 'Film not found' }, { status: 403 })
+    }
+
+    if (!isFilmAllowedForCountry(film, country)) {
+      return NextResponse.json({ error: 'No access in your territory' }, { status: 403 })
+    }
   }
 
   if (!hasSubscription) {

@@ -25,8 +25,28 @@ function rowToCard(row: {
   }
 }
 
+function normalizeCountryArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map(String).map((v) => v.trim()).filter(Boolean)
+}
+
+function isFilmAllowedForCountry(film: { allowed_in?: unknown; blocked_in?: unknown }, country: string): boolean {
+  if (!country) return true
+
+  const allowedIn = normalizeCountryArray(film.allowed_in)
+  const blockedIn = normalizeCountryArray(film.blocked_in)
+
+  // New logic:
+  // - If allowed_in is not empty AND country is NOT in allowed_in → block
+  // - If allowed_in is empty → fall back to blocked_in logic (country in blocked_in → block)
+  // - If both are empty → allow
+  if (allowedIn.length > 0) return allowedIn.includes(country)
+  if (blockedIn.length > 0) return !blockedIn.includes(country)
+  return true
+}
+
 const CARD_SELECT =
-  'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in'
+  'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in'
 
 export default async function FilmsPage({
   params,
@@ -46,43 +66,41 @@ export default async function FilmsPage({
   let featuredQuery = supabase
     .from('films')
     .select(
-      'id, title, slug, poster_url, backdrop_url, short_description, genres, is_published, blocked_in, is_featured'
+      'id, title, slug, poster_url, backdrop_url, short_description, genres, is_published, blocked_in, allowed_in, is_featured'
     )
     .eq('is_published', true)
     .eq('is_featured', true)
     .limit(1)
-  if (country) {
-    featuredQuery = featuredQuery.not('blocked_in', 'cs', `{${country}}`)
-  }
   const { data: featuredRow } = await featuredQuery.maybeSingle()
 
-  const featured = featuredRow
-    ? {
-        id: featuredRow.id,
-        title: featuredRow.title ?? '',
-        slug: featuredRow.slug ?? '',
-        poster_url: featuredRow.poster_url as string | null,
-        backdrop_url: featuredRow.backdrop_url as string | null,
-        short_description: featuredRow.short_description as string | null,
-        genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
-      }
-    : null
+  const featured =
+    featuredRow && isFilmAllowedForCountry(featuredRow, country)
+      ? {
+          id: featuredRow.id,
+          title: featuredRow.title ?? '',
+          slug: featuredRow.slug ?? '',
+          poster_url: featuredRow.poster_url as string | null,
+          backdrop_url: featuredRow.backdrop_url as string | null,
+          short_description: featuredRow.short_description as string | null,
+          genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
+        }
+      : null
 
   // New (last 6 by created_at)
   let newQuery = supabase
     .from('films')
     .select(`${CARD_SELECT}, created_at`)
     .eq('is_published', true)
-  if (country) {
-    newQuery = newQuery.not('blocked_in', 'cs', `{${country}}`)
-  }
   const { data: newRows, error: newErr } = await newQuery
     .order('created_at', { ascending: false })
-    .limit(6)
+    .limit(country ? 30 : 6)
 
   if (newErr) console.error('Films new row fetch error:', newErr)
 
-  const newFilms: FilmCardData[] = (newRows ?? []).map((row) => rowToCard(row))
+  const newFilms: FilmCardData[] = (newRows ?? [])
+    .filter((row) => isFilmAllowedForCountry(row, country))
+    .slice(0, 6)
+    .map((row) => rowToCard(row))
 
   // Trending: sum watchtime per film
   let trendingFilms: FilmCardData[] = []
@@ -104,17 +122,18 @@ export default async function FilmsPage({
       }
       const topIds = [...sums.entries()]
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 6)
+        .slice(0, country ? 18 : 6)
         .map(([id]) => id)
 
       if (topIds.length) {
-        let tq = supabase.from('films').select(CARD_SELECT).eq('is_published', true).in('id', topIds)
-        if (country) {
-          tq = tq.not('blocked_in', 'cs', `{${country}}`)
-        }
-        const { data: tr } = await tq
+        const { data: tr } = await supabase
+          .from('films')
+          .select(CARD_SELECT)
+          .eq('is_published', true)
+          .in('id', topIds)
         const orderMap = new Map(topIds.map((id, i) => [id, i]))
         trendingFilms = (tr ?? [])
+          .filter((row) => isFilmAllowedForCountry(row, country))
           .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
           .map((row) => rowToCard(row))
       }
@@ -125,9 +144,6 @@ export default async function FilmsPage({
 
   // All films (catalog grid)
   let allQuery = supabase.from('films').select(CARD_SELECT).eq('is_published', true)
-  if (country) {
-    allQuery = allQuery.not('blocked_in', 'cs', `{${country}}`)
-  }
   const { data: rows, error } = await allQuery.order('title')
 
   if (error) {
@@ -139,7 +155,9 @@ export default async function FilmsPage({
     )
   }
 
-  const allFilms: FilmCardData[] = (rows ?? []).map((row) => rowToCard(row))
+  const allFilms: FilmCardData[] = (rows ?? [])
+    .filter((row) => isFilmAllowedForCountry(row, country))
+    .map((row) => rowToCard(row))
 
   const bgImage =
     featured && (featured.backdrop_url?.trim() || featured.poster_url?.trim())

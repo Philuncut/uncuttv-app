@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { redirect } from 'next/navigation'
@@ -7,6 +8,29 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import FilmPlayer from './FilmPlayer'
 
 const ACTIVE_STATUSES = ['active', 'trialing']
+
+function normalizeCountryArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map(String).map((v) => v.trim()).filter(Boolean)
+}
+
+function isFilmAllowedForCountry(
+  film: { allowed_in?: unknown; blocked_in?: unknown },
+  country: string
+): boolean {
+  if (!country) return true
+
+  const allowedIn = normalizeCountryArray(film.allowed_in)
+  const blockedIn = normalizeCountryArray(film.blocked_in)
+
+  // New logic:
+  // - If allowed_in is not empty AND country is NOT in allowed_in → block
+  // - If allowed_in is empty → fall back to blocked_in logic (country in blocked_in → block)
+  // - If both are empty → allow
+  if (allowedIn.length > 0) return allowedIn.includes(country)
+  if (blockedIn.length > 0) return !blockedIn.includes(country)
+  return true
+}
 
 function joinCast(value: unknown): string {
   if (value == null) return ''
@@ -30,6 +54,9 @@ export default async function FilmSlugPage({
   setRequestLocale(locale)
   const t = await getTranslations('filmDetail')
 
+  const headersList = await headers()
+  const country = headersList.get('x-vercel-ip-country') ?? ''
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   console.log('[FilmSlugPage] user.id:', user?.id, 'user.email:', user?.email)
@@ -42,7 +69,7 @@ export default async function FilmSlugPage({
   const { data: film, error: filmError } = await supabase
     .from('films')
     .select(
-      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, short_description, director, film_cast, country, year, duration_minutes, genres, language'
+      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, short_description, director, film_cast, country, year, duration_minutes, genres, language, allowed_in, blocked_in'
     )
     .eq('slug', slug)
     .eq('is_published', true)
@@ -54,6 +81,11 @@ export default async function FilmSlugPage({
 
   if (filmError || !film) {
     console.log('[FilmSlugPage] redirect → films (film not found, slug:', slug, 'error:', filmError?.message, ')')
+    redirect(`/${locale}/films`)
+  }
+
+  // Territory geoblocking (server-side, prevents direct URL bypass)
+  if (country && !isFilmAllowedForCountry(film as { allowed_in?: unknown; blocked_in?: unknown }, country)) {
     redirect(`/${locale}/films`)
   }
 
