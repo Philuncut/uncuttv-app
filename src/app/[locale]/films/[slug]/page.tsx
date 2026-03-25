@@ -296,6 +296,7 @@ export default async function FilmSlugPage({
               playbackId={film.mux_playback_id}
               filmId={film.id}
               title={film.title}
+              durationMinutes={film.duration_minutes}
               variant="hero"
               playLabel={t('play')}
               loadingLabel={t('playerLoading')}
@@ -360,6 +361,7 @@ export default async function FilmSlugPage({
                 playbackId={film.mux_playback_id}
                 filmId={film.id}
                 title={film.title}
+                durationMinutes={film.duration_minutes}
                 playLabel={t('play')}
                 loadingLabel={t('playerLoading')}
               />
