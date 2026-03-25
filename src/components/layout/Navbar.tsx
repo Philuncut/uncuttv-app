@@ -146,7 +146,7 @@ export default function Navbar() {
           <span style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'nowrap', gap: '0' }}>
             UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
             <span
-              className="ml-2 shrink-0 rounded-full bg-[#c0392b] px-3 py-1 text-[13px] font-bold tracking-[0.15em] text-white shadow-md"
+              className="ml-2 shrink-0 rounded-sm bg-[#c0392b] px-3 py-1 text-[13px] font-bold tracking-[0.15em] text-white shadow-md"
               aria-label="Beta"
             >
               BETA
