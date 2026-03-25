@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.match(/^\/(de|en)\/auth\/login(?:\/|$)/)) {
     if (user) {
-      return NextResponse.redirect(new URL(`/${pathLocale}`, request.url))
+      return NextResponse.redirect(new URL(`/${pathLocale}/films`, request.url))
     }
     return supabaseResponse
   }

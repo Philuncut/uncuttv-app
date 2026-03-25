@@ -137,7 +137,7 @@ export default function Navbar() {
       gap: '12px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0, minWidth: 0 }}>
-        <Link href={`/${locale}`} style={{
+        <Link href={user ? `/${locale}/films` : `/${locale}`} style={{
           fontFamily: 'var(--font-display)', fontSize: isMobile ? '1.5rem' : '2rem',
           letterSpacing: '0.08em', color: 'var(--warm-white)', textDecoration: 'none',
           display: 'flex', alignItems: 'center',

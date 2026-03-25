@@ -27,7 +27,7 @@ export default function LoginPage() {
       return
     }
     // Full navigation so Supabase session cookies are applied before the next request (client router.push can race middleware).
-    window.location.assign(`/${locale}`)
+    window.location.assign(`/${locale}/films`)
   }
 
   return (
