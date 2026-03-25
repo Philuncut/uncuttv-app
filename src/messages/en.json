@@ -63,11 +63,16 @@
     "or": "OR",
     "email": "Email",
     "password": "Password",
+    "confirmPassword": "Confirm password",
     "signIn": "Sign In",
     "loading": "One moment...",
     "loginError": "Invalid email or password.",
     "noAccount": "Don't have an account?",
     "registerNow": "Register now",
+    "registerTitle": "REGISTRATION",
+    "registerSubtitle": "Registration is coming soon.",
+    "alreadyHaveAccount": "Already have an account?",
+    "comingSoon": "Coming Soon",
     "ageWarning": "⚠ For persons aged 18 and over only"
   },
   "filmsPage": {
