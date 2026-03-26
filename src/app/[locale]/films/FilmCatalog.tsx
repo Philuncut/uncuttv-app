@@ -29,7 +29,7 @@ function formatDuration(min: number | null): string {
 }
 
 export function FilmCard({ film, locale }: { film: FilmCardData; locale: string }) {
-  const t = useTranslations('filmsPage')
+  const alreadyWatchedLabel = locale === 'en' ? 'Already Watched' : 'Bereits gesehen'
   return (
     <Link
       href={`/${locale}/films/${film.slug}`}
@@ -88,14 +88,33 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
               No poster
             </div>
           )}
-          {film.alreadyWatched ? (
+          {!!film.alreadyWatched && (
             <div
-              className="absolute bottom-0 left-0 right-0 z-[2] bg-[#c0392b] py-1 text-center text-xs font-bold uppercase tracking-widest text-white"
               role="status"
+              aria-label={alreadyWatchedLabel}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 2,
+                background: '#c0392b',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+                paddingLeft: '8px',
+                paddingRight: '8px',
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                lineHeight: 1.25,
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: '#fff',
+              }}
             >
-              {t('alreadyWatchedBanner')}
+              {alreadyWatchedLabel}
             </div>
-          ) : null}
+          )}
           <div
             style={{
               position: 'absolute',
