@@ -99,7 +99,7 @@ export default async function GenresPage({
   const { byGenre, sortedKeys } = groupFilmsByGenre(films, t('uncategorized'))
 
   return (
-    <main style={{ background: '#0A0A0A', minHeight: '100vh' }}>
+    <main style={{ background: '#0A0A0A', minHeight: '100vh', overflowX: 'hidden' }}>
       <div
         style={{
           paddingTop: 'clamp(88px, 12vw, 108px)',

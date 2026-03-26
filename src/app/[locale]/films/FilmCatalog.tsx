@@ -223,35 +223,41 @@ export function FilmRow({
       >
         {title}
       </h2>
+      {/* Full-bleed horizontal scroll: escape max-width + padded parents (desktop) */}
       <div
-        className="films-row-scroll"
         style={{
-          display: 'flex',
-          gap: '16px',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          paddingBottom: '12px',
-          marginLeft: '-4px',
-          marginRight: '-4px',
-          paddingLeft: '4px',
-          paddingRight: '4px',
-          WebkitOverflowScrolling: 'touch',
-          scrollSnapType: 'x mandatory',
+          width: '100vw',
+          marginLeft: 'calc(50% - 50vw)',
+          boxSizing: 'border-box',
         }}
       >
-        {films.map((film) => (
-          <div
-            key={film.id}
-            style={{
-              flexShrink: 0,
-              width: 'min(42vw, 200px)',
-              maxWidth: '200px',
-              scrollSnapAlign: 'start',
-            }}
-          >
-            <FilmCard film={film} locale={locale} />
-          </div>
-        ))}
+        <div
+          className="films-row-scroll"
+          style={{
+            display: 'flex',
+            gap: '16px',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            paddingBottom: '12px',
+            paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'x mandatory',
+          }}
+        >
+          {films.map((film) => (
+            <div
+              key={film.id}
+              style={{
+                flexShrink: 0,
+                width: 'clamp(150px, 22vw, 240px)',
+                scrollSnapAlign: 'start',
+              }}
+            >
+              <FilmCard film={film} locale={locale} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

@@ -287,7 +287,7 @@ export default async function FilmsPage({
       : null
 
   return (
-    <main style={{ background: '#0A0A0A', minHeight: '100vh' }}>
+    <main style={{ background: '#0A0A0A', minHeight: '100vh', overflowX: 'hidden' }}>
       {featured && bgImage ? (
         <section
           style={{
