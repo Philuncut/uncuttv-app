@@ -178,11 +178,13 @@ export default function Hero() {
                 marginLeft: 'calc(50% - 50vw)',
                 boxSizing: 'border-box',
                 overflow: 'hidden',
+                paddingLeft: '0',
+                paddingRight: '0',
                 WebkitOverflowScrolling: 'touch',
                 maskImage:
-                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                  'linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%)',
                 WebkitMaskImage:
-                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                  'linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%)',
               }}
             >
               <div
@@ -193,6 +195,7 @@ export default function Hero() {
                   flexWrap: 'nowrap',
                   gap: '8px',
                   width: 'max-content',
+                  minWidth: 'max-content',
                 }}
               >
                 {[...ALL_POSTERS, ...ALL_POSTERS].map((poster, i) => (
