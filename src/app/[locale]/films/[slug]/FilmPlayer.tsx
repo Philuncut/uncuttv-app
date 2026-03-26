@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import MuxPlayer from '@mux/mux-player-react'
 import type MuxPlayerElement from '@mux/mux-player'
 
@@ -11,6 +12,8 @@ interface FilmPlayerProps {
   playbackId: string
   filmId: string
   title: string
+  /** e.g. de | en — used after playback ends to return to the films catalog */
+  locale: string
   /** From DB; used when media metadata duration is not ready yet */
   durationMinutes?: number | null
   /** Hero backdrop layout: tighter spacing for overlaid play control */
@@ -23,11 +26,13 @@ export default function FilmPlayer({
   playbackId,
   filmId,
   title,
+  locale,
   durationMinutes,
   variant = 'default',
   playLabel = 'Abspielen',
   loadingLabel = 'Wird geladen…',
 }: FilmPlayerProps) {
+  const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -122,10 +127,13 @@ export default function FilmPlayer({
     }
   }, [durationMinutes, syncWatchtime])
 
-  const handleEnded = useCallback(() => {
+  const handleEnded = useCallback(async () => {
     completedSentRef.current = true
-    void syncWatchtime({ completed: true })
-  }, [syncWatchtime])
+    await syncWatchtime({ completed: true })
+    setTimeout(() => {
+      router.push(`/${locale}/films`)
+    }, 1500)
+  }, [syncWatchtime, router, locale])
 
   const handleLoadedMetadata = useCallback(() => {
     const el = playerRef.current
