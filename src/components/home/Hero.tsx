@@ -177,12 +177,7 @@ export default function Hero() {
                 width: '100vw',
                 marginLeft: 'calc(50% - 50vw)',
                 boxSizing: 'border-box',
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'nowrap',
-                gap: '8px',
+                overflow: 'hidden',
                 WebkitOverflowScrolling: 'touch',
                 maskImage:
                   'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
@@ -190,61 +185,72 @@ export default function Hero() {
                   'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
               }}
             >
-              {ALL_POSTERS.map((poster, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flexShrink: 0,
-                    width: '180px',
-                    transition: 'transform 0.3s ease',
-                  }}
-                >
+              <div
+                className="carousel-track-desktop"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  flexWrap: 'nowrap',
+                  gap: '8px',
+                  width: 'max-content',
+                }}
+              >
+                {[...ALL_POSTERS, ...ALL_POSTERS].map((poster, i) => (
                   <div
+                    key={`${poster.src}-${i}`}
                     style={{
-                      width: '100%',
-                      aspectRatio: '2/3',
-                      outline: '1px solid rgba(255,255,255,0.06)',
-                      position: 'relative',
-                      overflow: 'hidden',
+                      flexShrink: 0,
+                      width: '180px',
+                      transition: 'transform 0.3s ease',
                     }}
                   >
-                    <img
-                      src={poster.src}
-                      alt=""
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
                     <div
                       style={{
-                        position: 'absolute',
-                        bottom: '0',
-                        left: '0',
-                        right: '0',
-                        background:
-                          'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-                        padding: '16px 6px 6px',
-                        textAlign: 'center',
+                        width: '100%',
+                        aspectRatio: '2/3',
+                        outline: '1px solid rgba(255,255,255,0.06)',
+                        position: 'relative',
+                        overflow: 'hidden',
                       }}
                     >
-                      <span
+                      <img
+                        src={poster.src}
+                        alt=""
                         style={{
-                          color: 'var(--red, #c0392b)',
-                          fontSize: '0.5rem',
-                          fontWeight: 700,
-                          letterSpacing: '0.12em',
-                          textTransform: 'uppercase',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '0',
+                          left: '0',
+                          right: '0',
+                          background:
+                            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                          padding: '16px 6px 6px',
+                          textAlign: 'center',
                         }}
                       >
-                        {poster.label}
-                      </span>
+                        <span
+                          style={{
+                            color: 'var(--red, #c0392b)',
+                            fontSize: '0.5rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.12em',
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {poster.label}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -59,11 +59,16 @@ body::before {
 .carousel-track:hover {
   animation-play-state: paused;
 }
+.carousel-track-desktop {
+  animation: carouselScroll 30s linear infinite;
+}
+.carousel-track-desktop:hover {
+  animation-play-state: paused;
+}
 
 /* Desktop full-bleed horizontal carousel: hide scrollbar */
 .carousel-scroll-x {
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
 }
