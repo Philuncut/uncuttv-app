@@ -5,18 +5,27 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-const POSTERS = [
-  { src: '/thumbnails/agp1.jpg', label: 'KULT' },
-  { src: '/thumbnails/agp2.jpg', label: 'SCHOCKER' },
-  { src: '/thumbnails/agp3.jpg', label: 'INKL. PREQUEL' },
-  { src: '/thumbnails/ato4s.jpg', label: 'DRAMA' },
-  { src: '/thumbnails/backwood.jpg', label: 'DAS ORIGINAL' },
-  { src: '/thumbnails/nn9.jpg', label: 'MADE IN AUSTRIA' },
-  { src: '/thumbnails/vermaehlung.jpg', label: 'UNCUTTV PRODUCTION' },
-  { src: '/thumbnails/wam.jpg', label: 'REVENGE' },
+const carouselPosters = [
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/agp1.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/backwood.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Blood_Feast_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/borndead2.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Caedes_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/fakenews.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Fist_of_Jesus_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/gorenography.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Headless_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/La_Petite_Mort_2_Nasty_Tapes_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/LPM.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/nn9.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/nn9_2.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/RAW_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/slavedolls.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/The_Woods_Turned_Red_UncutTV_Artwork.jpg',
+  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/traces%202.jpg',
 ]
 
-const ALL_POSTERS = [...POSTERS, ...POSTERS]
+const ALL_POSTERS = [...carouselPosters, ...carouselPosters]
 
 const BG_COLS = [
   'linear-gradient(160deg, #1a0505 0%, #3d0a0a 40%, #0a0a0a 100%)',
@@ -112,7 +121,7 @@ export default function Hero() {
                   width: 'max-content',
                 }}
               >
-                {ALL_POSTERS.map((poster, i) => (
+                {ALL_POSTERS.map((posterUrl, i) => (
                   <div
                     key={i}
                     style={{
@@ -131,7 +140,7 @@ export default function Hero() {
                       }}
                     >
                       <img
-                        src={poster.src}
+                        src={posterUrl}
                         alt=""
                         style={{
                           width: '100%',
@@ -140,30 +149,6 @@ export default function Hero() {
                           display: 'block',
                         }}
                       />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '0',
-                          left: '0',
-                          right: '0',
-                          background:
-                            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-                          padding: '16px 6px 6px',
-                          textAlign: 'center',
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: 'var(--red, #c0392b)',
-                            fontSize: '0.5rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.12em',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          {poster.label}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -198,9 +183,9 @@ export default function Hero() {
                   minWidth: 'max-content',
                 }}
               >
-                {[...ALL_POSTERS, ...ALL_POSTERS].map((poster, i) => (
+                {[...ALL_POSTERS, ...ALL_POSTERS].map((posterUrl, i) => (
                   <div
-                    key={`${poster.src}-${i}`}
+                    key={`${posterUrl}-${i}`}
                     style={{
                       flexShrink: 0,
                       width: '180px',
@@ -217,7 +202,7 @@ export default function Hero() {
                       }}
                     >
                       <img
-                        src={poster.src}
+                        src={posterUrl}
                         alt=""
                         style={{
                           width: '100%',
@@ -226,30 +211,6 @@ export default function Hero() {
                           display: 'block',
                         }}
                       />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '0',
-                          left: '0',
-                          right: '0',
-                          background:
-                            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-                          padding: '16px 6px 6px',
-                          textAlign: 'center',
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: 'var(--red, #c0392b)',
-                            fontSize: '0.5rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.12em',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          {poster.label}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ))}
