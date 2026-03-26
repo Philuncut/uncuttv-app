@@ -29,6 +29,7 @@ function formatDuration(min: number | null): string {
 }
 
 export function FilmCard({ film, locale }: { film: FilmCardData; locale: string }) {
+  const t = useTranslations('filmsPage')
   return (
     <Link
       href={`/${locale}/films/${film.slug}`}
@@ -89,34 +90,19 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
           )}
           {film.alreadyWatched ? (
             <div
-              aria-hidden
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                background: 'rgba(0,0,0,0.7)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '14px',
-                fontWeight: 700,
-                lineHeight: 1,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.45)',
-                zIndex: 2,
-              }}
+              className="absolute bottom-0 left-0 right-0 z-[2] bg-[#c0392b] py-1 text-center text-xs font-bold uppercase tracking-widest text-white"
+              role="status"
             >
-              ✓
+              {t('alreadyWatchedBanner')}
             </div>
           ) : null}
           <div
             style={{
               position: 'absolute',
-              bottom: '8px',
-              right: '8px',
+              ...(film.alreadyWatched
+                ? { top: '8px', right: '8px' }
+                : { bottom: '8px', right: '8px' }),
+              zIndex: 3,
               background: 'rgba(0,0,0,0.8)',
               color: 'var(--warm-white)',
               fontSize: '0.72rem',

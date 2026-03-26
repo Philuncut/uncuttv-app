@@ -85,7 +85,8 @@
     "emptyCategory": "Keine Filme in dieser Kategorie.",
     "newReleasesTitle": "Neuheiten",
     "genresBrowseTitle": "Genres",
-    "uncategorized": "Weitere"
+    "uncategorized": "Weitere",
+    "alreadyWatchedBanner": "Bereits gesehen"
   },
   "filmDetail": {
     "backToFilms": "Zurück zu den Filmen",
