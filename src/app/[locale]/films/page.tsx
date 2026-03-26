@@ -150,12 +150,17 @@ export default async function FilmsPage({
   let featuredQuery = supabase
     .from('films')
     .select(
-      'id, title, slug, poster_url, backdrop_url, short_description, genres, is_published, blocked_in, allowed_in, is_featured'
+      'id, title, slug, poster_url, backdrop_url, short_description, short_description_en, genres, is_published, blocked_in, allowed_in, is_featured'
     )
     .eq('is_published', true)
     .eq('is_featured', true)
     .limit(1)
   const { data: featuredRow } = await featuredQuery.maybeSingle()
+
+  const featuredShortDescription =
+    locale === 'en' && String(featuredRow?.short_description_en ?? '').trim()
+      ? String(featuredRow?.short_description_en).trim()
+      : String(featuredRow?.short_description ?? '').trim()
 
   const featured = featuredRow
     ? {
@@ -164,7 +169,7 @@ export default async function FilmsPage({
         slug: featuredRow.slug ?? '',
         poster_url: featuredRow.poster_url as string | null,
         backdrop_url: featuredRow.backdrop_url as string | null,
-        short_description: featuredRow.short_description as string | null,
+        short_description: featuredShortDescription || null,
         genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
       }
     : null

@@ -4,10 +4,9 @@ import { usePathname, useRouter } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 
 const NEXT_LOCALE = 'NEXT_LOCALE'
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
 function setLocaleCookie(locale: Locale) {
-  document.cookie = `${NEXT_LOCALE}=${locale}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
+  document.cookie = `${NEXT_LOCALE}=${locale}; path=/`
 }
 
 export default function LanguageSwitch({ currentLocale }: { currentLocale: Locale }) {

@@ -69,7 +69,7 @@ export default async function FilmSlugPage({
   const { data: film, error: filmError } = await supabase
     .from('films')
     .select(
-      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, short_description, director, film_cast, country, year, duration_minutes, genres, language, allowed_in, blocked_in'
+      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, allowed_in, blocked_in'
     )
     .eq('slug', slug)
     .eq('is_published', true)
@@ -105,6 +105,14 @@ export default async function FilmSlugPage({
   }
 
   const hasBackdrop = Boolean(film.backdrop_url && String(film.backdrop_url).trim())
+  const localizedShortDescription =
+    locale === 'en' && String(film.short_description_en ?? '').trim()
+      ? String(film.short_description_en).trim()
+      : String(film.short_description ?? '').trim()
+  const localizedDescription =
+    locale === 'en' && String(film.description_en ?? '').trim()
+      ? String(film.description_en).trim()
+      : String(film.description ?? '').trim()
   const castStr = joinCast(film.film_cast)
   const genresStr = joinGenres(film.genres)
   const showOriginalTitle =
@@ -137,7 +145,7 @@ export default async function FilmSlugPage({
 
   const contentBlock = (
     <>
-      {film.short_description && String(film.short_description).trim() ? (
+      {localizedShortDescription ? (
         <p
           style={{
             fontSize: 'clamp(1rem, 2.5vw, 1.15rem)',
@@ -147,10 +155,10 @@ export default async function FilmSlugPage({
             fontStyle: 'italic',
           }}
         >
-          {String(film.short_description).trim()}
+          {localizedShortDescription}
         </p>
       ) : null}
-      {film.description && String(film.description).trim() ? (
+      {localizedDescription ? (
         <div style={{ marginBottom: '28px' }}>
           <h2
             style={{
@@ -172,7 +180,7 @@ export default async function FilmSlugPage({
               fontSize: '0.95rem',
             }}
           >
-            {String(film.description).trim()}
+            {localizedDescription}
           </p>
         </div>
       ) : null}
