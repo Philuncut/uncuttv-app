@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 
 const NEXT_LOCALE = 'NEXT_LOCALE'
@@ -12,19 +12,23 @@ function setLocaleCookie(locale: Locale) {
 
 export default function LanguageSwitch({ currentLocale }: { currentLocale: Locale }) {
   const pathname = usePathname()
-  const otherLocale: Locale = currentLocale === 'de' ? 'en' : 'de'
+  const router = useRouter()
 
-  const handleSwitch = () => {
-    setLocaleCookie(otherLocale)
-    const newPath = pathname.replace(new RegExp(`^/${currentLocale}(/|$)`), `/${otherLocale}$1`)
-    window.location.href = newPath || `/${otherLocale}`
+  const switchToLocale = (nextLocale: Locale) => {
+    setLocaleCookie(nextLocale)
+    const currentPath = pathname || '/'
+    const hasLocalePrefix = /^\/(de|en)(\/|$)/.test(currentPath)
+    const newPath = hasLocalePrefix
+      ? currentPath.replace(/^\/(de|en)(\/|$)/, `/${nextLocale}$2`)
+      : `/${nextLocale}${currentPath === '/' ? '' : currentPath}`
+    router.push(newPath || `/${nextLocale}`)
   }
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
       <button
         type="button"
-        onClick={() => currentLocale !== 'de' && handleSwitch()}
+        onClick={() => currentLocale !== 'de' && switchToLocale('de')}
         aria-pressed={currentLocale === 'de'}
         style={{
           padding: '4px 8px',
@@ -42,7 +46,7 @@ export default function LanguageSwitch({ currentLocale }: { currentLocale: Local
       <span style={{ color: 'var(--grey)', fontSize: '0.7rem' }}>|</span>
       <button
         type="button"
-        onClick={() => currentLocale !== 'en' && handleSwitch()}
+        onClick={() => currentLocale !== 'en' && switchToLocale('en')}
         aria-pressed={currentLocale === 'en'}
         style={{
           padding: '4px 8px',
