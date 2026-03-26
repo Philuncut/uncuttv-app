@@ -60,7 +60,7 @@ body::before {
   animation-play-state: paused;
 }
 .carousel-track-desktop {
-  animation: carouselScroll 50s linear infinite;
+  animation: carouselScroll 70s linear infinite;
 }
 .carousel-track-desktop:hover {
   animation-play-state: paused;

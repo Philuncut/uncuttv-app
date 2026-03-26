@@ -25,7 +25,7 @@ const carouselPosters = [
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/traces%202.jpg',
 ]
 
-const ALL_POSTERS = [...carouselPosters, ...carouselPosters]
+const MOBILE_LOOP_POSTERS = [...carouselPosters, ...carouselPosters]
 
 const BG_COLS = [
   'linear-gradient(160deg, #1a0505 0%, #3d0a0a 40%, #0a0a0a 100%)',
@@ -121,7 +121,7 @@ export default function Hero() {
                   width: 'max-content',
                 }}
               >
-                {ALL_POSTERS.map((posterUrl, i) => (
+                {MOBILE_LOOP_POSTERS.map((posterUrl, i) => (
                   <div
                     key={i}
                     style={{
@@ -183,7 +183,7 @@ export default function Hero() {
                   minWidth: 'max-content',
                 }}
               >
-                {[...ALL_POSTERS, ...ALL_POSTERS].map((posterUrl, i) => (
+                {[...MOBILE_LOOP_POSTERS, ...MOBILE_LOOP_POSTERS].map((posterUrl, i) => (
                   <div
                     key={`${posterUrl}-${i}`}
                     style={{
