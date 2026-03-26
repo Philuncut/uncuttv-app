@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
@@ -85,6 +86,20 @@ function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[]): FilmCardData
 const CARD_SELECT =
   'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in'
 
+function normalizeCountryArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.map(String).map((v) => v.trim()).filter(Boolean)
+}
+
+function isFilmAllowedForCountry(film: { allowed_in?: unknown; blocked_in?: unknown }, country: string): boolean {
+  if (!country) return true
+  const allowedIn = normalizeCountryArray(film.allowed_in)
+  const blockedIn = normalizeCountryArray(film.blocked_in)
+  if (allowedIn.length > 0) return allowedIn.includes(country)
+  if (blockedIn.length > 0) return !blockedIn.includes(country)
+  return true
+}
+
 export default async function FilmsPage({
   params,
 }: {
@@ -93,6 +108,9 @@ export default async function FilmsPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('filmsPage')
+
+  const headersList = await headers()
+  const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
   const {
@@ -191,40 +209,50 @@ export default async function FilmsPage({
     watchMap
   )
 
-  // Trending: sum watchtime per film
+  // Trending: sum seconds_watched per film_id, top by total watchtime; geo filter; limit 10
   let trendingFilms: FilmCardData[] = []
   try {
     const admin = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    const { data: wtRows, error: wtErr } = await admin
-      .from('watchtime')
-      .select('film_id, watched_seconds')
+    type WtRow = { film_id: string; seconds_watched?: number; watched_seconds?: number }
+    let wtRows: WtRow[] | null = null
+    let wtErr = null as { message: string } | null
+    const wtPrimary = await admin.from('watchtime').select('film_id, seconds_watched')
+    if (wtPrimary.error) {
+      const wtLegacy = await admin.from('watchtime').select('film_id, watched_seconds')
+      wtRows = (wtLegacy.data ?? null) as WtRow[] | null
+      wtErr = wtLegacy.error
+    } else {
+      wtRows = (wtPrimary.data ?? null) as WtRow[] | null
+    }
 
     if (!wtErr && wtRows?.length) {
       const sums = new Map<string, number>()
       for (const row of wtRows) {
         const fid = row.film_id as string
-        const sec = Number((row as { watched_seconds?: number }).watched_seconds ?? 0)
+        const sec = Number(
+          row.seconds_watched ?? (row as { watched_seconds?: number }).watched_seconds ?? 0
+        )
         sums.set(fid, (sums.get(fid) ?? 0) + sec)
       }
-      const topIds = [...sums.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6)
-        .map(([id]) => id)
+      const sortedByWatch = [...sums.entries()].sort((a, b) => b[1] - a[1])
+      const candidateIds = sortedByWatch.map(([id]) => id).slice(0, 80)
 
-      if (topIds.length) {
+      if (candidateIds.length) {
         const { data: tr } = await supabase
           .from('films')
           .select(CARD_SELECT)
           .eq('is_published', true)
-          .in('id', topIds)
-        const orderMap = new Map(topIds.map((id, i) => [id, i]))
+          .in('id', candidateIds)
+        const orderMap = new Map(candidateIds.map((id, i) => [id, i]))
+        const allowedRows = (tr ?? [])
+          .filter((row) => isFilmAllowedForCountry(row, country))
+          .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
+          .slice(0, 10)
         trendingFilms = enrichFilmsWithWatchState(
-          (tr ?? [])
-            .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
-            .map((row) => rowToCard(row)),
+          allowedRows.map((row) => rowToCard(row)),
           watchMap
         )
       }
