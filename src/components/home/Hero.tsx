@@ -93,74 +93,160 @@ export default function Hero() {
           }}>
             Neu auf UncutTV
           </div>
-          <div
-            className={!isMobile ? 'carousel-scroll-x' : undefined}
-            style={{
-              // Mobile must stay unchanged (overflow hidden + animated track).
-              ...(isMobile
-                ? {
-                    overflow: 'hidden',
-                    maskImage:
-                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-                    WebkitMaskImage:
-                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-                  }
-                : {
-                    // Desktop: full-bleed scroller (break out of max-width parent)
-                    width: '100vw',
-                    marginLeft: 'calc(50% - 50vw)',
-                    boxSizing: 'border-box',
-                    overflowX: 'auto',
-                    overflowY: 'hidden',
-                    WebkitOverflowScrolling: 'touch',
-                    maskImage:
-                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-                    WebkitMaskImage:
-                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-                  }),
-            }}
-          >
+          {isMobile ? (
+            // Mobile: keep existing overflow-hidden + animated track behavior.
             <div
-              className={isMobile ? 'carousel-track' : undefined}
               style={{
+                overflow: 'hidden',
+                maskImage:
+                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                WebkitMaskImage:
+                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+              }}
+            >
+              <div
+                className="carousel-track"
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  width: 'max-content',
+                }}
+              >
+                {ALL_POSTERS.map((poster, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flexShrink: 0,
+                      width: '100px',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '100%',
+                        aspectRatio: '2/3',
+                        outline: '1px solid rgba(255,255,255,0.06)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <img
+                        src={poster.src}
+                        alt=""
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '0',
+                          left: '0',
+                          right: '0',
+                          background:
+                            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                          padding: '16px 6px 6px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: 'var(--red, #c0392b)',
+                            fontSize: '0.5rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.12em',
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {poster.label}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Desktop: full-bleed scroller (break out of max-width parent)
+            <div
+              className="carousel-scroll-x"
+              style={{
+                width: '100vw',
+                marginLeft: 'calc(50% - 50vw)',
+                boxSizing: 'border-box',
+                overflowX: 'auto',
+                overflowY: 'hidden',
                 display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
                 gap: '8px',
-                width: 'max-content',
+                WebkitOverflowScrolling: 'touch',
+                maskImage:
+                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                WebkitMaskImage:
+                  'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
               }}
             >
               {ALL_POSTERS.map((poster, i) => (
-                <div key={i} style={{
-                  flexShrink: 0,
-                  width: isMobile ? '100px' : '180px',
-                  transition: 'transform 0.3s ease',
-                }}>
-                  <div style={{
-                    width: '100%', aspectRatio: '2/3',
-                    outline: '1px solid rgba(255,255,255,0.06)',
-                    position: 'relative', overflow: 'hidden',
-                  }}>
+                <div
+                  key={i}
+                  style={{
+                    flexShrink: 0,
+                    width: '180px',
+                    transition: 'transform 0.3s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '2/3',
+                      outline: '1px solid rgba(255,255,255,0.06)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
                     <img
                       src={poster.src}
                       alt=""
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
                     />
-                    <div style={{
-                      position: 'absolute', bottom: '0', left: '0', right: '0',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-                      padding: '16px 6px 6px',
-                      textAlign: 'center',
-                    }}>
-                      <span style={{
-                        color: 'var(--red, #c0392b)',
-                        fontSize: '0.5rem', fontWeight: 700,
-                        letterSpacing: '0.12em', textTransform: 'uppercase',
-                      }}>{poster.label}</span>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '0',
+                        left: '0',
+                        right: '0',
+                        background:
+                          'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                        padding: '16px 6px 6px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'var(--red, #c0392b)',
+                          fontSize: '0.5rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.12em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {poster.label}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Bottom content */}
