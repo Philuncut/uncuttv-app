@@ -60,6 +60,17 @@ body::before {
   animation-play-state: paused;
 }
 
+/* Desktop full-bleed horizontal carousel: hide scrollbar */
+.carousel-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.carousel-scroll-x::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
 /* Scroll hint animation */
 @keyframes scrollline {
   0%   { transform: scaleY(0); transform-origin: top; }

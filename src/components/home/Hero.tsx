@@ -93,14 +93,41 @@ export default function Hero() {
           }}>
             Neu auf UncutTV
           </div>
-          <div style={{
-            overflow: 'hidden',
-            maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-          }}>
-            <div className="carousel-track" style={{
-              display: 'flex', gap: '8px', width: 'max-content',
-            }}>
+          <div
+            className={!isMobile ? 'carousel-scroll-x' : undefined}
+            style={{
+              // Mobile must stay unchanged (overflow hidden + animated track).
+              ...(isMobile
+                ? {
+                    overflow: 'hidden',
+                    maskImage:
+                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                  }
+                : {
+                    // Desktop: full-bleed scroller (break out of max-width parent)
+                    width: '100vw',
+                    marginLeft: 'calc(50% - 50vw)',
+                    boxSizing: 'border-box',
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    WebkitOverflowScrolling: 'touch',
+                    maskImage:
+                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                  }),
+            }}
+          >
+            <div
+              className={isMobile ? 'carousel-track' : undefined}
+              style={{
+                display: 'flex',
+                gap: '8px',
+                width: 'max-content',
+              }}
+            >
               {ALL_POSTERS.map((poster, i) => (
                 <div key={i} style={{
                   flexShrink: 0,
