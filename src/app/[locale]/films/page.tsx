@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
@@ -44,8 +43,6 @@ type ContinueWatchingFilmRow = {
         duration_minutes: number | null
         genres: unknown
         is_published: boolean | null
-        blocked_in?: unknown
-        allowed_in?: unknown
       }
     | null
     | Array<{
@@ -57,38 +54,15 @@ type ContinueWatchingFilmRow = {
         duration_minutes: number | null
         genres: unknown
         is_published: boolean | null
-        blocked_in?: unknown
-        allowed_in?: unknown
       }>
 }
 
-function normalizeCountryArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.map(String).map((v) => v.trim()).filter(Boolean)
-}
-
-function isFilmAllowedForCountry(film: { allowed_in?: unknown; blocked_in?: unknown }, country: string): boolean {
-  if (!country) return true
-
-  const allowedIn = normalizeCountryArray(film.allowed_in)
-  const blockedIn = normalizeCountryArray(film.blocked_in)
-
-  // New logic:
-  // - If allowed_in is not empty AND country is NOT in allowed_in → block
-  // - If allowed_in is empty → fall back to blocked_in logic (country in blocked_in → block)
-  // - If both are empty → allow
-  if (allowedIn.length > 0) return allowedIn.includes(country)
-  if (blockedIn.length > 0) return !blockedIn.includes(country)
-  return true
-}
-
-function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[], country: string): FilmCardData[] {
+function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[]): FilmCardData[] {
   const out: FilmCardData[] = []
   for (const row of rows) {
     const raw = row.films
     const f = Array.isArray(raw) ? raw[0] : raw
     if (!f || !f.is_published) continue
-    if (!isFilmAllowedForCountry(f, country)) continue
     const card = rowToCard(f)
     const dm = f.duration_minutes
     const totalSeconds = typeof dm === 'number' && dm > 0 ? dm * 60 : 0
@@ -119,9 +93,6 @@ export default async function FilmsPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('filmsPage')
-
-  const headersList = await headers()
-  const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
   const {
@@ -169,7 +140,7 @@ export default async function FilmsPage({
     if (cwErr) {
       console.error('Continue watching fetch error:', cwErr)
     } else if (cwRows?.length) {
-      continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[], country).map((c) =>
+      continueFilms = watchRowsToContinueCards(cwRows as ContinueWatchingFilmRow[]).map((c) =>
         applyWatchStateToFilm(c, watchMap.get(c.id))
       )
     }
@@ -186,18 +157,17 @@ export default async function FilmsPage({
     .limit(1)
   const { data: featuredRow } = await featuredQuery.maybeSingle()
 
-  const featured =
-    featuredRow && isFilmAllowedForCountry(featuredRow, country)
-      ? {
-          id: featuredRow.id,
-          title: featuredRow.title ?? '',
-          slug: featuredRow.slug ?? '',
-          poster_url: featuredRow.poster_url as string | null,
-          backdrop_url: featuredRow.backdrop_url as string | null,
-          short_description: featuredRow.short_description as string | null,
-          genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
-        }
-      : null
+  const featured = featuredRow
+    ? {
+        id: featuredRow.id,
+        title: featuredRow.title ?? '',
+        slug: featuredRow.slug ?? '',
+        poster_url: featuredRow.poster_url as string | null,
+        backdrop_url: featuredRow.backdrop_url as string | null,
+        short_description: featuredRow.short_description as string | null,
+        genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
+      }
+    : null
 
   // New (last 6 by created_at)
   let newQuery = supabase
@@ -206,14 +176,12 @@ export default async function FilmsPage({
     .eq('is_published', true)
   const { data: newRows, error: newErr } = await newQuery
     .order('created_at', { ascending: false })
-    .limit(country ? 30 : 6)
+    .limit(6)
 
   if (newErr) console.error('Films new row fetch error:', newErr)
 
   const newFilms: FilmCardData[] = enrichFilmsWithWatchState(
     (newRows ?? [])
-      .filter((row) => isFilmAllowedForCountry(row, country))
-      .slice(0, 6)
       .map((row) => rowToCard(row)),
     watchMap
   )
@@ -238,7 +206,7 @@ export default async function FilmsPage({
       }
       const topIds = [...sums.entries()]
         .sort((a, b) => b[1] - a[1])
-        .slice(0, country ? 18 : 6)
+        .slice(0, 6)
         .map(([id]) => id)
 
       if (topIds.length) {
@@ -250,7 +218,6 @@ export default async function FilmsPage({
         const orderMap = new Map(topIds.map((id, i) => [id, i]))
         trendingFilms = enrichFilmsWithWatchState(
           (tr ?? [])
-            .filter((row) => isFilmAllowedForCountry(row, country))
             .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
             .map((row) => rowToCard(row)),
           watchMap
@@ -276,7 +243,6 @@ export default async function FilmsPage({
 
   const allFilms: FilmCardData[] = enrichFilmsWithWatchState(
     (rows ?? [])
-      .filter((row) => isFilmAllowedForCountry(row, country))
       .map((row) => rowToCard(row)),
     watchMap
   )

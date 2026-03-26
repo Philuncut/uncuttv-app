@@ -84,10 +84,10 @@ export default async function FilmSlugPage({
     redirect(`/${locale}/films`)
   }
 
-  // Territory geoblocking (server-side, prevents direct URL bypass)
-  if (country && !isFilmAllowedForCountry(film as { allowed_in?: unknown; blocked_in?: unknown }, country)) {
-    redirect(`/${locale}/films`)
-  }
+  const isGeoBlocked = Boolean(
+    country && !isFilmAllowedForCountry(film as { allowed_in?: unknown; blocked_in?: unknown }, country)
+  )
+  const geoBlockedMessage = locale === 'de' ? 'In Ihrem Land nicht verfügbar' : 'Not available in your country'
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -292,16 +292,40 @@ export default async function FilmSlugPage({
                 {t('voucherAccess')}
               </p>
             ) : null}
-            <FilmPlayer
-              playbackId={film.mux_playback_id}
-              filmId={film.id}
-              title={film.title}
-              locale={locale}
-              durationMinutes={film.duration_minutes}
-              variant="hero"
-              playLabel={t('play')}
-              loadingLabel={t('playerLoading')}
-            />
+            {isGeoBlocked ? (
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '16 / 9',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: '#0A0A0A',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  color: 'var(--warm-white)',
+                  fontSize: '0.95rem',
+                  letterSpacing: '0.04em',
+                  padding: '24px',
+                }}
+              >
+                {geoBlockedMessage}
+              </div>
+            ) : (
+              <FilmPlayer
+                playbackId={film.mux_playback_id}
+                filmId={film.id}
+                title={film.title}
+                locale={locale}
+                durationMinutes={film.duration_minutes}
+                variant="hero"
+                playLabel={t('play')}
+                loadingLabel={t('playerLoading')}
+              />
+            )}
           </div>
         </section>
       ) : (
@@ -358,15 +382,39 @@ export default async function FilmSlugPage({
                   {t('voucherAccess')}
                 </p>
               ) : null}
-              <FilmPlayer
-                playbackId={film.mux_playback_id}
-                filmId={film.id}
-                title={film.title}
-                locale={locale}
-                durationMinutes={film.duration_minutes}
-                playLabel={t('play')}
-                loadingLabel={t('playerLoading')}
-              />
+              {isGeoBlocked ? (
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: '#0A0A0A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    color: 'var(--warm-white)',
+                    fontSize: '0.95rem',
+                    letterSpacing: '0.04em',
+                    padding: '24px',
+                  }}
+                >
+                  {geoBlockedMessage}
+                </div>
+              ) : (
+                <FilmPlayer
+                  playbackId={film.mux_playback_id}
+                  filmId={film.id}
+                  title={film.title}
+                  locale={locale}
+                  durationMinutes={film.duration_minutes}
+                  playLabel={t('play')}
+                  loadingLabel={t('playerLoading')}
+                />
+              )}
             </div>
             {film.poster_url ? (
               <div

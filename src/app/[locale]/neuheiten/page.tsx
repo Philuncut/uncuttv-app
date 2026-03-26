@@ -1,26 +1,7 @@
-import { headers } from 'next/headers'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { enrichFilmsWithWatchState, fetchUserWatchFilmStateMap } from '@/lib/watch-film-cards'
 import FilmCatalog, { type FilmCardData } from '../films/FilmCatalog'
-
-function normalizeCountryArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.map(String).map((v) => v.trim()).filter(Boolean)
-}
-
-function isFilmAllowedForCountry(
-  film: { allowed_in?: unknown; blocked_in?: unknown },
-  country: string
-): boolean {
-  if (!country) return true
-  const allowedIn = normalizeCountryArray(film.allowed_in)
-  const blockedIn = normalizeCountryArray(film.blocked_in)
-
-  if (allowedIn.length > 0) return allowedIn.includes(country)
-  if (blockedIn.length > 0) return !blockedIn.includes(country)
-  return true
-}
 
 export default async function NeuheitenPage({
   params,
@@ -30,9 +11,6 @@ export default async function NeuheitenPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('filmsPage')
-
-  const headersList = await headers()
-  const country = headersList.get('x-vercel-ip-country') ?? ''
 
   const supabase = await createClient()
   const {
@@ -58,7 +36,6 @@ export default async function NeuheitenPage({
 
   const films: FilmCardData[] = enrichFilmsWithWatchState(
     (rows ?? [])
-      .filter((row) => isFilmAllowedForCountry(row, country))
       .map((row) => ({
         id: row.id,
         title: row.title ?? '',
