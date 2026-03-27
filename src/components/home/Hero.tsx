@@ -54,7 +54,7 @@ export default function Hero() {
       minHeight: isMobile ? 'auto' : 'auto',
       display: 'flex', alignItems: 'stretch',
       padding: isMobile ? '0 20px 48px' : '0 48px 80px',
-      overflow: 'hidden',
+      overflow: isMobile ? 'hidden' : 'visible',
     }}>
       {/* Background film strip */}
       <div style={{
@@ -160,7 +160,7 @@ export default function Hero() {
               className="carousel-scroll-x"
               style={{
                 width: '100vw',
-                marginLeft: 'calc(50% - 50vw)',
+                marginLeft: '-48px',
                 boxSizing: 'border-box',
                 overflow: 'hidden',
                 paddingLeft: '0',
