@@ -204,6 +204,7 @@ export default async function FilmSlugPage({
                 {item.label}
               </div>
               <div
+                className={item.label === t('language') ? 'whitespace-pre-line' : undefined}
                 style={{
                   color: 'var(--warm-white)',
                   fontSize: '0.9rem',
