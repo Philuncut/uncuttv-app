@@ -7,8 +7,6 @@ import Link from 'next/link'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import FilmPlayer from './FilmPlayer'
 
-const ACTIVE_STATUSES = ['active', 'trialing']
-
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.map(String).map((v) => v.trim()).filter(Boolean)
@@ -89,14 +87,14 @@ export default async function FilmSlugPage({
   )
   const geoBlockedMessage = locale === 'de' ? 'In Ihrem Land nicht verfügbar' : 'Not available in your country'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_status')
-    .eq('id', user.id)
-    .single()
+  const { data: activeSubscriptions } = await supabase
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .limit(1)
 
-  console.log('[FilmSlugPage] profile.subscription_status:', profile?.subscription_status)
-  const hasSubscription = profile && ACTIVE_STATUSES.includes(profile.subscription_status)
+  const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
   const hasVoucher = await userHasVoucherForFilm(user.id, film.id)
 
   if (!hasSubscription && !hasVoucher) {

@@ -65,14 +65,14 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const { data: profile } = await adminDb
-    .from('profiles')
-    .select('subscription_status')
-    .eq('id', user.id)
-    .single()
+  const { data: activeSubscriptions } = await adminDb
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .limit(1)
 
-  const activeStatuses = ['active', 'trialing']
-  const hasSubscription = profile && activeStatuses.includes(profile.subscription_status)
+  const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
 
   const playbackId = req.nextUrl.searchParams.get('playbackId')
   const filmId = req.nextUrl.searchParams.get('filmId')

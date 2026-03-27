@@ -42,14 +42,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${pathLocale}/auth/login`, request.url))
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_status')
-    .eq('id', user.id)
-    .single()
+  const { data: activeSubscriptions } = await supabase
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .limit(1)
 
-  const activeStatuses = ['active', 'trialing']
-  const hasSubscription = profile && activeStatuses.includes(profile.subscription_status)
+  const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
   if (hasSubscription) {
     return supabaseResponse
   }
