@@ -66,6 +66,27 @@ body::before {
   animation-play-state: paused;
 }
 
+/* Film row bleed: full-viewport on mobile, contained on desktop */
+.film-row-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  box-sizing: border-box;
+}
+.film-row-bleed .films-row-scroll {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 768px) {
+  .film-row-bleed {
+    width: 100%;
+    margin-left: 0;
+  }
+  .film-row-bleed .films-row-scroll {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 /* Film row scroll: hide scrollbar */
 .films-row-scroll {
   scrollbar-width: none;

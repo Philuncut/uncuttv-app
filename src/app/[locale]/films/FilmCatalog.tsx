@@ -314,10 +314,8 @@ export function FilmRow({
         {title}
       </h2>
       <div
+        className="film-row-bleed"
         style={{
-          width: '100vw',
-          marginLeft: 'calc(50% - 50vw)',
-          boxSizing: 'border-box',
           position: 'relative',
         }}
         onMouseEnter={() => setHovered(true)}
@@ -339,8 +337,8 @@ export function FilmRow({
             overflowX: 'auto',
             overflowY: 'hidden',
             paddingBottom: '12px',
-            paddingLeft: 'max(16px, env(safe-area-inset-left, 0px), calc(50vw - 676px))',
-            paddingRight: 'max(16px, env(safe-area-inset-right, 0px), calc(50vw - 676px))',
+            paddingLeft: '0',
+            paddingRight: '0',
             WebkitOverflowScrolling: 'touch',
             scrollSnapType: 'x mandatory',
             scrollbarWidth: 'none',
