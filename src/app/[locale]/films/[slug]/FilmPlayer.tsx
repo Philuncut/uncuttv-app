@@ -38,6 +38,7 @@ interface FilmPlayerProps {
   locale: string
   durationMinutes?: number | null
   originalLanguage?: string
+  startTime?: number
   variant?: 'default' | 'hero'
   playLabel?: string
   loadingLabel?: string
@@ -59,6 +60,7 @@ export default function FilmPlayer({
   locale,
   durationMinutes,
   originalLanguage,
+  startTime,
   variant = 'default',
   playLabel = 'Abspielen',
   loadingLabel = 'Wird geladen…',
@@ -388,6 +390,7 @@ export default function FilmPlayer({
         playbackId={playbackId}
         tokens={{ playback: token }}
         metadata={{ video_title: title }}
+        startTime={startTime && startTime > 0 ? startTime : undefined}
         style={{ aspectRatio: '16/9', width: '100%' }}
         primaryColor="#C8102E"
         onLoadedMetadata={handleLoadedMetadata}

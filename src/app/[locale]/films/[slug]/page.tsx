@@ -102,6 +102,18 @@ export default async function FilmSlugPage({
     redirect(`/${locale}/subscribe`)
   }
 
+  // Fetch last watch position for resume
+  const { data: watchtimeRow } = await supabase
+    .from('watchtime')
+    .select('last_position, completed')
+    .eq('user_id', user.id)
+    .eq('film_id', film.id)
+    .maybeSingle()
+
+  const startTime = watchtimeRow && !watchtimeRow.completed
+    ? Math.max(0, Number(watchtimeRow.last_position) || 0)
+    : 0
+
   const hasBackdrop = Boolean(film.backdrop_url && String(film.backdrop_url).trim())
   const localizedShortDescription =
     locale === 'en' && String(film.short_description_en ?? '').trim()
@@ -329,6 +341,7 @@ export default async function FilmSlugPage({
                 locale={locale}
                 durationMinutes={film.duration_minutes}
                 originalLanguage={film.original_language ?? ''}
+                startTime={startTime}
                 variant="hero"
                 playLabel={t('play')}
                 loadingLabel={t('playerLoading')}
@@ -420,6 +433,7 @@ export default async function FilmSlugPage({
                   locale={locale}
                   durationMinutes={film.duration_minutes}
                   originalLanguage={film.original_language ?? ''}
+                  startTime={startTime}
                   playLabel={t('play')}
                   loadingLabel={t('playerLoading')}
                 />
