@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -34,6 +34,10 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
     <Link
       href={`/${locale}/films/${film.slug}`}
       style={{ textDecoration: 'none', color: 'inherit' }}
+      onClick={() => {
+        sessionStorage.setItem('filmeScrollY', String(window.scrollY))
+        sessionStorage.setItem('filmeScrollBack', '1')
+      }}
     >
       <article
         style={{
@@ -281,13 +285,37 @@ export default function FilmCatalog({
   const t = useTranslations('filmsPage')
   const pathname = usePathname()
   const locale = (pathname?.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
-  const [genreFilter, setGenreFilter] = useState<string | null>(null)
+  const [genreFilter, setGenreFilter] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return sessionStorage.getItem('selectedGenre') || null
+  })
+
+  // Restore scroll position on back-navigation
+  useEffect(() => {
+    const shouldRestore = sessionStorage.getItem('filmeScrollBack')
+    if (shouldRestore) {
+      sessionStorage.removeItem('filmeScrollBack')
+      const y = Number(sessionStorage.getItem('filmeScrollY')) || 0
+      if (y > 0) {
+        requestAnimationFrame(() => window.scrollTo(0, y))
+      }
+    }
+  }, [])
 
   const allGenres = useMemo(() => {
     const set = new Set<string>()
     films.forEach((f) => (f.genres ?? []).forEach((g) => set.add(g)))
     return Array.from(set).sort()
   }, [films])
+
+  const handleGenreChange = useCallback((genre: string | null) => {
+    setGenreFilter(genre)
+    if (genre) {
+      sessionStorage.setItem('selectedGenre', genre)
+    } else {
+      sessionStorage.removeItem('selectedGenre')
+    }
+  }, [])
 
   const filteredFilms = useMemo(() => {
     if (!genreFilter) return films
@@ -323,7 +351,7 @@ export default function FilmCatalog({
           >
             <button
               type="button"
-              onClick={() => setGenreFilter(null)}
+              onClick={() => handleGenreChange(null)}
               style={{
                 padding: '8px 16px',
                 fontSize: '0.78rem',
@@ -342,7 +370,7 @@ export default function FilmCatalog({
               <button
                 key={g}
                 type="button"
-                onClick={() => setGenreFilter(g)}
+                onClick={() => handleGenreChange(g)}
                 style={{
                   padding: '8px 16px',
                   fontSize: '0.78rem',
