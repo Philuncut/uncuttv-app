@@ -88,6 +88,7 @@ export default function FilmPlayer({
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const switcherRef = useRef<HTMLDivElement>(null)
   const subSwitcherRef = useRef<HTMLDivElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
 
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const lastPeriodicSyncRef = useRef(Date.now())
@@ -317,7 +318,14 @@ export default function FilmPlayer({
       const el = playerRef.current
       const tt = el ? getTextTracks(el) : null
       if (tt) {
-        const onAdd = () => readSubtitles()
+        const onAdd = (e: Event) => {
+          // Disable newly added subtitle tracks to keep subs off by default
+          const track = (e as TrackEvent).track
+          if (track && (track.kind === 'subtitles' || track.kind === 'captions')) {
+            track.mode = 'disabled'
+          }
+          readSubtitles()
+        }
         const onChange = () => readSubtitles()
         tt.addEventListener('addtrack', onAdd)
         tt.addEventListener('change', onChange)
@@ -392,7 +400,7 @@ export default function FilmPlayer({
   // ── Auto-hide controls after 3s of no mouse movement ──
   useEffect(() => {
     if (!token) return
-    const wrapEl = document.querySelector('.film-player-wrap') as HTMLElement | null
+    const wrapEl = wrapRef.current
     if (!wrapEl) return
 
     function show() {
@@ -484,6 +492,7 @@ export default function FilmPlayer({
 
   return (
     <div
+      ref={wrapRef}
       className="film-player-wrap"
       style={{
         marginTop: wrapMarginTop,
