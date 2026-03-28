@@ -395,9 +395,9 @@ export default async function FilmsPage({
         }}
       >
         {continueFilms.length > 0 ? (
-          <FilmRow films={continueFilms.slice(0, 6)} title={t('sectionContinueWatching')} locale={locale} showArrows={false} />
+          <FilmRow films={continueFilms} title={t('sectionContinueWatching')} locale={locale} />
         ) : null}
-        <FilmRow films={newFilms.slice(0, 6)} title={t('sectionNew')} locale={locale} showArrows={false} />
+        <FilmRow films={newFilms} title={t('sectionNew')} locale={locale} />
         <FilmRow films={trendingFilms} title={t('sectionTrending')} locale={locale} />
       </div>
 
