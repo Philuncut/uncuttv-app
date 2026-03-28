@@ -272,14 +272,30 @@ export default function FilmPlayer({
   }, [token, originalLanguage, locale])
 
   // ── Discover subtitle/caption text tracks ──
+  const subsDisabledRef = useRef(false)
+
   useEffect(() => {
     if (!token) return
+    subsDisabledRef.current = false
+    let cleanupFns: (() => void)[] = []
 
     function readSubtitles() {
       const el = playerRef.current
       if (!el) return
       const tt = getTextTracks(el)
       if (!tt || tt.length === 0) return
+
+      // Disable all subtitle tracks once on first discovery
+      if (!subsDisabledRef.current) {
+        let found = false
+        for (let i = 0; i < tt.length; i++) {
+          if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
+            tt[i].mode = 'disabled'
+            found = true
+          }
+        }
+        if (found) subsDisabledRef.current = true
+      }
 
       const infos: SubtitleTrackInfo[] = []
       for (let i = 0; i < tt.length; i++) {
@@ -295,38 +311,34 @@ export default function FilmPlayer({
       setSubtitles(infos)
     }
 
-    // Disable all subtitle tracks on load, then read
-    function disableAndRead() {
-      const el = playerRef.current
-      if (!el) return
-      const tt = getTextTracks(el)
-      if (tt) {
-        for (let i = 0; i < tt.length; i++) {
-          if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
-            tt[i].mode = 'disabled'
-          }
-        }
-      }
+    // Initial attempt + listen for addtrack and change events
+    const t0 = setTimeout(() => {
       readSubtitles()
-    }
+      const el = playerRef.current
+      const tt = el ? getTextTracks(el) : null
+      if (tt) {
+        const onAdd = () => readSubtitles()
+        const onChange = () => readSubtitles()
+        tt.addEventListener('addtrack', onAdd)
+        tt.addEventListener('change', onChange)
+        cleanupFns.push(() => {
+          tt.removeEventListener('addtrack', onAdd)
+          tt.removeEventListener('change', onChange)
+        })
+      }
+    }, 300)
 
-    const t0 = setTimeout(disableAndRead, 300)
-    const t1 = setTimeout(disableAndRead, 1000)
-    const t2 = setTimeout(disableAndRead, 3000)
-
-    // Listen for track changes
-    const onChange = () => readSubtitles()
-    const el = playerRef.current
-    const tt = el ? getTextTracks(el) : null
-    if (tt) {
-      tt.addEventListener('change', onChange)
-    }
+    // Fallback retries for late-loading tracks
+    const t1 = setTimeout(readSubtitles, 1000)
+    const t2 = setTimeout(readSubtitles, 3000)
+    const t3 = setTimeout(readSubtitles, 5000)
 
     return () => {
       clearTimeout(t0)
       clearTimeout(t1)
       clearTimeout(t2)
-      if (tt) tt.removeEventListener('change', onChange)
+      clearTimeout(t3)
+      cleanupFns.forEach(fn => fn())
     }
   }, [token])
 
