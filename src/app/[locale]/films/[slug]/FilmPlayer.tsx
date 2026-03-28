@@ -76,6 +76,7 @@ export default function FilmPlayer({
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const lastPeriodicSyncRef = useRef(Date.now())
   const completedSentRef = useRef(false)
+  const localeAppliedRef = useRef(false)
   const durationSecondsRef = useRef<number | null>(
     typeof durationMinutes === 'number' && durationMinutes > 0 ? Math.round(durationMinutes * 60) : null
   )
@@ -201,6 +202,26 @@ export default function FilmPlayer({
           enabled: t.enabled,
         })
       }
+
+      // Auto-select track matching current locale (only on first discovery)
+      if (list.length > 1 && !localeAppliedRef.current) {
+        let targetIdx = -1
+        for (let i = 0; i < infos.length; i++) {
+          const raw = list[i].language
+          const resolved = raw && raw !== 'und' ? raw : (i === 0 && originalLanguage ? originalLanguage : '')
+          if (resolved === locale) { targetIdx = i; break }
+        }
+        if (targetIdx >= 0) {
+          for (let i = 0; i < list.length; i++) {
+            list[i].enabled = i === targetIdx
+          }
+          for (const info of infos) {
+            info.enabled = info.index === targetIdx
+          }
+          localeAppliedRef.current = true
+        }
+      }
+
       setTracks(infos)
     }
 
@@ -232,7 +253,7 @@ export default function FilmPlayer({
         list.removeEventListener('change', readTracks)
       }
     }
-  }, [token, originalLanguage])
+  }, [token, originalLanguage, locale])
 
   // ── Switch audio track ──
   function switchTrack(index: number) {
