@@ -69,6 +69,8 @@ export default function FilmPlayer({
   const [loading, setLoading] = useState(false)
   const [tracks, setTracks] = useState<AudioTrackInfo[]>([])
   const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [controlsVisible, setControlsVisible] = useState(false)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const switcherRef = useRef<HTMLDivElement>(null)
 
   const playerRef = useRef<MuxPlayerElement | null>(null)
@@ -259,6 +261,37 @@ export default function FilmPlayer({
     return () => document.removeEventListener('mousedown', onDown)
   }, [switcherOpen])
 
+  // ── Auto-hide switcher after 3s of no mouse movement ──
+  useEffect(() => {
+    if (!token) return
+    const wrapEl = document.querySelector('.film-player-wrap') as HTMLElement | null
+    if (!wrapEl) return
+
+    function show() {
+      setControlsVisible(true)
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = setTimeout(() => {
+        setControlsVisible(false)
+      }, 3000)
+    }
+
+    function hide() {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      setControlsVisible(false)
+    }
+
+    wrapEl.addEventListener('mousemove', show)
+    wrapEl.addEventListener('mouseenter', show)
+    wrapEl.addEventListener('mouseleave', hide)
+
+    return () => {
+      wrapEl.removeEventListener('mousemove', show)
+      wrapEl.removeEventListener('mouseenter', show)
+      wrapEl.removeEventListener('mouseleave', hide)
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    }
+  }, [token])
+
   async function handlePlay() {
     if (token) return
     setLoading(true)
@@ -345,32 +378,36 @@ export default function FilmPlayer({
       {showSwitcher && (
         <div
           ref={switcherRef}
-          className="audio-switcher"
-          data-open={switcherOpen || undefined}
           style={{
             position: 'absolute',
             bottom: '52px',
             right: '12px',
             zIndex: 10,
+            opacity: (controlsVisible || switcherOpen) ? 1 : 0,
+            pointerEvents: (controlsVisible || switcherOpen) ? 'auto' : 'none',
+            transition: 'opacity 0.3s ease',
           }}
         >
           {/* Trigger */}
           <button
             type="button"
             onClick={() => setSwitcherOpen(o => !o)}
+            className="audio-switcher-btn"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '5px',
-              background: 'rgba(0,0,0,0.75)',
+              background: switcherOpen ? '#a93226' : '#c0392b',
               color: '#fff',
               border: 'none',
+              borderRadius: '2px',
               padding: '6px 10px',
               fontSize: '0.75rem',
               fontWeight: 600,
               letterSpacing: '0.06em',
               cursor: 'pointer',
               lineHeight: 1,
+              transition: 'background 0.15s',
             }}
           >
             <span style={{ fontSize: '0.85rem' }}>🔊</span>
@@ -417,19 +454,8 @@ export default function FilmPlayer({
         </div>
       )}
 
-      {/* Show switcher only on hover / focus-within + hide MUX built-in audio menu */}
+      {/* Hide MUX built-in audio menu + switcher button hover style */}
       <style>{`
-        .film-player-wrap .audio-switcher {
-          opacity: 0;
-          transition: opacity 0.2s ease;
-          pointer-events: none;
-        }
-        .film-player-wrap:hover .audio-switcher,
-        .film-player-wrap:focus-within .audio-switcher,
-        .film-player-wrap .audio-switcher[data-open="true"] {
-          opacity: 1;
-          pointer-events: auto;
-        }
         .film-player-wrap mux-player {
           --audio-track-menu-button: none;
         }
@@ -441,6 +467,9 @@ export default function FilmPlayer({
         }
         media-audio-track-menu {
           display: none !important;
+        }
+        .audio-switcher-btn:hover {
+          background: #a93226 !important;
         }
       `}</style>
     </div>
