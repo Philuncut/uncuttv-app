@@ -417,7 +417,7 @@ export default function FilmPlayer({
         </div>
       )}
 
-      {/* Show switcher only on hover / focus-within */}
+      {/* Show switcher only on hover / focus-within + hide MUX built-in audio menu */}
       <style>{`
         .film-player-wrap .audio-switcher {
           opacity: 0;
@@ -429,6 +429,12 @@ export default function FilmPlayer({
         .film-player-wrap .audio-switcher[data-open="true"] {
           opacity: 1;
           pointer-events: auto;
+        }
+        mux-player::part(audio-track-menu-button) {
+          display: none !important;
+        }
+        mux-player [slot="audio-track-menu-button"] {
+          display: none !important;
         }
       `}</style>
     </div>
