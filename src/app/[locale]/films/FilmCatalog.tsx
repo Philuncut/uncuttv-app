@@ -220,27 +220,36 @@ function RowArrow({
       className="film-row-arrow"
       style={{
         position: 'absolute',
-        top: 0,
-        bottom: '12px',
-        [direction === 'left' ? 'left' : 'right']: 0,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        [direction === 'left' ? 'left' : 'right']: '-8px',
         zIndex: 5,
-        width: '48px',
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#c0392b',
+        background: '#d40000',
         color: '#fff',
         border: 'none',
         cursor: 'pointer',
-        fontSize: '1.5rem',
+        fontSize: '20px',
         lineHeight: 1,
         padding: 0,
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
-        transition: 'opacity 0.2s, background 0.15s',
+        transition: 'all 0.2s ease',
+        boxShadow: 'none',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = '#a93226' }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = '#c0392b' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = '#b30000'
+        e.currentTarget.style.boxShadow = '0 0 12px rgba(212, 0, 0, 0.8)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = '#d40000'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
     >
       {direction === 'left' ? '‹' : '›'}
     </button>
