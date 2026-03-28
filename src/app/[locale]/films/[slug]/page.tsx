@@ -67,7 +67,7 @@ export default async function FilmSlugPage({
   const { data: film, error: filmError } = await supabase
     .from('films')
     .select(
-      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, allowed_in, blocked_in'
+      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, original_language, allowed_in, blocked_in'
     )
     .eq('slug', slug)
     .eq('is_published', true)
@@ -328,6 +328,7 @@ export default async function FilmSlugPage({
                 title={film.title}
                 locale={locale}
                 durationMinutes={film.duration_minutes}
+                originalLanguage={film.original_language ?? ''}
                 variant="hero"
                 playLabel={t('play')}
                 loadingLabel={t('playerLoading')}
@@ -418,6 +419,7 @@ export default async function FilmSlugPage({
                   title={film.title}
                   locale={locale}
                   durationMinutes={film.duration_minutes}
+                  originalLanguage={film.original_language ?? ''}
                   playLabel={t('play')}
                   loadingLabel={t('playerLoading')}
                 />

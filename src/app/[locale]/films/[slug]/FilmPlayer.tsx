@@ -8,6 +8,14 @@ import type MuxPlayerElement from '@mux/mux-player'
 const SYNC_INTERVAL_MS = 12_000
 const COMPLETE_RATIO = 0.9
 
+const AUDIO_LANG_LABELS: Record<string, string> = {
+  de: 'Deutsch',
+  en: 'English',
+  es: 'Español',
+  fr: 'Français',
+  it: 'Italiano',
+}
+
 interface FilmPlayerProps {
   playbackId: string
   filmId: string
@@ -16,6 +24,8 @@ interface FilmPlayerProps {
   locale: string
   /** From DB; used when media metadata duration is not ready yet */
   durationMinutes?: number | null
+  /** ISO 639-1 code from films.original_language — used to relabel the "Default" audio track */
+  originalLanguage?: string
   /** Hero backdrop layout: tighter spacing for overlaid play control */
   variant?: 'default' | 'hero'
   playLabel?: string
@@ -28,6 +38,7 @@ export default function FilmPlayer({
   title,
   locale,
   durationMinutes,
+  originalLanguage,
   variant = 'default',
   playLabel = 'Abspielen',
   loadingLabel = 'Wird geladen…',
@@ -137,10 +148,36 @@ export default function FilmPlayer({
 
   const handleLoadedMetadata = useCallback(() => {
     const el = playerRef.current
-    if (el && Number.isFinite(el.duration) && el.duration > 0) {
+    if (!el) return
+
+    if (Number.isFinite(el.duration) && el.duration > 0) {
       durationSecondsRef.current = Math.floor(el.duration)
     }
-  }, [])
+
+    // Rename "Default" audio track to the film's original language
+    if (originalLanguage) {
+      const label = AUDIO_LANG_LABELS[originalLanguage] ?? originalLanguage
+      const renameTrack = () => {
+        const tracks = (el as unknown as { audioTracks?: ArrayLike<{ label: string }> }).audioTracks
+        if (!tracks || tracks.length === 0) return false
+        for (let i = 0; i < tracks.length; i++) {
+          const t = tracks[i]
+          if (t.label === 'Default' || t.label === '' || !t.label) {
+            try { t.label = label } catch { /* readonly in some browsers */ }
+          }
+        }
+        return true
+      }
+      // audioTracks may not be populated immediately — retry briefly
+      if (!renameTrack()) {
+        const timer = setTimeout(renameTrack, 500)
+        const timer2 = setTimeout(renameTrack, 1500)
+        // cleanup not critical — timers are short-lived and idempotent
+        void timer
+        void timer2
+      }
+    }
+  }, [originalLanguage])
 
   async function handlePlay() {
     if (token) return
