@@ -528,9 +528,9 @@ export default function FilmPlayer({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
-                background: subSwitcherOpen ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.75)',
-                color: activeSub ? '#fff' : 'rgba(255,255,255,0.5)',
+                gap: '5px',
+                background: subSwitcherOpen ? '#b30000' : '#d40000',
+                color: '#fff',
                 border: 'none',
                 borderRadius: '2px',
                 padding: '6px 10px',
@@ -539,10 +539,10 @@ export default function FilmPlayer({
                 letterSpacing: '0.06em',
                 cursor: 'pointer',
                 lineHeight: 1,
-                transition: 'background 0.15s',
+                transition: 'all 0.2s ease',
               }}
             >
-              CC
+              CC{activeSubLang ? ` · ${activeSubLang.toUpperCase()}` : ''}
             </button>
 
             {subSwitcherOpen && (
@@ -706,7 +706,8 @@ export default function FilmPlayer({
           background: #b30000 !important;
         }
         .sub-switcher-btn:hover {
-          background: rgba(0,0,0,0.9) !important;
+          background: #b30000 !important;
+          box-shadow: 0 0 12px rgba(212, 0, 0, 0.8);
         }
       `}</style>
     </div>
