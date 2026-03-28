@@ -690,6 +690,7 @@ export default function FilmPlayer({
           --media-primary-color: #d40000;
           --media-secondary-color: #ffffff;
           --media-accent-color: #d40000;
+          --media-icon-color: #ffffff;
         }
         mux-player::part(audio-track) {
           display: none !important;
