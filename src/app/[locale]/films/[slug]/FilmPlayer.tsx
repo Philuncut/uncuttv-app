@@ -500,7 +500,7 @@ export default function FilmPlayer({
         startTime={startTime && startTime > 0 ? startTime : undefined}
         defaultHiddenCaptions
         style={{ aspectRatio: '16/9', width: '100%' }}
-        primaryColor="#C8102E"
+        primaryColor="#d40000"
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
@@ -687,6 +687,7 @@ export default function FilmPlayer({
           --audio-track-menu-button: none;
           --captions-button: none;
           --captions-menu-button: none;
+          --media-primary-color: #d40000;
         }
         mux-player::part(audio-track) {
           display: none !important;
