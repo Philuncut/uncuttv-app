@@ -119,22 +119,6 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
               {alreadyWatchedLabel}
             </div>
           )}
-          <div
-            style={{
-              position: 'absolute',
-              ...(film.alreadyWatched
-                ? { top: '8px', right: '8px' }
-                : { bottom: '8px', right: '8px' }),
-              zIndex: 3,
-              background: 'rgba(0,0,0,0.8)',
-              color: 'var(--warm-white)',
-              fontSize: '0.72rem',
-              padding: '4px 8px',
-              letterSpacing: '0.04em',
-            }}
-          >
-            {formatDuration(film.duration_minutes)}
-          </div>
         </div>
         <div style={{ padding: '16px' }}>
           <h2
