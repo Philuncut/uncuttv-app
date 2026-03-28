@@ -153,31 +153,79 @@ export default function FilmPlayer({
     if (Number.isFinite(el.duration) && el.duration > 0) {
       durationSecondsRef.current = Math.floor(el.duration)
     }
+  }, [])
 
-    // Rename "Default" audio track to the film's original language
-    if (originalLanguage) {
-      const label = AUDIO_LANG_LABELS[originalLanguage] ?? originalLanguage
-      const renameTrack = () => {
-        const tracks = (el as unknown as { audioTracks?: ArrayLike<{ label: string }> }).audioTracks
-        if (!tracks || tracks.length === 0) return false
+  // Rename "Default" audio track via media-tracks AudioTrackList event
+  useEffect(() => {
+    if (!token || !originalLanguage) return
+
+    const label = AUDIO_LANG_LABELS[originalLanguage] ?? originalLanguage
+    let cleanup: (() => void) | undefined
+
+    const tryRename = (source: string) => {
+      const el = playerRef.current
+      if (!el) {
+        console.log('[AudioTrack] no playerRef yet (%s)', source)
+        return
+      }
+
+      // media-tracks exposes audioTracks on the mux-player element
+      const tracks = (el as unknown as { audioTracks?: { length: number; [i: number]: { id: string; label: string; language: string; kind: string } } }).audioTracks
+      console.log('[AudioTrack] %s — el.audioTracks:', source, tracks, 'length:', tracks?.length ?? 'N/A')
+
+      // Also check the underlying <mux-video> element
+      const mediaEl = (el as unknown as { media?: HTMLElement }).media
+      const nativeTracks = (mediaEl as unknown as { audioTracks?: { length: number } } | undefined)?.audioTracks
+      console.log('[AudioTrack] %s — mediaEl:', source, mediaEl?.tagName, 'mediaEl.audioTracks:', nativeTracks, 'length:', nativeTracks?.length ?? 'N/A')
+
+      if (tracks && tracks.length > 0) {
         for (let i = 0; i < tracks.length; i++) {
           const t = tracks[i]
+          console.log('[AudioTrack] track[%d] id=%s label=%s language=%s kind=%s', i, t.id, t.label, t.language, t.kind)
           if (t.label === 'Default' || t.label === '' || !t.label) {
-            try { t.label = label } catch { /* readonly in some browsers */ }
+            console.log('[AudioTrack] renaming track[%d] label "%s" → "%s"', i, t.label, label)
+            try { t.label = label } catch (e) { console.warn('[AudioTrack] label write failed:', e) }
           }
         }
         return true
       }
-      // audioTracks may not be populated immediately — retry briefly
-      if (!renameTrack()) {
-        const timer = setTimeout(renameTrack, 500)
-        const timer2 = setTimeout(renameTrack, 1500)
-        // cleanup not critical — timers are short-lived and idempotent
-        void timer
-        void timer2
-      }
+      return false
     }
-  }, [originalLanguage])
+
+    // Attempt immediately (in case tracks are already present)
+    const immediate = setTimeout(() => {
+      if (tryRename('immediate')) return
+
+      // Listen for addtrack events on the AudioTrackList
+      const el = playerRef.current
+      const tracks = (el as unknown as { audioTracks?: EventTarget & { length: number } })?.audioTracks
+      if (tracks && typeof tracks.addEventListener === 'function') {
+        const onAddTrack = () => {
+          console.log('[AudioTrack] addtrack event fired, tracks.length:', tracks.length)
+          tryRename('addtrack-event')
+        }
+        tracks.addEventListener('addtrack', onAddTrack)
+        cleanup = () => tracks.removeEventListener('addtrack', onAddTrack)
+      }
+
+      // Fallback retries
+      const t1 = setTimeout(() => { console.log('[AudioTrack] retry 500ms'); tryRename('retry-500') }, 500)
+      const t2 = setTimeout(() => { console.log('[AudioTrack] retry 1500ms'); tryRename('retry-1500') }, 1500)
+      const t3 = setTimeout(() => { console.log('[AudioTrack] retry 3000ms'); tryRename('retry-3000') }, 3000)
+      const prevCleanup = cleanup
+      cleanup = () => {
+        prevCleanup?.()
+        clearTimeout(t1)
+        clearTimeout(t2)
+        clearTimeout(t3)
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(immediate)
+      cleanup?.()
+    }
+  }, [token, originalLanguage])
 
   async function handlePlay() {
     if (token) return
