@@ -500,7 +500,7 @@ export default function FilmPlayer({
         startTime={startTime && startTime > 0 ? startTime : undefined}
         defaultHiddenCaptions
         style={{ aspectRatio: '16/9', width: '100%' }}
-        primaryColor="#d40000"
+        accentColor="#d40000"
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
@@ -687,10 +687,9 @@ export default function FilmPlayer({
           --audio-track-menu-button: none;
           --captions-button: none;
           --captions-menu-button: none;
-          --media-primary-color: #d40000;
-          --media-secondary-color: #ffffff;
+          --media-primary-color: #ffffff;
+          --media-secondary-color: rgba(0,0,0,0.6);
           --media-accent-color: #d40000;
-          --media-icon-color: #ffffff;
         }
         mux-player::part(audio-track) {
           display: none !important;
