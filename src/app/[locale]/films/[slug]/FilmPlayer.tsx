@@ -31,6 +31,12 @@ interface AudioTrackInfo {
   enabled: boolean
 }
 
+interface SubtitleTrackInfo {
+  index: number
+  label: string
+  active: boolean
+}
+
 interface FilmPlayerProps {
   playbackId: string
   filmId: string
@@ -53,6 +59,11 @@ function getAudioTracks(el: MuxPlayerElement): MuxAudioTrackList | null {
   return tracks && typeof tracks.length === 'number' ? tracks : null
 }
 
+function getTextTracks(el: MuxPlayerElement): TextTrackList | null {
+  const tt = (el as unknown as { textTracks?: TextTrackList }).textTracks
+  return tt && typeof tt.length === 'number' ? tt : null
+}
+
 export default function FilmPlayer({
   playbackId,
   filmId,
@@ -70,10 +81,13 @@ export default function FilmPlayer({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [tracks, setTracks] = useState<AudioTrackInfo[]>([])
+  const [subtitles, setSubtitles] = useState<SubtitleTrackInfo[]>([])
   const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [subSwitcherOpen, setSubSwitcherOpen] = useState(false)
   const [controlsVisible, setControlsVisible] = useState(false)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const switcherRef = useRef<HTMLDivElement>(null)
+  const subSwitcherRef = useRef<HTMLDivElement>(null)
 
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const lastPeriodicSyncRef = useRef(Date.now())
@@ -257,6 +271,82 @@ export default function FilmPlayer({
     }
   }, [token, originalLanguage, locale])
 
+  // ── Discover subtitle/caption text tracks ──
+  useEffect(() => {
+    if (!token) return
+
+    function readSubtitles() {
+      const el = playerRef.current
+      if (!el) return
+      const tt = getTextTracks(el)
+      if (!tt || tt.length === 0) return
+
+      const infos: SubtitleTrackInfo[] = []
+      for (let i = 0; i < tt.length; i++) {
+        const t = tt[i]
+        if (t.kind !== 'subtitles' && t.kind !== 'captions') continue
+        const lang = t.language || ''
+        infos.push({
+          index: i,
+          label: LANG_LABELS[lang] ?? (t.label || lang.toUpperCase() || `Sub ${infos.length + 1}`),
+          active: t.mode === 'showing',
+        })
+      }
+      setSubtitles(infos)
+    }
+
+    // Disable all subtitle tracks on load, then read
+    function disableAndRead() {
+      const el = playerRef.current
+      if (!el) return
+      const tt = getTextTracks(el)
+      if (tt) {
+        for (let i = 0; i < tt.length; i++) {
+          if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
+            tt[i].mode = 'disabled'
+          }
+        }
+      }
+      readSubtitles()
+    }
+
+    const t0 = setTimeout(disableAndRead, 300)
+    const t1 = setTimeout(disableAndRead, 1000)
+    const t2 = setTimeout(disableAndRead, 3000)
+
+    // Listen for track changes
+    const onChange = () => readSubtitles()
+    const el = playerRef.current
+    const tt = el ? getTextTracks(el) : null
+    if (tt) {
+      tt.addEventListener('change', onChange)
+    }
+
+    return () => {
+      clearTimeout(t0)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      if (tt) tt.removeEventListener('change', onChange)
+    }
+  }, [token])
+
+  // ── Switch subtitle track ──
+  function switchSubtitle(index: number | null) {
+    const el = playerRef.current
+    if (!el) return
+    const tt = getTextTracks(el)
+    if (!tt) return
+
+    for (let i = 0; i < tt.length; i++) {
+      if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
+        tt[i].mode = i === index ? 'showing' : 'disabled'
+      }
+    }
+
+    setSubtitles(prev => prev.map(s => ({ ...s, active: s.index === index })))
+    setSubSwitcherOpen(false)
+  }
+
   // ── Switch audio track ──
   function switchTrack(index: number) {
     const el = playerRef.current
@@ -272,19 +362,22 @@ export default function FilmPlayer({
     setSwitcherOpen(false)
   }
 
-  // ── Close switcher on outside click ──
+  // ── Close dropdowns on outside click ──
   useEffect(() => {
-    if (!switcherOpen) return
+    if (!switcherOpen && !subSwitcherOpen) return
     function onDown(e: MouseEvent) {
-      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+      if (switcherOpen && switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
         setSwitcherOpen(false)
+      }
+      if (subSwitcherOpen && subSwitcherRef.current && !subSwitcherRef.current.contains(e.target as Node)) {
+        setSubSwitcherOpen(false)
       }
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
-  }, [switcherOpen])
+  }, [switcherOpen, subSwitcherOpen])
 
-  // ── Auto-hide switcher after 3s of no mouse movement ──
+  // ── Auto-hide controls after 3s of no mouse movement ──
   useEffect(() => {
     if (!token) return
     const wrapEl = document.querySelector('.film-player-wrap') as HTMLElement | null
@@ -372,7 +465,10 @@ export default function FilmPlayer({
   }
 
   const activeTrack = tracks.find(t => t.enabled)
-  const showSwitcher = tracks.length > 1
+  const showAudioSwitcher = tracks.length > 1
+  const activeSub = subtitles.find(s => s.active)
+  const showSubSwitcher = subtitles.length > 0
+  const anyOverlayOpen = switcherOpen || subSwitcherOpen
 
   return (
     <div
@@ -391,6 +487,7 @@ export default function FilmPlayer({
         tokens={{ playback: token }}
         metadata={{ video_title: title }}
         startTime={startTime && startTime > 0 ? startTime : undefined}
+        defaultHiddenCaptions
         style={{ aspectRatio: '16/9', width: '100%' }}
         primaryColor="#C8102E"
         onLoadedMetadata={handleLoadedMetadata}
@@ -398,90 +495,187 @@ export default function FilmPlayer({
         onEnded={handleEnded}
       />
 
-      {/* ── Custom audio track switcher ── */}
-      {showSwitcher && (
-        <div
-          ref={switcherRef}
-          style={{
-            position: 'absolute',
-            bottom: '52px',
-            right: '12px',
-            zIndex: 10,
-            opacity: (controlsVisible || switcherOpen) ? 1 : 0,
-            pointerEvents: (controlsVisible || switcherOpen) ? 'auto' : 'none',
-            transition: 'opacity 0.3s ease',
-          }}
-        >
-          {/* Trigger */}
-          <button
-            type="button"
-            onClick={() => setSwitcherOpen(o => !o)}
-            className="audio-switcher-btn"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              background: switcherOpen ? '#b30000' : '#d40000',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '2px',
-              padding: '6px 10px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              letterSpacing: '0.06em',
-              cursor: 'pointer',
-              lineHeight: 1,
-              transition: 'background 0.15s',
-            }}
-          >
-            <span style={{ fontSize: '0.85rem' }}>🔊</span>
-            {activeTrack?.shortLabel ?? '—'}
-          </button>
+      {/* ── Custom control overlays (bottom-right) ── */}
+      <div style={{
+        position: 'absolute',
+        bottom: '52px',
+        right: '12px',
+        zIndex: 10,
+        display: 'flex',
+        gap: '6px',
+        opacity: (controlsVisible || anyOverlayOpen) ? 1 : 0,
+        pointerEvents: (controlsVisible || anyOverlayOpen) ? 'auto' : 'none',
+        transition: 'opacity 0.3s ease',
+      }}>
+        {/* ── Subtitle switcher ── */}
+        {showSubSwitcher && (
+          <div ref={subSwitcherRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => { setSubSwitcherOpen(o => !o); setSwitcherOpen(false) }}
+              className="sub-switcher-btn"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: subSwitcherOpen ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.75)',
+                color: activeSub ? '#fff' : 'rgba(255,255,255,0.5)',
+                border: 'none',
+                borderRadius: '2px',
+                padding: '6px 10px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+                lineHeight: 1,
+                transition: 'background 0.15s',
+              }}
+            >
+              CC
+            </button>
 
-          {/* Dropdown */}
-          {switcherOpen && (
-            <div style={{
-              position: 'absolute',
-              bottom: 'calc(100% + 4px)',
-              right: 0,
-              minWidth: '140px',
-              background: 'rgba(0,0,0,0.9)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              overflow: 'hidden',
-            }}>
-              {tracks.map(t => (
+            {subSwitcherOpen && (
+              <div style={{
+                position: 'absolute',
+                bottom: 'calc(100% + 4px)',
+                right: 0,
+                minWidth: '150px',
+                background: 'rgba(0,0,0,0.92)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                overflow: 'hidden',
+              }}>
+                {/* Off option */}
                 <button
-                  key={t.index}
                   type="button"
-                  onClick={() => switchTrack(t.index)}
+                  onClick={() => switchSubtitle(null)}
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                     width: '100%',
                     textAlign: 'left',
                     padding: '8px 14px',
                     fontSize: '0.8rem',
-                    fontWeight: t.enabled ? 600 : 400,
-                    color: t.enabled ? '#c0392b' : '#fff',
-                    background: 'none',
+                    fontWeight: !activeSub ? 600 : 400,
+                    color: '#fff',
+                    background: !activeSub ? 'rgba(255,255,255,0.08)' : 'none',
                     border: 'none',
                     cursor: 'pointer',
                     letterSpacing: '0.04em',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
                   }}
-                  onMouseEnter={e => { if (!t.enabled) e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = !activeSub ? 'rgba(255,255,255,0.08)' : 'none' }}
                 >
-                  {t.label}
+                  <span style={{ width: '14px', textAlign: 'center' }}>{!activeSub ? '✓' : ''}</span>
+                  Off
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                {subtitles.map(s => (
+                  <button
+                    key={s.index}
+                    type="button"
+                    onClick={() => switchSubtitle(s.index)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 14px',
+                      fontSize: '0.8rem',
+                      fontWeight: s.active ? 600 : 400,
+                      color: '#fff',
+                      background: s.active ? 'rgba(255,255,255,0.08)' : 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = s.active ? 'rgba(255,255,255,0.08)' : 'none' }}
+                  >
+                    <span style={{ width: '14px', textAlign: 'center' }}>{s.active ? '✓' : ''}</span>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* Hide MUX built-in audio menu + switcher button hover style */}
+        {/* ── Audio track switcher ── */}
+        {showAudioSwitcher && (
+          <div ref={switcherRef} style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => { setSwitcherOpen(o => !o); setSubSwitcherOpen(false) }}
+              className="audio-switcher-btn"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: switcherOpen ? '#b30000' : '#d40000',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '2px',
+                padding: '6px 10px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+                lineHeight: 1,
+                transition: 'background 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '0.85rem' }}>🔊</span>
+              {activeTrack?.shortLabel ?? '—'}
+            </button>
+
+            {switcherOpen && (
+              <div style={{
+                position: 'absolute',
+                bottom: 'calc(100% + 4px)',
+                right: 0,
+                minWidth: '140px',
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                overflow: 'hidden',
+              }}>
+                {tracks.map(t => (
+                  <button
+                    key={t.index}
+                    type="button"
+                    onClick={() => switchTrack(t.index)}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 14px',
+                      fontSize: '0.8rem',
+                      fontWeight: t.enabled ? 600 : 400,
+                      color: t.enabled ? '#c0392b' : '#fff',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                    }}
+                    onMouseEnter={e => { if (!t.enabled) e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Hide MUX built-in audio + captions menus */}
       <style>{`
         .film-player-wrap mux-player {
           --audio-track-menu-button: none;
+          --captions-button: none;
+          --captions-menu-button: none;
         }
         mux-player::part(audio-track) {
           display: none !important;
@@ -492,8 +686,16 @@ export default function FilmPlayer({
         media-audio-track-menu {
           display: none !important;
         }
+        media-captions-button,
+        media-captions-menu-button,
+        media-captions-menu {
+          display: none !important;
+        }
         .audio-switcher-btn:hover {
           background: #b30000 !important;
+        }
+        .sub-switcher-btn:hover {
+          background: rgba(0,0,0,0.9) !important;
         }
       `}</style>
     </div>
