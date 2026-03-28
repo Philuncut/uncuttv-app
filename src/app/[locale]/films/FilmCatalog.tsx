@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -203,6 +203,50 @@ export function FilmCard({ film, locale }: { film: FilmCardData; locale: string 
   )
 }
 
+function RowArrow({
+  direction,
+  visible,
+  onClick,
+}: {
+  direction: 'left' | 'right'
+  visible: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={direction === 'left' ? 'Scroll left' : 'Scroll right'}
+      onClick={onClick}
+      className="film-row-arrow"
+      style={{
+        position: 'absolute',
+        top: 0,
+        bottom: '12px',
+        [direction === 'left' ? 'left' : 'right']: 0,
+        zIndex: 5,
+        width: '48px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.7)',
+        color: '#fff',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '1.5rem',
+        lineHeight: 1,
+        padding: 0,
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: 'opacity 0.2s, background 0.15s',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.9)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.7)' }}
+    >
+      {direction === 'left' ? '‹' : '›'}
+    </button>
+  )
+}
+
 export function FilmRow({
   films,
   title,
@@ -212,6 +256,37 @@ export function FilmRow({
   title: string
   locale: string
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const [hovered, setHovered] = useState(false)
+
+  const updateArrows = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 2)
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2)
+  }, [])
+
+  useEffect(() => {
+    updateArrows()
+    const el = scrollRef.current
+    if (!el) return
+    el.addEventListener('scroll', updateArrows, { passive: true })
+    window.addEventListener('resize', updateArrows)
+    return () => {
+      el.removeEventListener('scroll', updateArrows)
+      window.removeEventListener('resize', updateArrows)
+    }
+  }, [updateArrows, films])
+
+  function scroll(dir: 'left' | 'right') {
+    const el = scrollRef.current
+    if (!el) return
+    const amount = el.clientWidth * 0.8
+    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' })
+  }
+
   if (films.length === 0) return null
 
   return (
@@ -227,15 +302,23 @@ export function FilmRow({
       >
         {title}
       </h2>
-      {/* Full-bleed horizontal scroll: escape max-width + padded parents (desktop) */}
       <div
         style={{
           width: '100vw',
           marginLeft: 'calc(50% - 50vw)',
           boxSizing: 'border-box',
+          position: 'relative',
         }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
+        {/* Left arrow — hidden on mobile */}
+        <div className="film-row-arrow-wrap">
+          <RowArrow direction="left" visible={hovered && canScrollLeft} onClick={() => scroll('left')} />
+        </div>
+
         <div
+          ref={scrollRef}
           className="films-row-scroll"
           style={{
             display: 'flex',
@@ -247,6 +330,7 @@ export function FilmRow({
             paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
             WebkitOverflowScrolling: 'touch',
             scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
           }}
         >
           {films.map((film) => (
@@ -261,6 +345,11 @@ export function FilmRow({
               <FilmCard film={film} locale={locale} />
             </div>
           ))}
+        </div>
+
+        {/* Right arrow — hidden on mobile */}
+        <div className="film-row-arrow-wrap">
+          <RowArrow direction="right" visible={hovered && canScrollRight} onClick={() => scroll('right')} />
         </div>
       </div>
     </section>

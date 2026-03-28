@@ -66,6 +66,22 @@ body::before {
   animation-play-state: paused;
 }
 
+/* Film row scroll: hide scrollbar */
+.films-row-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.films-row-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Film row arrows: hidden on mobile */
+@media (max-width: 767px) {
+  .film-row-arrow-wrap {
+    display: none !important;
+  }
+}
+
 /* Desktop full-bleed horizontal carousel: hide scrollbar */
 .carousel-scroll-x {
   overflow: hidden;
