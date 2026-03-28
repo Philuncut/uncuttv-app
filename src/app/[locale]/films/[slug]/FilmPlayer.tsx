@@ -430,10 +430,16 @@ export default function FilmPlayer({
           opacity: 1;
           pointer-events: auto;
         }
-        mux-player::part(audio-track-menu-button) {
+        .film-player-wrap mux-player {
+          --audio-track-menu-button: none;
+        }
+        mux-player::part(audio-track) {
           display: none !important;
         }
-        mux-player [slot="audio-track-menu-button"] {
+        media-audio-track-menu-button {
+          display: none !important;
+        }
+        media-audio-track-menu {
           display: none !important;
         }
       `}</style>
