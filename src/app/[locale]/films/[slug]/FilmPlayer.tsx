@@ -8,7 +8,7 @@ import type MuxPlayerElement from '@mux/mux-player'
 const SYNC_INTERVAL_MS = 12_000
 const COMPLETE_RATIO = 0.9
 
-const AUDIO_LANG_LABELS: Record<string, string> = {
+const LANG_LABELS: Record<string, string> = {
   de: 'Deutsch',
   en: 'English',
   es: 'Español',
@@ -16,20 +16,40 @@ const AUDIO_LANG_LABELS: Record<string, string> = {
   it: 'Italiano',
 }
 
+const LANG_SHORT: Record<string, string> = {
+  de: 'DE',
+  en: 'EN',
+  es: 'ES',
+  fr: 'FR',
+  it: 'IT',
+}
+
+interface AudioTrackInfo {
+  index: number
+  label: string
+  shortLabel: string
+  enabled: boolean
+}
+
 interface FilmPlayerProps {
   playbackId: string
   filmId: string
   title: string
-  /** e.g. de | en — used after playback ends to return to the films catalog */
   locale: string
-  /** From DB; used when media metadata duration is not ready yet */
   durationMinutes?: number | null
-  /** ISO 639-1 code from films.original_language — used to relabel the "Default" audio track */
   originalLanguage?: string
-  /** Hero backdrop layout: tighter spacing for overlaid play control */
   variant?: 'default' | 'hero'
   playLabel?: string
   loadingLabel?: string
+}
+
+// ── helpers to reach the media-tracks AudioTrackList on the mux-player element
+type MuxAudioTrack = { id: string; label: string; language: string; kind: string; enabled: boolean }
+type MuxAudioTrackList = EventTarget & { length: number; [i: number]: MuxAudioTrack }
+
+function getAudioTracks(el: MuxPlayerElement): MuxAudioTrackList | null {
+  const tracks = (el as unknown as { audioTracks?: MuxAudioTrackList }).audioTracks
+  return tracks && typeof tracks.length === 'number' ? tracks : null
 }
 
 export default function FilmPlayer({
@@ -47,6 +67,9 @@ export default function FilmPlayer({
   const [token, setToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [tracks, setTracks] = useState<AudioTrackInfo[]>([])
+  const [switcherOpen, setSwitcherOpen] = useState(false)
+  const switcherRef = useRef<HTMLDivElement>(null)
 
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const lastPeriodicSyncRef = useRef(Date.now())
@@ -155,77 +178,86 @@ export default function FilmPlayer({
     }
   }, [])
 
-  // Rename "Default" audio track via media-tracks AudioTrackList event
+  // ── Discover audio tracks from the mux-player element ──
   useEffect(() => {
-    if (!token || !originalLanguage) return
+    if (!token) return
 
-    const label = AUDIO_LANG_LABELS[originalLanguage] ?? originalLanguage
-    let cleanup: (() => void) | undefined
-
-    const tryRename = (source: string) => {
+    function readTracks() {
       const el = playerRef.current
-      if (!el) {
-        console.log('[AudioTrack] no playerRef yet (%s)', source)
-        return
+      if (!el) return
+      const list = getAudioTracks(el)
+      if (!list || list.length === 0) return
+
+      const infos: AudioTrackInfo[] = []
+      for (let i = 0; i < list.length; i++) {
+        const t = list[i]
+        const lang = t.language && t.language !== 'und' ? t.language : (i === 0 && originalLanguage ? originalLanguage : '')
+        infos.push({
+          index: i,
+          label: LANG_LABELS[lang] ?? (t.label || `Track ${i + 1}`),
+          shortLabel: LANG_SHORT[lang] ?? (lang.toUpperCase() || `${i + 1}`),
+          enabled: t.enabled,
+        })
       }
-
-      // media-tracks exposes audioTracks on the mux-player element
-      const tracks = (el as unknown as { audioTracks?: { length: number; [i: number]: { id: string; label: string; language: string; kind: string } } }).audioTracks
-      console.log('[AudioTrack] %s — el.audioTracks:', source, tracks, 'length:', tracks?.length ?? 'N/A')
-
-      // Also check the underlying <mux-video> element
-      const mediaEl = (el as unknown as { media?: HTMLElement }).media
-      const nativeTracks = (mediaEl as unknown as { audioTracks?: { length: number } } | undefined)?.audioTracks
-      console.log('[AudioTrack] %s — mediaEl:', source, mediaEl?.tagName, 'mediaEl.audioTracks:', nativeTracks, 'length:', nativeTracks?.length ?? 'N/A')
-
-      if (tracks && tracks.length > 0) {
-        for (let i = 0; i < tracks.length; i++) {
-          const t = tracks[i]
-          console.log('[AudioTrack] track[%d] id=%s label=%s language=%s kind=%s', i, t.id, t.label, t.language, t.kind)
-          if (t.label === 'Default' || t.label === '' || !t.label) {
-            console.log('[AudioTrack] renaming track[%d] label "%s" → "%s"', i, t.label, label)
-            try { t.label = label } catch (e) { console.warn('[AudioTrack] label write failed:', e) }
-          }
-        }
-        return true
-      }
-      return false
+      setTracks(infos)
     }
 
-    // Attempt immediately (in case tracks are already present)
-    const immediate = setTimeout(() => {
-      if (tryRename('immediate')) return
-
-      // Listen for addtrack events on the AudioTrackList
+    // Try immediately, then listen for addtrack
+    const t0 = setTimeout(() => {
+      readTracks()
       const el = playerRef.current
-      const tracks = (el as unknown as { audioTracks?: EventTarget & { length: number } })?.audioTracks
-      if (tracks && typeof tracks.addEventListener === 'function') {
-        const onAddTrack = () => {
-          console.log('[AudioTrack] addtrack event fired, tracks.length:', tracks.length)
-          tryRename('addtrack-event')
-        }
-        tracks.addEventListener('addtrack', onAddTrack)
-        cleanup = () => tracks.removeEventListener('addtrack', onAddTrack)
+      if (!el) return
+      const list = getAudioTracks(el)
+      if (list && typeof list.addEventListener === 'function') {
+        list.addEventListener('addtrack', readTracks)
+        list.addEventListener('change', readTracks)
       }
+    }, 200)
 
-      // Fallback retries
-      const t1 = setTimeout(() => { console.log('[AudioTrack] retry 500ms'); tryRename('retry-500') }, 500)
-      const t2 = setTimeout(() => { console.log('[AudioTrack] retry 1500ms'); tryRename('retry-1500') }, 1500)
-      const t3 = setTimeout(() => { console.log('[AudioTrack] retry 3000ms'); tryRename('retry-3000') }, 3000)
-      const prevCleanup = cleanup
-      cleanup = () => {
-        prevCleanup?.()
-        clearTimeout(t1)
-        clearTimeout(t2)
-        clearTimeout(t3)
-      }
-    }, 100)
+    // Fallback retries for slow HLS manifests
+    const t1 = setTimeout(readTracks, 1000)
+    const t2 = setTimeout(readTracks, 3000)
 
     return () => {
-      clearTimeout(immediate)
-      cleanup?.()
+      clearTimeout(t0)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      const el = playerRef.current
+      if (!el) return
+      const list = getAudioTracks(el)
+      if (list && typeof list.removeEventListener === 'function') {
+        list.removeEventListener('addtrack', readTracks)
+        list.removeEventListener('change', readTracks)
+      }
     }
   }, [token, originalLanguage])
+
+  // ── Switch audio track ──
+  function switchTrack(index: number) {
+    const el = playerRef.current
+    if (!el) return
+    const list = getAudioTracks(el)
+    if (!list) return
+
+    for (let i = 0; i < list.length; i++) {
+      list[i].enabled = i === index
+    }
+
+    setTracks(prev => prev.map(t => ({ ...t, enabled: t.index === index })))
+    setSwitcherOpen(false)
+  }
+
+  // ── Close switcher on outside click ──
+  useEffect(() => {
+    if (!switcherOpen) return
+    function onDown(e: MouseEvent) {
+      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
+        setSwitcherOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [switcherOpen])
 
   async function handlePlay() {
     if (token) return
@@ -283,8 +315,19 @@ export default function FilmPlayer({
     )
   }
 
+  const activeTrack = tracks.find(t => t.enabled)
+  const showSwitcher = tracks.length > 1
+
   return (
-    <div style={{ marginTop: wrapMarginTop, maxWidth: variant === 'hero' ? '100%' : '900px', width: '100%' }}>
+    <div
+      className="film-player-wrap"
+      style={{
+        marginTop: wrapMarginTop,
+        maxWidth: variant === 'hero' ? '100%' : '900px',
+        width: '100%',
+        position: 'relative',
+      }}
+    >
       <MuxPlayer
         ref={playerRef}
         streamType="on-demand"
@@ -297,6 +340,97 @@ export default function FilmPlayer({
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
       />
+
+      {/* ── Custom audio track switcher ── */}
+      {showSwitcher && (
+        <div
+          ref={switcherRef}
+          className="audio-switcher"
+          data-open={switcherOpen || undefined}
+          style={{
+            position: 'absolute',
+            bottom: '52px',
+            right: '12px',
+            zIndex: 10,
+          }}
+        >
+          {/* Trigger */}
+          <button
+            type="button"
+            onClick={() => setSwitcherOpen(o => !o)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: 'rgba(0,0,0,0.75)',
+              color: '#fff',
+              border: 'none',
+              padding: '6px 10px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              cursor: 'pointer',
+              lineHeight: 1,
+            }}
+          >
+            <span style={{ fontSize: '0.85rem' }}>🔊</span>
+            {activeTrack?.shortLabel ?? '—'}
+          </button>
+
+          {/* Dropdown */}
+          {switcherOpen && (
+            <div style={{
+              position: 'absolute',
+              bottom: 'calc(100% + 4px)',
+              right: 0,
+              minWidth: '140px',
+              background: 'rgba(0,0,0,0.9)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              overflow: 'hidden',
+            }}>
+              {tracks.map(t => (
+                <button
+                  key={t.index}
+                  type="button"
+                  onClick={() => switchTrack(t.index)}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '8px 14px',
+                    fontSize: '0.8rem',
+                    fontWeight: t.enabled ? 600 : 400,
+                    color: t.enabled ? '#c0392b' : '#fff',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    letterSpacing: '0.04em',
+                  }}
+                  onMouseEnter={e => { if (!t.enabled) e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show switcher only on hover / focus-within */}
+      <style>{`
+        .film-player-wrap .audio-switcher {
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          pointer-events: none;
+        }
+        .film-player-wrap:hover .audio-switcher,
+        .film-player-wrap:focus-within .audio-switcher,
+        .film-player-wrap .audio-switcher[data-open="true"] {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      `}</style>
     </div>
   )
 }
