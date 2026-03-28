@@ -397,7 +397,7 @@ export default function FilmPlayer({
               display: 'flex',
               alignItems: 'center',
               gap: '5px',
-              background: switcherOpen ? '#cc0000' : '#ff0000',
+              background: switcherOpen ? '#cc0000' : '#e60000',
               color: '#fff',
               border: 'none',
               borderRadius: '2px',
