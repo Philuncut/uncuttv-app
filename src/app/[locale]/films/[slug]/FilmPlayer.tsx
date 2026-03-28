@@ -284,7 +284,14 @@ export default function FilmPlayer({
       const el = playerRef.current
       if (!el) return
       const tt = getTextTracks(el)
+      console.log('[Subtitles] textTracks:', tt, 'length:', tt?.length ?? 'N/A')
       if (!tt || tt.length === 0) return
+
+      // Log all tracks
+      for (let i = 0; i < tt.length; i++) {
+        const t = tt[i]
+        console.log('[Subtitles] track[%d] kind=%s label=%s language=%s mode=%s', i, t.kind, t.label, t.language, t.mode)
+      }
 
       // Disable all subtitle tracks once on first discovery
       if (!subsDisabledRef.current) {
@@ -309,6 +316,7 @@ export default function FilmPlayer({
           active: t.mode === 'showing',
         })
       }
+      console.log('[Subtitles] filtered tracks:', infos.length, infos.map(s => `${s.label} (idx=${s.index})`))
       setSubtitles(infos)
     }
 
