@@ -44,6 +44,8 @@ interface FilmPlayerProps {
   locale: string
   durationMinutes?: number | null
   originalLanguage?: string
+  /** ISO 639-1 codes from films.subtitle_languages in Supabase */
+  subtitleLanguages?: string[]
   startTime?: number
   variant?: 'default' | 'hero'
   playLabel?: string
@@ -71,6 +73,7 @@ export default function FilmPlayer({
   locale,
   durationMinutes,
   originalLanguage,
+  subtitleLanguages = [],
   startTime,
   variant = 'default',
   playLabel = 'Abspielen',
@@ -272,106 +275,85 @@ export default function FilmPlayer({
     }
   }, [token, originalLanguage, locale])
 
-  // ── Discover subtitle/caption text tracks ──
-  const subsDisabledRef = useRef(false)
+  // ── Build subtitle list from DB data + disable HLS tracks on load ──
+  const [activeSubLang, setActiveSubLang] = useState<string | null>(null)
 
   useEffect(() => {
     if (!token) return
-    subsDisabledRef.current = false
-    let cleanupFns: (() => void)[] = []
 
-    function readSubtitles() {
+    // Build subtitle options from DB column (always complete)
+    if (subtitleLanguages.length > 0) {
+      setSubtitles(
+        subtitleLanguages.map((lang, i) => ({
+          index: i,
+          label: LANG_LABELS[lang] ?? lang.toUpperCase(),
+          active: false,
+        }))
+      )
+    }
+
+    // Disable all HLS subtitle/caption tracks on load
+    function disableAllSubs() {
       const el = playerRef.current
       if (!el) return
       const tt = getTextTracks(el)
-      console.log('[Subtitles] textTracks:', tt, 'length:', tt?.length ?? 'N/A')
-      if (!tt || tt.length === 0) return
-
-      // Log all tracks
+      if (!tt) return
       for (let i = 0; i < tt.length; i++) {
-        const t = tt[i]
-        console.log('[Subtitles] track[%d] kind=%s label=%s language=%s mode=%s', i, t.kind, t.label, t.language, t.mode)
-      }
-
-      // Disable all subtitle tracks once on first discovery
-      if (!subsDisabledRef.current) {
-        let found = false
-        for (let i = 0; i < tt.length; i++) {
-          if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
-            tt[i].mode = 'disabled'
-            found = true
-          }
+        if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
+          tt[i].mode = 'disabled'
         }
-        if (found) subsDisabledRef.current = true
       }
-
-      const infos: SubtitleTrackInfo[] = []
-      for (let i = 0; i < tt.length; i++) {
-        const t = tt[i]
-        if (t.kind !== 'subtitles' && t.kind !== 'captions') continue
-        const lang = t.language || ''
-        infos.push({
-          index: i,
-          label: LANG_LABELS[lang] ?? (t.label || lang.toUpperCase() || `Sub ${infos.length + 1}`),
-          active: t.mode === 'showing',
-        })
-      }
-      console.log('[Subtitles] filtered tracks:', infos.length, infos.map(s => `${s.label} (idx=${s.index})`))
-      setSubtitles(infos)
     }
 
-    // Initial attempt + listen for addtrack and change events
-    const t0 = setTimeout(() => {
-      readSubtitles()
+    const t0 = setTimeout(disableAllSubs, 300)
+    const t1 = setTimeout(disableAllSubs, 1000)
+    const t2 = setTimeout(disableAllSubs, 3000)
+
+    // Also disable newly added tracks
+    let cleanupFn: (() => void) | undefined
+    const t3 = setTimeout(() => {
       const el = playerRef.current
       const tt = el ? getTextTracks(el) : null
       if (tt) {
         const onAdd = (e: Event) => {
-          // Disable newly added subtitle tracks to keep subs off by default
           const track = (e as TrackEvent).track
           if (track && (track.kind === 'subtitles' || track.kind === 'captions')) {
             track.mode = 'disabled'
           }
-          readSubtitles()
         }
-        const onChange = () => readSubtitles()
         tt.addEventListener('addtrack', onAdd)
-        tt.addEventListener('change', onChange)
-        cleanupFns.push(() => {
-          tt.removeEventListener('addtrack', onAdd)
-          tt.removeEventListener('change', onChange)
-        })
+        cleanupFn = () => tt.removeEventListener('addtrack', onAdd)
       }
-    }, 300)
-
-    // Fallback retries for late-loading tracks
-    const t1 = setTimeout(readSubtitles, 1000)
-    const t2 = setTimeout(readSubtitles, 3000)
-    const t3 = setTimeout(readSubtitles, 5000)
+    }, 200)
 
     return () => {
       clearTimeout(t0)
       clearTimeout(t1)
       clearTimeout(t2)
       clearTimeout(t3)
-      cleanupFns.forEach(fn => fn())
+      cleanupFn?.()
     }
-  }, [token])
+  }, [token, subtitleLanguages])
 
-  // ── Switch subtitle track ──
-  function switchSubtitle(index: number | null) {
+  // ── Switch subtitle track by language code ──
+  function switchSubtitle(lang: string | null) {
     const el = playerRef.current
     if (!el) return
     const tt = getTextTracks(el)
     if (!tt) return
 
+    // Disable all, then enable the matching one
     for (let i = 0; i < tt.length; i++) {
       if (tt[i].kind === 'subtitles' || tt[i].kind === 'captions') {
-        tt[i].mode = i === index ? 'showing' : 'disabled'
+        tt[i].mode = (lang && tt[i].language === lang) ? 'showing' : 'disabled'
       }
     }
 
-    setSubtitles(prev => prev.map(s => ({ ...s, active: s.index === index })))
+    setActiveSubLang(lang)
+    setSubtitles(prev => prev.map(s => ({
+      ...s,
+      active: lang ? subtitleLanguages[s.index] === lang : false,
+    })))
     setSubSwitcherOpen(false)
   }
 
@@ -494,8 +476,8 @@ export default function FilmPlayer({
 
   const activeTrack = tracks.find(t => t.enabled)
   const showAudioSwitcher = tracks.length > 1
-  const activeSub = subtitles.find(s => s.active)
-  const showSubSwitcher = subtitles.length > 0
+  const activeSub = activeSubLang !== null
+  const showSubSwitcher = subtitleLanguages.length > 0
   const anyOverlayOpen = switcherOpen || subSwitcherOpen
 
   return (
@@ -599,11 +581,11 @@ export default function FilmPlayer({
                   <span style={{ width: '14px', textAlign: 'center' }}>{!activeSub ? '✓' : ''}</span>
                   Off
                 </button>
-                {subtitles.map(s => (
+                {subtitles.map((s, i) => (
                   <button
                     key={s.index}
                     type="button"
-                    onClick={() => switchSubtitle(s.index)}
+                    onClick={() => switchSubtitle(subtitleLanguages[i])}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
