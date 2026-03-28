@@ -228,7 +228,7 @@ function RowArrow({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(0,0,0,0.7)',
+        background: '#c0392b',
         color: '#fff',
         border: 'none',
         cursor: 'pointer',
@@ -239,8 +239,8 @@ function RowArrow({
         pointerEvents: visible ? 'auto' : 'none',
         transition: 'opacity 0.2s, background 0.15s',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.9)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.7)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = '#a93226' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = '#c0392b' }}
     >
       {direction === 'left' ? '‹' : '›'}
     </button>
@@ -251,10 +251,12 @@ export function FilmRow({
   films,
   title,
   locale,
+  showArrows = true,
 }: {
   films: FilmCardData[]
   title: string
   locale: string
+  showArrows?: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -313,9 +315,11 @@ export function FilmRow({
         onMouseLeave={() => setHovered(false)}
       >
         {/* Left arrow — hidden on mobile */}
-        <div className="film-row-arrow-wrap">
-          <RowArrow direction="left" visible={hovered && canScrollLeft} onClick={() => scroll('left')} />
-        </div>
+        {showArrows && (
+          <div className="film-row-arrow-wrap">
+            <RowArrow direction="left" visible={hovered && canScrollLeft} onClick={() => scroll('left')} />
+          </div>
+        )}
 
         <div
           ref={scrollRef}
@@ -348,9 +352,11 @@ export function FilmRow({
         </div>
 
         {/* Right arrow — hidden on mobile */}
-        <div className="film-row-arrow-wrap">
-          <RowArrow direction="right" visible={hovered && canScrollRight} onClick={() => scroll('right')} />
-        </div>
+        {showArrows && (
+          <div className="film-row-arrow-wrap">
+            <RowArrow direction="right" visible={hovered && canScrollRight} onClick={() => scroll('right')} />
+          </div>
+        )}
       </div>
     </section>
   )
