@@ -397,7 +397,7 @@ export default function FilmPlayer({
               display: 'flex',
               alignItems: 'center',
               gap: '5px',
-              background: switcherOpen ? '#c0392b' : '#e81c0a',
+              background: switcherOpen ? '#cc0000' : '#ff0000',
               color: '#fff',
               border: 'none',
               borderRadius: '2px',
@@ -469,7 +469,7 @@ export default function FilmPlayer({
           display: none !important;
         }
         .audio-switcher-btn:hover {
-          background: #c0392b !important;
+          background: #cc0000 !important;
         }
       `}</style>
     </div>
