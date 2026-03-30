@@ -50,6 +50,8 @@ interface FilmPlayerProps {
   variant?: 'default' | 'hero'
   playLabel?: string
   loadingLabel?: string
+  /** Called when the main film playback starts */
+  onPlay?: () => void
 }
 
 // ── helpers to reach the media-tracks AudioTrackList on the mux-player element
@@ -78,6 +80,7 @@ export default function FilmPlayer({
   variant = 'default',
   playLabel = 'Abspielen',
   loadingLabel = 'Wird geladen…',
+  onPlay,
 }: FilmPlayerProps) {
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
@@ -431,6 +434,7 @@ export default function FilmPlayer({
       }
       const data = await res.json()
       setToken(data.token)
+      onPlay?.()
     } catch {
       setError('Fehler beim Laden')
     } finally {

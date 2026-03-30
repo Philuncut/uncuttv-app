@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import Hls from 'hls.js'
 
-export default function TrailerHero({ trailerPlaybackId }: { trailerPlaybackId: string }) {
+export default function TrailerHero({ trailerPlaybackId, paused }: { trailerPlaybackId: string; paused?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -60,6 +60,16 @@ export default function TrailerHero({ trailerPlaybackId }: { trailerPlaybackId: 
       document.removeEventListener('touchstart', onTouch)
     }
   }, [trailerPlaybackId])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (paused) {
+      video.pause()
+    } else {
+      video.play().catch(() => {})
+    }
+  }, [paused])
 
   return (
     <video

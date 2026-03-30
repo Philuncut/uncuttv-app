@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import FilmPlayer from './FilmPlayer'
-import TrailerHero from './TrailerHero'
+import FilmHero from './FilmHero'
 
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
@@ -381,109 +381,77 @@ export default async function FilmSlugPage({
           </div>
         </section>
       ) : hasTrailer ? (
-        <section
-          style={{
-            position: 'relative',
-            minHeight: 'min(72vh, 820px)',
-            width: '100%',
-            overflow: 'hidden',
+        <FilmHero
+          trailerPlaybackId={String(film.trailer_playback_id)}
+          filmPlayer={{
+            playbackId: film.mux_playback_id,
+            filmId: film.id,
+            title: film.title,
+            locale,
+            durationMinutes: film.duration_minutes,
+            originalLanguage: film.original_language ?? '',
+            subtitleLanguages: film.subtitle_languages ?? [],
+            startTime,
+            playLabel: t('play'),
+            loadingLabel: t('playerLoading'),
           }}
-        >
-          {/* Trailer video background (HLS via hls.js) */}
-          <TrailerHero trailerPlaybackId={String(film.trailer_playback_id)} />
-          {/* Gradient overlay */}
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 0,
-              background:
-                'linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
-            }}
-          />
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 1,
-              paddingTop: 'clamp(88px, 14vw, 120px)',
-              paddingBottom: 0,
-              paddingLeft: 'clamp(16px, 4vw, 48px)',
-              paddingRight: 'clamp(16px, 4vw, 48px)',
-              maxWidth: '1100px',
-              margin: '0 auto',
-            }}
-          >
-            <Link href={`/${locale}/films`} style={linkStyle}>
-              ← {t('backToFilms')}
-            </Link>
-            <h1
+          isGeoBlocked={isGeoBlocked}
+          geoBlockedContent={
+            <div
               style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(1.75rem, 5vw, 2.75rem)',
-                letterSpacing: '0.04em',
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '16 / 9',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: '#0A0A0A',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
                 color: 'var(--warm-white)',
-                margin: '0 0 8px',
-                lineHeight: 1.15,
+                fontSize: '0.95rem',
+                letterSpacing: '0.04em',
+                padding: '24px',
               }}
             >
-              {film.title}
-            </h1>
-            {showOriginalTitle ? (
-              <p
-                style={{
-                  fontSize: '0.95rem',
-                  color: 'rgba(255,255,255,0.65)',
-                  margin: '0 0 12px',
-                }}
-              >
-                {t('originalTitle')}: {String(film.original_title).trim()}
-              </p>
-            ) : null}
-            {hasVoucher && !hasSubscription ? (
-              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
-                {t('voucherAccess')}
-              </p>
-            ) : null}
-            {isGeoBlocked ? (
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: '#0A0A0A',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  color: 'var(--warm-white)',
-                  fontSize: '0.95rem',
-                  letterSpacing: '0.04em',
-                  padding: '24px',
-                }}
-              >
-                {geoBlockedMessage}
-              </div>
-            ) : (
-              <FilmPlayer
-                playbackId={film.mux_playback_id}
-                filmId={film.id}
-                title={film.title}
-                locale={locale}
-                durationMinutes={film.duration_minutes}
-                originalLanguage={film.original_language ?? ''}
-                subtitleLanguages={film.subtitle_languages ?? []}
-                startTime={startTime}
-                variant="hero"
-                playLabel={t('play')}
-                loadingLabel={t('playerLoading')}
-              />
-            )}
-          </div>
-        </section>
+              {geoBlockedMessage}
+            </div>
+          }
+        >
+          <Link href={`/${locale}/films`} style={linkStyle}>
+            ← {t('backToFilms')}
+          </Link>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.75rem, 5vw, 2.75rem)',
+              letterSpacing: '0.04em',
+              color: 'var(--warm-white)',
+              margin: '0 0 8px',
+              lineHeight: 1.15,
+            }}
+          >
+            {film.title}
+          </h1>
+          {showOriginalTitle ? (
+            <p
+              style={{
+                fontSize: '0.95rem',
+                color: 'rgba(255,255,255,0.65)',
+                margin: '0 0 12px',
+              }}
+            >
+              {t('originalTitle')}: {String(film.original_title).trim()}
+            </p>
+          ) : null}
+          {hasVoucher && !hasSubscription ? (
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
+              {t('voucherAccess')}
+            </p>
+          ) : null}
+        </FilmHero>
       ) : (
         <div
           style={{
