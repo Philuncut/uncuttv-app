@@ -298,25 +298,32 @@ export default async function FilmsPage({
             position: 'relative',
             minHeight: 'min(56vh, 560px)',
             width: '100%',
+            overflow: 'hidden',
           }}
         >
+          {/* Blurred poster background */}
           <div
             aria-hidden
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${bgImage})`,
+              backgroundImage: `url(${featured.poster_url?.trim() || bgImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              filter: 'blur(18px) brightness(0.35)',
+              transform: 'scale(1.08)',
             }}
           />
+          {/* Left-to-right gradient + bottom fade */}
           <div
             aria-hidden
             style={{
               position: 'absolute',
               inset: 0,
-              background:
-                'linear-gradient(to top, #0A0A0A 0%, rgba(10,10,10,0.88) 38%, rgba(10,10,10,0.35) 100%)',
+              background: [
+                'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.1) 100%)',
+                'linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 30%)',
+              ].join(', '),
             }}
           />
           <div
