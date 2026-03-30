@@ -323,6 +323,7 @@ export default async function FilmsPage({
           {/* Left-to-right gradient */}
           <div
             aria-hidden
+            className="hero-gradient-overlay"
             style={{
               position: 'absolute',
               inset: 0,
@@ -334,6 +335,7 @@ export default async function FilmsPage({
           {/* Bottom fade */}
           <div
             aria-hidden
+            className="hero-gradient-overlay"
             style={{
               position: 'absolute',
               inset: 0,
@@ -342,6 +344,14 @@ export default async function FilmsPage({
               background: 'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.0) 35%)',
             }}
           />
+          <style dangerouslySetInnerHTML={{ __html: `
+            @media (max-width: 768px) {
+              .hero-gradient-overlay {
+                opacity: 1 !important;
+                display: block !important;
+              }
+            }
+          ` }} />
           <div
             style={{
               position: 'relative',
