@@ -11,18 +11,36 @@ export default function TrailerHero({ trailerPlaybackId }: { trailerPlaybackId: 
     if (!video) return
 
     const src = `https://stream.mux.com/${trailerPlaybackId}.m3u8`
+    let hls: Hls | null = null
 
     if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: false })
+      hls = new Hls({ enableWorker: false })
       hls.loadSource(src)
       hls.attachMedia(video)
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch(() => {})
       })
-      return () => hls.destroy()
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src
       video.play().catch(() => {})
+    }
+
+    // Resume playback after screen lock / app background
+    const resume = () => video.play().catch(() => {})
+    const onVisibility = () => { if (document.visibilityState === 'visible') resume() }
+    const onWebkitVisibility = () => {
+      if ((document as { webkitVisibilityState?: string }).webkitVisibilityState === 'visible') resume()
+    }
+
+    document.addEventListener('visibilitychange', onVisibility)
+    document.addEventListener('webkitvisibilitychange', onWebkitVisibility)
+    window.addEventListener('focus', resume)
+
+    return () => {
+      hls?.destroy()
+      document.removeEventListener('visibilitychange', onVisibility)
+      document.removeEventListener('webkitvisibilitychange', onWebkitVisibility)
+      window.removeEventListener('focus', resume)
     }
   }, [trailerPlaybackId])
 
