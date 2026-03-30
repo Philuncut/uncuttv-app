@@ -328,7 +328,7 @@ export default async function FilmsPage({
               inset: 0,
               zIndex: 1,
               pointerEvents: 'none',
-              background: 'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.05) 100%)',
+              background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.05) 100%)',
             }}
           />
           {/* Bottom fade */}
@@ -339,7 +339,7 @@ export default async function FilmsPage({
               inset: 0,
               zIndex: 1,
               pointerEvents: 'none',
-              background: 'linear-gradient(to top, rgba(10,10,10,1.0) 0%, rgba(10,10,10,0.0) 35%)',
+              background: 'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.0) 35%)',
             }}
           />
           <div

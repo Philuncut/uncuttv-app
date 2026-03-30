@@ -41,6 +41,7 @@ export default function TrailerHero({ trailerPlaybackId }: { trailerPlaybackId: 
         height: '100%',
         objectFit: 'cover',
         zIndex: 0,
+        filter: 'brightness(1.4)',
       }}
     />
   )
