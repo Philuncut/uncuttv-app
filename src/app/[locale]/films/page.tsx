@@ -347,6 +347,7 @@ export default async function FilmsPage({
           {/* Mobile-only gradient overlays */}
           <div aria-hidden className="hero-mobile-gradient-left" />
           <div aria-hidden className="hero-mobile-gradient-bottom" />
+          <div aria-hidden className="hero-mobile-gradient-bottom-fade" />
           <style dangerouslySetInnerHTML={{ __html: `
             @media (max-width: 768px) {
               .hero-gradient-overlay {
@@ -366,6 +367,16 @@ export default async function FilmsPage({
                 z-index: 1 !important;
                 pointer-events: none !important;
                 background: linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.7) 25%, rgba(0,0,0,0.0) 60%) !important;
+              }
+              .hero-mobile-gradient-bottom-fade {
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                height: 120px !important;
+                z-index: 2 !important;
+                pointer-events: none !important;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,1.0) 100%) !important;
               }
             }
           ` }} />
