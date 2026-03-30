@@ -67,7 +67,7 @@ export default async function FilmSlugPage({
   const { data: film, error: filmError } = await supabase
     .from('films')
     .select(
-      'id, title, original_title, slug, mux_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, original_language, subtitle_languages, allowed_in, blocked_in'
+      'id, title, original_title, slug, mux_playback_id, trailer_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, original_language, subtitle_languages, allowed_in, blocked_in'
     )
     .eq('slug', slug)
     .eq('is_published', true)
@@ -115,6 +115,7 @@ export default async function FilmSlugPage({
     : 0
 
   const hasBackdrop = Boolean(film.backdrop_url && String(film.backdrop_url).trim())
+  const hasTrailer = Boolean(film.trailer_playback_id && String(film.trailer_playback_id).trim())
   const localizedShortDescription =
     locale === 'en' && String(film.short_description_en ?? '').trim()
       ? String(film.short_description_en).trim()
@@ -132,7 +133,7 @@ export default async function FilmSlugPage({
 
   const linkStyle: CSSProperties = {
     fontSize: '0.82rem',
-    color: hasBackdrop ? 'rgba(255,255,255,0.75)' : 'var(--grey)',
+    color: (hasBackdrop || hasTrailer) ? 'rgba(255,255,255,0.75)' : 'var(--grey)',
     textDecoration: 'none',
     letterSpacing: '0.06em',
     marginBottom: '20px',
@@ -264,6 +265,125 @@ export default async function FilmSlugPage({
             style={{
               position: 'absolute',
               inset: 0,
+              background:
+                'linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              paddingTop: 'clamp(88px, 14vw, 120px)',
+              paddingBottom: 'clamp(32px, 6vw, 56px)',
+              paddingLeft: 'clamp(16px, 4vw, 48px)',
+              paddingRight: 'clamp(16px, 4vw, 48px)',
+              maxWidth: '1100px',
+              margin: '0 auto',
+            }}
+          >
+            <Link href={`/${locale}/films`} style={linkStyle}>
+              ← {t('backToFilms')}
+            </Link>
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(1.75rem, 5vw, 2.75rem)',
+                letterSpacing: '0.04em',
+                color: 'var(--warm-white)',
+                margin: '0 0 8px',
+                lineHeight: 1.15,
+              }}
+            >
+              {film.title}
+            </h1>
+            {showOriginalTitle ? (
+              <p
+                style={{
+                  fontSize: '0.95rem',
+                  color: 'rgba(255,255,255,0.65)',
+                  margin: '0 0 12px',
+                }}
+              >
+                {t('originalTitle')}: {String(film.original_title).trim()}
+              </p>
+            ) : null}
+            {hasVoucher && !hasSubscription ? (
+              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
+                {t('voucherAccess')}
+              </p>
+            ) : null}
+            {isGeoBlocked ? (
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '16 / 9',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: '#0A0A0A',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  color: 'var(--warm-white)',
+                  fontSize: '0.95rem',
+                  letterSpacing: '0.04em',
+                  padding: '24px',
+                }}
+              >
+                {geoBlockedMessage}
+              </div>
+            ) : (
+              <FilmPlayer
+                playbackId={film.mux_playback_id}
+                filmId={film.id}
+                title={film.title}
+                locale={locale}
+                durationMinutes={film.duration_minutes}
+                originalLanguage={film.original_language ?? ''}
+                subtitleLanguages={film.subtitle_languages ?? []}
+                startTime={startTime}
+                variant="hero"
+                playLabel={t('play')}
+                loadingLabel={t('playerLoading')}
+              />
+            )}
+          </div>
+        </section>
+      ) : hasTrailer ? (
+        <section
+          style={{
+            position: 'relative',
+            minHeight: 'min(72vh, 820px)',
+            width: '100%',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Trailer video background */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: 0,
+            }}
+            src={`https://stream.mux.com/${film.trailer_playback_id}.m3u8`}
+          />
+          {/* Gradient overlay */}
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
               background:
                 'linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
             }}
