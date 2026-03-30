@@ -154,8 +154,8 @@ export default async function FilmSlugPage({
       {localizedShortDescription ? (
         <p
           style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.15rem)',
-            color: 'var(--grey)',
+            fontSize: '1.1rem',
+            color: 'rgba(255,255,255,0.55)',
             lineHeight: 1.5,
             margin: '0 0 16px',
             fontStyle: 'italic',
@@ -169,9 +169,9 @@ export default async function FilmSlugPage({
           <h2
             style={{
               fontSize: '0.72rem',
-              letterSpacing: '0.14em',
+              letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              color: 'var(--grey)',
+              color: '#d40000',
               margin: '0 0 10px',
             }}
           >
@@ -180,10 +180,10 @@ export default async function FilmSlugPage({
           <p
             style={{
               margin: 0,
-              color: 'var(--warm-white)',
+              color: 'rgba(255,255,255,0.85)',
               whiteSpace: 'pre-wrap',
-              lineHeight: 1.75,
-              fontSize: '0.95rem',
+              lineHeight: 1.85,
+              fontSize: '1rem',
             }}
           >
             {localizedDescription}
@@ -203,9 +203,9 @@ export default async function FilmSlugPage({
               <div
                 style={{
                   fontSize: '0.68rem',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: 'var(--grey)',
+                  color: '#d40000',
                   marginBottom: '6px',
                 }}
               >
@@ -214,7 +214,7 @@ export default async function FilmSlugPage({
               <div
                 className={item.label === t('language') ? 'whitespace-pre-line' : undefined}
                 style={{
-                  color: 'var(--warm-white)',
+                  color: 'rgba(255,255,255,0.9)',
                   fontSize: '0.9rem',
                   lineHeight: 1.45,
                   wordBreak: 'break-word',
@@ -598,14 +598,12 @@ export default async function FilmSlugPage({
         </div>
       )}
 
-      {/* Red accent line */}
-      <div style={{ height: '3px', width: '100%', background: '#d40000' }} />
-
       <div
         style={{
           maxWidth: '1100px',
           margin: '0 auto',
-          padding: 'clamp(24px, 4vw, 40px) clamp(16px, 4vw, 48px) 0',
+          padding: 'clamp(32px, 5vw, 52px) clamp(16px, 4vw, 48px) 0',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         {contentBlock}
