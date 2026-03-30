@@ -96,6 +96,28 @@ body::before {
   display: none;
 }
 
+/* Genre filter: horizontal scroll ribbon on mobile */
+@media (max-width: 768px) {
+  .genre-filter-container {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .genre-filter-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  .genre-filter-container button {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+}
+
 /* Film row arrows: hidden on mobile */
 @media (max-width: 767px) {
   .film-row-arrow-wrap {

@@ -248,6 +248,7 @@ export default function FilmCatalog({
 
         {showGenreFilter && allGenres.length > 0 && (
           <div
+            className="genre-filter-container"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
