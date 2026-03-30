@@ -96,6 +96,16 @@ body::before {
   display: none;
 }
 
+/* Genre scroll hint: hidden on desktop */
+.genre-scroll-hint {
+  display: none;
+}
+@media (max-width: 768px) {
+  .genre-scroll-hint {
+    display: flex !important;
+  }
+}
+
 /* Genre filter: horizontal scroll ribbon on mobile */
 @media (max-width: 768px) {
   .genre-filter-container {

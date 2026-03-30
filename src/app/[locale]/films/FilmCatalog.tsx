@@ -228,6 +228,25 @@ export default function FilmCatalog({
     return films.filter((f) => (f.genres ?? []).includes(genreFilter))
   }, [films, genreFilter])
 
+  // Genre scroll hint (mobile only)
+  const genreScrollRef = useRef<HTMLDivElement>(null)
+  const [genreAtEnd, setGenreAtEnd] = useState(false)
+
+  useEffect(() => {
+    const el = genreScrollRef.current
+    if (!el) return
+    const check = () => {
+      setGenreAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 5)
+    }
+    check()
+    el.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      el.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [allGenres])
+
   return (
     <div style={{ paddingTop: `${topPadding}px`, paddingBottom: '48px', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
@@ -247,52 +266,95 @@ export default function FilmCatalog({
         )}
 
         {showGenreFilter && allGenres.length > 0 && (
-          <div
-            className="genre-filter-container"
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-              marginBottom: '32px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => handleGenreChange(null)}
+          <div style={{ position: 'relative', marginBottom: '32px' }}>
+            <div
+              ref={genreScrollRef}
+              className="genre-filter-container"
               style={{
-                padding: '8px 16px',
-                fontSize: '0.78rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                background: genreFilter === null ? '#C8102E' : 'rgba(255,255,255,0.08)',
-                color: genreFilter === null ? 'white' : 'var(--grey-light)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                cursor: 'pointer',
-                transition: 'background 0.2s, color 0.2s',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
               }}
             >
-              {t('filterAll')}
-            </button>
-            {allGenres.map((g) => (
               <button
-                key={g}
                 type="button"
-                onClick={() => handleGenreChange(g)}
+                onClick={() => handleGenreChange(null)}
                 style={{
                   padding: '8px 16px',
                   fontSize: '0.78rem',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  background: genreFilter === g ? '#C8102E' : 'rgba(255,255,255,0.08)',
-                  color: genreFilter === g ? 'white' : 'var(--grey-light)',
+                  background: genreFilter === null ? '#C8102E' : 'rgba(255,255,255,0.08)',
+                  color: genreFilter === null ? 'white' : 'var(--grey-light)',
                   border: '1px solid rgba(255,255,255,0.12)',
                   cursor: 'pointer',
                   transition: 'background 0.2s, color 0.2s',
                 }}
               >
-                {g}
+                {t('filterAll')}
               </button>
-            ))}
+              {allGenres.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => handleGenreChange(g)}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '0.78rem',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    background: genreFilter === g ? '#C8102E' : 'rgba(255,255,255,0.08)',
+                    color: genreFilter === g ? 'white' : 'var(--grey-light)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, color 0.2s',
+                  }}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+            {/* Mobile scroll hint: fade + arrow (hidden on desktop via className) */}
+            <div
+              className="genre-scroll-hint"
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: '60px',
+                height: '100%',
+                background: 'linear-gradient(to left, rgba(10,10,10,1) 0%, rgba(10,10,10,0) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2,
+                opacity: genreAtEnd ? 0 : 1,
+                transition: 'opacity 0.3s ease',
+              }}
+            />
+            <div
+              className="genre-scroll-hint"
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: '#d40000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontSize: '12px',
+                lineHeight: 1,
+                pointerEvents: 'none',
+                zIndex: 3,
+                opacity: genreAtEnd ? 0 : 1,
+                transition: 'opacity 0.3s ease',
+              }}
+            >
+              ›
+            </div>
           </div>
         )}
 
