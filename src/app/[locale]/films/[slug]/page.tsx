@@ -147,6 +147,19 @@ export default async function FilmSlugPage({
     })
   }
   if (film.language) metaItems.push({ label: t('language'), value: String(film.language) })
+  const subLangs = Array.isArray(film.subtitle_languages) ? film.subtitle_languages : []
+  if (subLangs.length > 0) {
+    const subLabel = locale === 'de' ? 'Untertitel' : 'Subtitles'
+    const subValue = subLangs.map((code: string) => {
+      if (code === 'de') return 'Deutsch'
+      if (code === 'en') return 'English'
+      if (code === 'fr') return 'Français'
+      if (code === 'es') return 'Español'
+      if (code === 'it') return 'Italiano'
+      return code.toUpperCase()
+    }).join(', ')
+    metaItems.push({ label: subLabel, value: subValue })
+  }
   const genreList: string[] = Array.isArray(film.genres) ? film.genres.filter(Boolean) : []
 
   const contentBlock = (
