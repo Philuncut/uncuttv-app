@@ -98,10 +98,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  if (!hasSubscription) {
-    if (!filmId) {
-      return NextResponse.json({ error: 'No active subscription' }, { status: 403 })
-    }
+  if (!hasSubscription && filmId) {
     const hasVoucher = await userHasVoucherForFilm(user.id, filmId)
     if (!hasVoucher) {
       return NextResponse.json({ error: 'No access' }, { status: 403 })

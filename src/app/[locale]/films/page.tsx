@@ -16,6 +16,7 @@ function rowToCard(row: {
   title: string | null
   slug: string | null
   poster_url: string | null
+  trailer_playback_id: string | null
   year: number | null
   duration_minutes: number | null
   genres: unknown
@@ -25,6 +26,7 @@ function rowToCard(row: {
     title: row.title ?? '',
     slug: row.slug ?? '',
     poster_url: row.poster_url ?? null,
+    trailer_playback_id: row.trailer_playback_id ?? null,
     year: row.year ?? null,
     duration_minutes: row.duration_minutes ?? null,
     genres: Array.isArray(row.genres) ? row.genres : [],
@@ -40,6 +42,7 @@ type ContinueWatchingFilmRow = {
         title: string | null
         slug: string | null
         poster_url: string | null
+        trailer_playback_id: string | null
         year: number | null
         duration_minutes: number | null
         genres: unknown
@@ -51,6 +54,7 @@ type ContinueWatchingFilmRow = {
         title: string | null
         slug: string | null
         poster_url: string | null
+        trailer_playback_id: string | null
         year: number | null
         duration_minutes: number | null
         genres: unknown
@@ -84,7 +88,7 @@ function watchRowsToContinueCards(rows: ContinueWatchingFilmRow[]): FilmCardData
 }
 
 const CARD_SELECT =
-  'id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in'
+  'id, title, slug, poster_url, trailer_playback_id, year, duration_minutes, genres, is_published, blocked_in, allowed_in'
 
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
@@ -132,6 +136,7 @@ export default async function FilmsPage({
           title,
           slug,
           poster_url,
+          trailer_playback_id,
           year,
           duration_minutes,
           genres,

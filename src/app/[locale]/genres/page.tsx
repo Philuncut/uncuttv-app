@@ -45,7 +45,7 @@ export default async function GenresPage({
 
   let query = supabase
     .from('films')
-    .select('id, title, slug, poster_url, year, duration_minutes, genres, is_published, blocked_in, allowed_in')
+    .select('id, title, slug, poster_url, trailer_playback_id, year, duration_minutes, genres, is_published, blocked_in, allowed_in')
     .eq('is_published', true)
 
   const { data: rows, error } = await query.order('title')
@@ -66,6 +66,7 @@ export default async function GenresPage({
         title: row.title ?? '',
         slug: row.slug ?? '',
         poster_url: row.poster_url ?? null,
+        trailer_playback_id: row.trailer_playback_id ?? null,
         year: row.year ?? null,
         duration_minutes: row.duration_minutes ?? null,
         genres: Array.isArray(row.genres) ? row.genres : [],
