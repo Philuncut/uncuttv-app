@@ -314,22 +314,32 @@ export default async function FilmsPage({
               transform: 'scale(1.08)',
             }}
           />
-          {/* Left-to-right gradient + bottom fade */}
+          {/* Left-to-right gradient */}
           <div
             aria-hidden
             style={{
               position: 'absolute',
               inset: 0,
-              background: [
-                'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.1) 100%)',
-                'linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 30%)',
-              ].join(', '),
+              zIndex: 1,
+              pointerEvents: 'none',
+              background: 'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.05) 100%)',
+            }}
+          />
+          {/* Bottom fade */}
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 1,
+              pointerEvents: 'none',
+              background: 'linear-gradient(to top, rgba(10,10,10,1.0) 0%, rgba(10,10,10,0.0) 35%)',
             }}
           />
           <div
             style={{
               position: 'relative',
-              zIndex: 1,
+              zIndex: 2,
               paddingTop: 'clamp(88px, 14vw, 120px)',
               paddingBottom: 'clamp(40px, 8vw, 64px)',
               paddingLeft: 'clamp(16px, 4vw, 48px)',
@@ -338,6 +348,13 @@ export default async function FilmsPage({
               margin: '0 auto',
             }}
           >
+            {/* Eyebrow */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ display: 'inline-block', width: '24px', height: '1px', background: '#d40000', marginRight: '10px' }} />
+              <span style={{ fontSize: '0.68rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#d40000' }}>
+                {locale === 'en' ? 'Movie of the Month' : 'Film des Monats'}
+              </span>
+            </div>
             <h1
               style={{
                 fontFamily: 'var(--font-display)',
