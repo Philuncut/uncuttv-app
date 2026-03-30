@@ -344,11 +344,28 @@ export default async function FilmsPage({
               background: 'linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.0) 35%)',
             }}
           />
+          {/* Mobile-only gradient overlays */}
+          <div aria-hidden className="hero-mobile-gradient-left" />
+          <div aria-hidden className="hero-mobile-gradient-bottom" />
           <style dangerouslySetInnerHTML={{ __html: `
             @media (max-width: 768px) {
               .hero-gradient-overlay {
                 opacity: 1 !important;
                 display: block !important;
+              }
+              .hero-mobile-gradient-left {
+                position: absolute !important;
+                inset: 0 !important;
+                z-index: 1 !important;
+                pointer-events: none !important;
+                background: linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.0) 100%) !important;
+              }
+              .hero-mobile-gradient-bottom {
+                position: absolute !important;
+                inset: 0 !important;
+                z-index: 1 !important;
+                pointer-events: none !important;
+                background: linear-gradient(to top, rgba(0,0,0,1.0) 0%, rgba(0,0,0,0.7) 25%, rgba(0,0,0,0.0) 60%) !important;
               }
             }
           ` }} />
