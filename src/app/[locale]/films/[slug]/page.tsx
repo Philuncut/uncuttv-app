@@ -295,7 +295,7 @@ export default async function FilmSlugPage({
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
+                'linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
             }}
           />
           <div
@@ -303,7 +303,7 @@ export default async function FilmSlugPage({
               position: 'relative',
               zIndex: 1,
               paddingTop: 'clamp(88px, 14vw, 120px)',
-              paddingBottom: 'clamp(32px, 6vw, 56px)',
+              paddingBottom: 0,
               paddingLeft: 'clamp(16px, 4vw, 48px)',
               paddingRight: 'clamp(16px, 4vw, 48px)',
               maxWidth: '1100px',
@@ -399,7 +399,7 @@ export default async function FilmSlugPage({
               inset: 0,
               zIndex: 0,
               background:
-                'linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
+                'linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.55) 42%, rgba(10,10,10,0.25) 100%)',
             }}
           />
           <div
@@ -407,7 +407,7 @@ export default async function FilmSlugPage({
               position: 'relative',
               zIndex: 1,
               paddingTop: 'clamp(88px, 14vw, 120px)',
-              paddingBottom: 'clamp(32px, 6vw, 56px)',
+              paddingBottom: 0,
               paddingLeft: 'clamp(16px, 4vw, 48px)',
               paddingRight: 'clamp(16px, 4vw, 48px)',
               maxWidth: '1100px',
@@ -603,7 +603,6 @@ export default async function FilmSlugPage({
           maxWidth: '1100px',
           margin: '0 auto',
           padding: 'clamp(32px, 5vw, 52px) clamp(16px, 4vw, 48px) 0',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         {contentBlock}
