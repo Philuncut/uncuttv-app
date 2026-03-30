@@ -10,6 +10,7 @@ import {
   type UserWatchFilmState,
 } from '@/lib/watch-film-cards'
 import FilmCatalog, { FilmRow, type FilmCardData } from './FilmCatalog'
+import TrailerHero from './[slug]/TrailerHero'
 
 function rowToCard(row: {
   id: string
@@ -173,7 +174,7 @@ export default async function FilmsPage({
   let featuredQuery = supabase
     .from('films')
     .select(
-      'id, title, slug, poster_url, backdrop_url, short_description, short_description_en, genres, is_published, blocked_in, allowed_in, is_featured'
+      'id, title, slug, poster_url, backdrop_url, trailer_playback_id, short_description, short_description_en, genres, is_published, blocked_in, allowed_in, is_featured'
     )
     .eq('is_published', true)
     .eq('is_featured', true)
@@ -192,6 +193,7 @@ export default async function FilmsPage({
         slug: featuredRow.slug ?? '',
         poster_url: featuredRow.poster_url as string | null,
         backdrop_url: featuredRow.backdrop_url as string | null,
+        trailer_playback_id: featuredRow.trailer_playback_id as string | null,
         short_description: featuredShortDescription || null,
         genres: Array.isArray(featuredRow.genres) ? featuredRow.genres : [],
       }
@@ -301,19 +303,23 @@ export default async function FilmsPage({
             overflow: 'hidden',
           }}
         >
-          {/* Blurred poster background */}
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: `url(${featured.poster_url?.trim() || bgImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(18px) brightness(0.35)',
-              transform: 'scale(1.08)',
-            }}
-          />
+          {/* Background: trailer video or blurred poster fallback */}
+          {featured.trailer_playback_id && String(featured.trailer_playback_id).trim() ? (
+            <TrailerHero trailerPlaybackId={String(featured.trailer_playback_id).trim()} />
+          ) : (
+            <div
+              aria-hidden
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url(${featured.poster_url?.trim() || bgImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(18px) brightness(0.35)',
+                transform: 'scale(1.08)',
+              }}
+            />
+          )}
           {/* Left-to-right gradient */}
           <div
             aria-hidden
@@ -349,9 +355,9 @@ export default async function FilmsPage({
             }}
           >
             {/* Eyebrow */}
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ display: 'inline-block', width: '24px', height: '1px', background: '#d40000', marginRight: '10px' }} />
-              <span style={{ fontSize: '0.68rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#d40000' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ display: 'inline-block', width: '32px', height: '2px', background: '#d40000', marginRight: '10px' }} />
+              <span style={{ fontSize: '0.78rem', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#d40000' }}>
                 {locale === 'en' ? 'Movie of the Month' : 'Film des Monats'}
               </span>
             </div>
