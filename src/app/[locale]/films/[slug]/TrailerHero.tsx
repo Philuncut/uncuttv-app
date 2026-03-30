@@ -25,22 +25,39 @@ export default function TrailerHero({ trailerPlaybackId }: { trailerPlaybackId: 
       video.play().catch(() => {})
     }
 
-    // Resume playback after screen lock / app background
-    const resume = () => video.play().catch(() => {})
-    const onVisibility = () => { if (document.visibilityState === 'visible') resume() }
-    const onWebkitVisibility = () => {
-      if ((document as { webkitVisibilityState?: string }).webkitVisibilityState === 'visible') resume()
+    // Resume playback after screen lock / app background (aggressive iOS strategy)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && videoRef.current) {
+        const v = videoRef.current
+        const pos = v.currentTime
+        v.load()
+        v.currentTime = pos
+        v.play().catch(() => {})
+      }
+    }
+    const onPageShow = () => {
+      if (videoRef.current) {
+        videoRef.current.load()
+        videoRef.current.play().catch(() => {})
+      }
+    }
+    const onTouch = () => {
+      if (videoRef.current && videoRef.current.paused) {
+        videoRef.current.play().catch(() => {})
+      }
     }
 
     document.addEventListener('visibilitychange', onVisibility)
-    document.addEventListener('webkitvisibilitychange', onWebkitVisibility)
-    window.addEventListener('focus', resume)
+    window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('focus', onPageShow)
+    document.addEventListener('touchstart', onTouch, { passive: true })
 
     return () => {
       hls?.destroy()
       document.removeEventListener('visibilitychange', onVisibility)
-      document.removeEventListener('webkitvisibilitychange', onWebkitVisibility)
-      window.removeEventListener('focus', resume)
+      window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('focus', onPageShow)
+      document.removeEventListener('touchstart', onTouch)
     }
   }, [trailerPlaybackId])
 
