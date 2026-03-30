@@ -38,11 +38,6 @@ function joinCast(value: unknown): string {
   return ''
 }
 
-function joinGenres(genres: unknown): string {
-  if (genres == null) return ''
-  if (Array.isArray(genres)) return genres.map(String).filter(Boolean).join(', ')
-  return String(genres)
-}
 
 export default async function FilmSlugPage({
   params,
@@ -126,7 +121,6 @@ export default async function FilmSlugPage({
       ? String(film.description_en).trim()
       : String(film.description ?? '').trim()
   const castStr = joinCast(film.film_cast)
-  const genresStr = joinGenres(film.genres)
   const showOriginalTitle =
     film.original_title &&
     String(film.original_title).trim() &&
@@ -153,7 +147,7 @@ export default async function FilmSlugPage({
     })
   }
   if (film.language) metaItems.push({ label: t('language'), value: String(film.language) })
-  if (genresStr) metaItems.push({ label: t('genres'), value: genresStr })
+  const genreList: string[] = Array.isArray(film.genres) ? film.genres.filter(Boolean) : []
 
   const contentBlock = (
     <>
@@ -230,6 +224,40 @@ export default async function FilmSlugPage({
               </div>
             </div>
           ))}
+        </div>
+      ) : null}
+      {genreList.length > 0 ? (
+        <div style={{ marginTop: '24px' }}>
+          <div
+            style={{
+              fontSize: '0.68rem',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: 'var(--grey)',
+              marginBottom: '8px',
+            }}
+          >
+            {t('genres')}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {genreList.map((g) => (
+              <span
+                key={g}
+                style={{
+                  background: 'rgba(212,0,0,0.15)',
+                  border: '1px solid rgba(212,0,0,0.4)',
+                  color: '#d40000',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '3px 10px',
+                  borderRadius: '2px',
+                }}
+              >
+                {g}
+              </span>
+            ))}
+          </div>
         </div>
       ) : null}
     </>
@@ -569,6 +597,9 @@ export default async function FilmSlugPage({
           </div>
         </div>
       )}
+
+      {/* Red accent line */}
+      <div style={{ height: '3px', width: '100%', background: '#d40000' }} />
 
       <div
         style={{
