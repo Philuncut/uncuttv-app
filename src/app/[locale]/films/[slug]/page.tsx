@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import FilmPlayer from './FilmPlayer'
+import TrailerHero from './TrailerHero'
 
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
@@ -360,23 +361,8 @@ export default async function FilmSlugPage({
             overflow: 'hidden',
           }}
         >
-          {/* Trailer video background */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              zIndex: 0,
-            }}
-            src={`https://stream.mux.com/${film.trailer_playback_id}.m3u8`}
-          />
+          {/* Trailer video background (HLS via hls.js) */}
+          <TrailerHero trailerPlaybackId={String(film.trailer_playback_id)} />
           {/* Gradient overlay */}
           <div
             aria-hidden
