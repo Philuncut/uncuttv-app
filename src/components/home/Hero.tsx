@@ -10,7 +10,6 @@ const carouselPosters = [
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/backwood.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Blood_Feast_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/borndead2.jpg',
-  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Caedes_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/fakenews.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Fist_of_Jesus_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/gorenography.jpg',
