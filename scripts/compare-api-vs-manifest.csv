@@ -1,0 +1,30 @@
+title,slug,asset_id,api_tracks,manifest_tracks,de_in_api,de_in_manifest,en_in_api,en_in_manifest,discrepancy
+"American Guinea Pig: Bloodshock",american-guinea-pig-bloodshock,rH00PnDaEZDPA4UcXl99UOoyrSFYl1F1X00d8lydMbDhA,en:ready,en,false,false,true,true,OK
+"American Guinea Pig: Bouquet of Guts and Gore",american-guinea-pig-bouquet-of-guts-and-gore,GigQ01E01CsuvIidxKnu5Ei01013Flfo01p00Ine00aQpzWcx4,en:ready|de:ready,en,true,false,true,true,DE_HIDDEN
+"Backwood: The Camp Massacre",backwood-the-camp-massacre,DvIHe8tUPorZKWrBXo2rOqCkx5gEsjyZNhcUWktr00y8,en:ready|de:ready,en,true,false,true,true,DE_HIDDEN
+"Blood Feast",blood-feast,UpB4PuZ0189JNTki38nOr029kZ4aiZ00MAJgaHcvvO28v4,de:ready,de,true,true,false,false,OK
+"Born Dead 2 Redux",born-dead-2-redux,00hxhU6FZC2VcTil43ettDKvkwronjlKq5WoaLRQKkAU,,,false,false,false,false,OK
+"Caedes",caedes,pHSyVgF01XUlEoc89001QhUoHnVqZSKVnpxyea00POVfrw,,,false,false,false,false,OK
+"Catcall",catcall,hqX9HssBEqgPsCnW59D92EDWY0100Irto627kn7gnRr3E,en:ready|de:ready,,true,false,true,false,DE_HIDDEN EN_HIDDEN
+"Dark Mixtape",dark-mixtape,hA2WkjA101GkKdEAApeRCNm00rY8SiFJ65BDNqVgbqgwk,,,false,false,false,false,OK
+"Fake News - The Bloody Truth",fake-news-the-bloody-truth,pXi684krJkmywn01g9cGR2AV00Hb4TLHcPQNAyLVwxwwc,en:ready|de:ready,en,true,false,true,true,DE_HIDDEN
+"Fist of Jesus",fist-of-jesus,Y00ZrGUpTfZFya5oTnJxKjJ4ffSxH102NLWp6BMqvzdyo,de:ready,de,true,true,false,false,OK
+"Gorenography",gorenography,61F001bmdjGh57WX02S7uuCJfbULhMO02vcLD3vmYBkPZg,de:ready,,true,false,false,false,DE_HIDDEN
+"Headless",headless,95W02N7lI02gDv012myIu00t2lWETBmDs2ib8gEFhvrwLtg,de:ready,de,true,true,false,false,OK
+"La Petite Mort",la-petite-mort,fZmjvnnHne9Fh01UHMwFxgHghFYCwn2IId3qLtI1PQ8A,,,false,false,false,false,OK
+"La Petite Mort 2 - Nasty Tapes",la-petite-mort-2,3NDMRktmIA8R8PFYOMadnRHBUfzQj5nez4XNj01A902ug,en:ready,en,false,false,true,true,OK
+"Neighbor Number 9. : Welcome Home",neghbor-number-9-2,HGT8Srbzgt3OA02XaemkJUIUNyeR78gyYchKoUL7kRZ8,en:ready|de:ready,en,true,false,true,true,DE_HIDDEN
+"Neighbor Number. 9",neighbor-number-9,e102ck246p00HJ1sbaHgbghV5WRLp9UTGADL00HuvU84o00,,,false,false,false,false,OK
+"Night of Doom",night-of-doom,Xvb361Ahc01ZudzmTJxiJIECagCBHONfxRIJif02ftt02c,,,false,false,false,false,OK
+"RAW - Der Fluch der Grete Müller",der-fluch-der-grete-müller,QChbrDXMy4lKaqwTMc008QTFdzu1j28LfQEwZLBgL2C4,,,false,false,false,false,OK
+"RE-FLESH",re-flesh,YqASj5aMVomvvvZDSIjPVPCAPn178obaHoRtYYRBFqU,de:ready|en:ready,de,true,true,true,false,EN_HIDDEN
+"Satanic Snuff",satanic-snuff,R4xIAX4w013cDZ79YfBKLlaV01ziTWjHZvL2wvCilnLao,,,false,false,false,false,OK
+"Satanic Suffering",satanic-suffering,94k00W02hEdupmmIZYLzq4BeSgqbbhIXvdViCaA9rrCs8,,,false,false,false,false,OK
+"Slave Dolls",slave-dolls,9o5OTxg8RqYVzU00u02SGD1v02TN6hbV4ibsXwEktOTSes,en:ready|de:ready,en,de,true,true,true,true,OK
+"Slave Dolls 2",slave-dolls-2,zUnV45AYhoTXwFHrzgG9PojXTKOCqKBNgX4m5pQ6oLo,de:errored|en:errored,,false,false,false,false,OK
+"The Doctor",the-doctor,2m5OO596QfSmEihp14LvjEVvr3zxk4KELPvl6dKwwXg,,,false,false,false,false,OK
+"The Woods Turned Red",the-woods-turned-red,02wOMIjdzIJVSXe3LX5eBYufy00pKQlbQdnd8XRyTi7gI,de:ready,de,true,true,false,false,OK
+"Traces of Snuff Vol 1",traces-of.snuff-1,8je3Nz2PqpcLvukR00zlJj56l8lDvUIHslhGh02OjNufg,,,false,false,false,false,OK
+"Traces of Snuff Vol 2",traces-of-snuff-2,vVPvwWnC9sbyWOqIIse02mSTyF2ZNrkzZ8K8YKWG9P3k,,,false,false,false,false,OK
+"Vom Satan gezeugt",vom-satan-gezeugt,mcrr7CyV4KCaA7fPHs923jbOoPN5AR02qM02KTr01SQqaQ,,,false,false,false,false,OK
+"We Are Monsters",we-are-monsters,lu61Fr1WY7oXCf17jyJUO7USxlPkaANeLyl4Bs7ImRk,en:ready|de:ready,en,de,true,true,true,true,OK
