@@ -3,6 +3,7 @@ import { WillkommenEmail } from './willkommen'
 import { ZahlungFehlgeschlagenEmail } from './zahlung-fehlgeschlagen'
 import { AboGekuendigtEmail } from './abo-gekuendigt'
 import { TestphaseEndetEmail } from './testphase-endet'
+import { PinResetEmail } from './pin-reset'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM || 'noreply@uncuttv.at'
@@ -40,5 +41,14 @@ export async function sendTestphaseEndetEmail(email: string, endDate: string) {
     to: email,
     subject: 'Deine UncutTV-Testphase endet bald',
     html: TestphaseEndetEmail({ email, endDate }),
+  })
+}
+
+export async function sendPinResetEmail(email: string, code: string) {
+  return resend.emails.send({
+    from: `UncutTV <${FROM}>`,
+    to: email,
+    subject: 'UncutTV – Dein PIN Reset Code',
+    html: PinResetEmail({ code }),
   })
 }
