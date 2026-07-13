@@ -6,26 +6,32 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type')
+  const localeParam = searchParams.get('locale')
+  const locale = localeParam === 'en' ? 'en' : 'de'
 
   const supabase = await createClient()
 
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as any })
     if (error) {
-      return NextResponse.redirect(`${origin}/de/auth/login?error=auth_failed`)
+      return NextResponse.redirect(`${origin}/${locale}/auth/login?error=auth_failed`)
     }
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
-      return NextResponse.redirect(`${origin}/de/auth/login?error=auth_failed`)
+      return NextResponse.redirect(`${origin}/${locale}/auth/login?error=auth_failed`)
     }
   } else {
-    return NextResponse.redirect(`${origin}/de/auth/login?error=auth_failed`)
+    return NextResponse.redirect(`${origin}/${locale}/auth/login?error=auth_failed`)
   }
 
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
+    if (type === 'recovery') {
+      return NextResponse.redirect(`${origin}/${locale}/auth/change-password`)
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('age_verified')
@@ -33,11 +39,11 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (!profile?.age_verified) {
-      return NextResponse.redirect(`${origin}/de/auth/verify-age`)
+      return NextResponse.redirect(`${origin}/${locale}/auth/verify-age`)
     }
 
-    return NextResponse.redirect(`${origin}/de/films`)
+    return NextResponse.redirect(`${origin}/${locale}/films`)
   }
 
-  return NextResponse.redirect(`${origin}/de/auth/login?error=auth_failed`)
+  return NextResponse.redirect(`${origin}/${locale}/auth/login?error=auth_failed`)
 }

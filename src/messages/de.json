@@ -73,7 +73,8 @@
     "registerSubtitle": "Die Registrierung ist demnächst verfügbar.",
     "alreadyHaveAccount": "Schon ein Konto?",
     "comingSoon": "Demnächst verfügbar",
-    "ageWarning": "⚠ Nur für Personen ab 18 Jahren"
+    "ageWarning": "⚠ Nur für Personen ab 18 Jahren",
+    "forgotPassword": "Passwort vergessen?"
   },
   "filmsPage": {
     "featuredWatchNow": "Jetzt ansehen",

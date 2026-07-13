@@ -6,6 +6,11 @@ function isMaintenanceBypass(pathname: string): boolean {
   if (pathname.startsWith('/maintenance')) return true
   if (pathname.startsWith('/_next/')) return true
   if (pathname.startsWith('/api/')) return true
+  if (pathname === '/auth/callback' || pathname.startsWith('/auth/callback/')) return true
+  if (/^\/(de|en)\/auth\/forgot-password(?:\/|$)/.test(pathname)) return true
+  if (/^\/(de|en)\/auth\/change-password(?:\/|$)/.test(pathname)) return true
+  if (/^\/(de|en)\/auth\/login(?:\/|$)/.test(pathname)) return true
+  if (/^\/(de|en)\/auth\/verify-age(?:\/|$)/.test(pathname)) return true
   if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json|webmanifest|woff2?)$/i.test(pathname)) {
     return true
   }

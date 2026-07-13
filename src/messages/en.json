@@ -73,7 +73,8 @@
     "registerSubtitle": "Registration is coming soon.",
     "alreadyHaveAccount": "Already have an account?",
     "comingSoon": "Coming Soon",
-    "ageWarning": "⚠ For persons aged 18 and over only"
+    "ageWarning": "⚠ For persons aged 18 and over only",
+    "forgotPassword": "Forgot password?"
   },
   "filmsPage": {
     "featuredWatchNow": "Watch Now",

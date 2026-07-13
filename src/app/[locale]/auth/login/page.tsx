@@ -113,6 +113,15 @@ export default function LoginPage() {
               />
             </div>
 
+            <div style={{ marginTop: '-8px', marginBottom: '16px', textAlign: 'right' }}>
+              <Link
+                href={`/${locale}/auth/forgot-password`}
+                style={{ color: 'var(--grey)', fontSize: '0.78rem', textDecoration: 'none' }}
+              >
+                {t('forgotPassword')}
+              </Link>
+            </div>
+
             {error && (
               <div style={{
                 background: 'rgba(229,9,20,0.1)', border: '1px solid rgba(229,9,20,0.3)',
