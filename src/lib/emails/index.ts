@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { RegistrierungEmail } from './registrierung'
 import { WillkommenEmail } from './willkommen'
 import { ZahlungFehlgeschlagenEmail } from './zahlung-fehlgeschlagen'
 import { AboGekuendigtEmail } from './abo-gekuendigt'
@@ -7,6 +8,19 @@ import { PinResetEmail } from './pin-reset'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM || 'noreply@uncuttv.at'
+
+export async function sendRegistrierungEmail(
+  email: string,
+  legalVersion: string,
+  acceptedAt: string
+) {
+  return resend.emails.send({
+    from: `UncutTV <${FROM}>`,
+    to: email,
+    subject: 'Deine Registrierung bei UncutTV',
+    html: RegistrierungEmail({ email, legalVersion, acceptedAt }),
+  })
+}
 
 export async function sendWillkommenEmail(email: string) {
   return resend.emails.send({

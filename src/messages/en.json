@@ -70,11 +70,17 @@
     "noAccount": "Don't have an account?",
     "registerNow": "Register now",
     "registerTitle": "REGISTRATION",
-    "registerSubtitle": "Registration is coming soon.",
+    "registerSubtitle": "Create your account and get started.",
     "alreadyHaveAccount": "Already have an account?",
     "comingSoon": "Coming Soon",
     "ageWarning": "⚠ For persons aged 18 and over only",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "register": "Create account",
+    "registerSuccessTitle": "ALMOST THERE",
+    "registerSuccessText": "We sent you an email. Confirm your address in it and you are good to go.",
+    "passwordMismatch": "The passwords do not match.",
+    "passwordTooShort": "The password must be at least 8 characters long.",
+    "registerError": "Registration failed. Please try again."
   },
   "filmsPage": {
     "featuredWatchNow": "Watch Now",
@@ -104,5 +110,13 @@
     "genres": "Genres",
     "play": "Play",
     "playerLoading": "Loading…"
+  },
+  "legal": {
+    "consent": {
+      "signup": "PLACEHOLDER - final wording pending from legal counsel. I have read and accept the <agb>Terms</agb> and the <privacy>Privacy Policy</privacy>.",
+      "signupRequired": "Please accept the Terms and the Privacy Policy.",
+      "withdrawalWaiver": "PLACEHOLDER - final wording pending from legal counsel. I expressly request that UncutTV begins performance before the withdrawal period expires, and I acknowledge that I thereby lose my right of withdrawal.",
+      "withdrawalWaiverRequired": "Please confirm the declaration regarding the right of withdrawal."
+    }
   }
 }
