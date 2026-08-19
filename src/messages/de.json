@@ -118,5 +118,30 @@
       "withdrawalWaiver": "PLATZHALTER – finaler Wortlaut folgt vom Anwalt. Ich verlange ausdrücklich, dass UncutTV vor Ablauf der Rücktrittsfrist mit der Leistung beginnt, und nehme zur Kenntnis, dass ich damit mein Rücktrittsrecht verliere.",
       "withdrawalWaiverRequired": "Bitte bestätige die Erklärung zum Rücktrittsrecht."
     }
+  },
+  "verifyAge": {
+    "title": "ALTERSVERIFIKATION",
+    "subtitle": "Einmalig, danach nie wieder. UncutTV ist ab 18 — das müssen wir prüfen, bevor du den ersten Film startest.",
+    "whatYouNeed": "Das brauchst du",
+    "need1": "Einen gültigen Lichtbildausweis — Personalausweis, Reisepass oder Führerschein",
+    "need2": "Eine Kamera — Handy oder Webcam",
+    "need3": "Rund zwei Minuten Zeit",
+    "howItWorks": "Du fotografierst deinen Ausweis und machst ein Selfie. Beides prüft unser Partner Veriff. Wir selbst sehen deinen Ausweis nicht — bei uns landet nur das Ergebnis.",
+    "privacyNote": "Was dabei mit deinen Daten passiert, steht in der <privacy>Datenschutzerklärung</privacy>.",
+    "start": "Verifizierung starten",
+    "starting": "Wird vorbereitet …",
+    "startError": "Die Verifizierung konnte nicht gestartet werden. Bitte versuch es noch einmal.",
+    "pendingTitle": "WIR PRÜFEN",
+    "pendingText": "Deine Daten sind angekommen. Die Prüfung dauert meist nur wenige Minuten — diese Seite aktualisiert sich von selbst.",
+    "pendingHint": "Du kannst das Fenster auch schließen. Sobald die Prüfung durch ist, kommst du beim nächsten Login direkt rein.",
+    "approvedTitle": "BESTÄTIGT",
+    "approvedText": "Dein Alter ist verifiziert. Viel Vergnügen.",
+    "toFilms": "Zu den Filmen",
+    "declinedTitle": "NICHT BESTÄTIGT",
+    "declinedText": "Die Prüfung war nicht erfolgreich. Das passiert meist bei unscharfen Fotos, abgelaufenen Ausweisen oder schlechtem Licht. Du kannst es erneut versuchen.",
+    "resubmissionTitle": "NOCH EINMAL, BITTE",
+    "resubmissionText": "Die Aufnahmen waren nicht auswertbar. Achte auf gutes Licht, halte den Ausweis vollständig ins Bild und vermeide Spiegelungen.",
+    "retry": "Erneut versuchen",
+    "needHelp": "Klappt es nicht? Schreib uns an <support>support@uncuttv.at</support>."
   }
 }

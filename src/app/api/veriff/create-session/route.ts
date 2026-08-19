@@ -13,9 +13,12 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.NEXT_PUBLIC_VERIFF_API_KEY!
   const secret = process.env.VERIFF_SECRET_KEY!
 
+  const body = await req.json().catch(() => ({}))
+  const locale = body?.locale === 'en' ? 'en' : 'de'
+
   const payload = {
     verification: {
-      callback: `${process.env.NEXT_PUBLIC_APP_URL}/de/auth/verify-age?status=submitted`,
+      callback: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/auth/verify-age?status=submitted`,
       person: { idNumber: user.id },
       vendorData: user.id,
       timestamp: new Date().toISOString(),

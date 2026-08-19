@@ -48,13 +48,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No user ID' }, { status: 400 })
   }
 
-  if (status === 'approved') {
-    const admin = createAdminClient()
-    const result = await admin
-      .from('profiles')
-      .upsert({ id: vendorData, age_verified: true }, { count: 'exact' })
-    reportWrite('Veriff webhook: profiles.age_verified', result)
+  // Jeder Status wird festgehalten, nicht nur approved: /auth/verify-age kann
+  // sonst nicht zwischen "laeuft noch", "abgelehnt" und "neuer Versuch
+  // noetig" unterscheiden. age_verified bleibt das Tor und wird nur bei
+  // approved gesetzt.
+  const record: Record<string, unknown> = {
+    id: vendorData,
+    age_verification_status: typeof status === 'string' ? status : null,
+    age_verification_updated_at: new Date().toISOString(),
   }
+
+  // Nur nach oben: einmal bestaetigtes Alter wird durch ein spaeteres
+  // review- oder expired-Event nicht wieder entzogen. Ein Mensch wird nicht
+  // wieder minderjaehrig -- ein Entzug waere eine bewusste Admin-Handlung.
+  if (status === 'approved') {
+    record.age_verified = true
+  }
+
+  const admin = createAdminClient()
+  reportWrite(
+    `Veriff webhook: profiles age_verification (${status})`,
+    await admin.from('profiles').upsert(record, { count: 'exact' })
+  )
 
   return NextResponse.json({ received: true })
 }

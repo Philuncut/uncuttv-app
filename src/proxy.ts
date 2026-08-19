@@ -49,20 +49,34 @@ export async function proxy(request: NextRequest) {
     .eq('status', 'active')
     .limit(1)
 
-  const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
-  if (hasSubscription) {
-    return supabaseResponse
+  let hasAccess = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
+
+  if (!hasAccess) {
+    const { data: vouchers } = await supabase
+      .from('vouchers')
+      .select('id')
+      .eq('used_by', user.id)
+      .limit(1)
+
+    hasAccess = Boolean(vouchers && vouchers.length > 0)
   }
 
-  const { data: vouchers } = await supabase
-    .from('vouchers')
-    .select('id')
-    .eq('used_by', user.id)
-    .limit(1)
-
-  if (vouchers && vouchers.length > 0) {
-    return supabaseResponse
+  if (!hasAccess) {
+    return NextResponse.redirect(new URL(`/${pathLocale}/subscribe`, request.url))
   }
 
-  return NextResponse.redirect(new URL(`/${pathLocale}/subscribe`, request.url))
+  // Altersverifikation erst hier, nach Abo bzw. Voucher: bezahlt wird zuerst,
+  // der Ausweis wird erst vor dem ersten Stream verlangt. Wer noch gar keinen
+  // Zugang hat, soll auf /subscribe landen und nicht vorher durch Veriff.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('age_verified')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.age_verified) {
+    return NextResponse.redirect(new URL(`/${pathLocale}/auth/verify-age`, request.url))
+  }
+
+  return supabaseResponse
 }

@@ -118,5 +118,30 @@
       "withdrawalWaiver": "PLACEHOLDER - final wording pending from legal counsel. I expressly request that UncutTV begins performance before the withdrawal period expires, and I acknowledge that I thereby lose my right of withdrawal.",
       "withdrawalWaiverRequired": "Please confirm the declaration regarding the right of withdrawal."
     }
+  },
+  "verifyAge": {
+    "title": "AGE VERIFICATION",
+    "subtitle": "Once, and never again. UncutTV is 18+ — we have to check this before you start your first film.",
+    "whatYouNeed": "What you need",
+    "need1": "A valid photo ID — national ID card, passport or driving licence",
+    "need2": "A camera — phone or webcam",
+    "need3": "About two minutes",
+    "howItWorks": "You photograph your ID and take a selfie. Our partner Veriff checks both. We never see your ID ourselves — only the result reaches us.",
+    "privacyNote": "What happens to your data is set out in the <privacy>Privacy Policy</privacy>.",
+    "start": "Start verification",
+    "starting": "Preparing …",
+    "startError": "Verification could not be started. Please try again.",
+    "pendingTitle": "CHECKING",
+    "pendingText": "We received your data. The check usually takes only a few minutes — this page updates itself.",
+    "pendingHint": "You can close this window. Once the check is done, you are in at your next sign-in.",
+    "approvedTitle": "CONFIRMED",
+    "approvedText": "Your age is verified. Enjoy.",
+    "toFilms": "Go to films",
+    "declinedTitle": "NOT CONFIRMED",
+    "declinedText": "The check was not successful. This usually happens with blurry photos, expired IDs or poor lighting. You can try again.",
+    "resubmissionTitle": "ONE MORE TIME",
+    "resubmissionText": "The images could not be evaluated. Use good lighting, fit the whole ID in frame and avoid reflections.",
+    "retry": "Try again",
+    "needHelp": "Not working? Write to us at <support>support@uncuttv.at</support>."
   }
 }

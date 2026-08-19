@@ -16,19 +16,19 @@ export async function POST(req: NextRequest) {
   const { plan } = await req.json().catch(() => ({ plan: 'monthly' }))
   const isYearly = plan === 'yearly'
 
-  // Check age verification
+  // Die Altersverifikation wird hier bewusst NICHT verlangt. Sie steht erst
+  // vor dem ersten Stream (siehe Content-Gate in src/proxy.ts): Ausweis und
+  // Selfie sind die hoechste Huerde im Trichter und haetten vor der Zahlung
+  // die meisten Abbrueche gekostet. AGB Paragraph 3 knuepft die Verifikation
+  // an den Zugang zu den Inhalten, nicht an den Vertragsschluss.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('age_verified, stripe_customer_id')
+    .select('stripe_customer_id')
     .eq('id', user.id)
     .single()
 
-  if (!profile?.age_verified) {
-    return NextResponse.json({ error: 'Altersverifikation erforderlich' }, { status: 403 })
-  }
-
   // Get or create Stripe customer
-  let customerId = profile.stripe_customer_id
+  let customerId = profile?.stripe_customer_id
 
   if (!customerId) {
     const customer = await stripe.customers.create({
