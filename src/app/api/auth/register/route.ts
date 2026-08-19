@@ -68,13 +68,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  // Kein email-Feld: public.profiles hat keine solche Spalte, die Adresse
+  // liegt in auth.users. Der Upsert legt nur die Zeile an, falls kein
+  // Datenbank-Trigger das bereits erledigt hat.
   const admin = createAdminClient()
-  reportWrite(
+  const profileCreated = reportWrite(
     'register: profiles upsert',
-    await admin
-      .from('profiles')
-      .upsert({ id: user.id, email }, { onConflict: 'id', count: 'exact' })
+    await admin.from('profiles').upsert({ id: user.id }, { onConflict: 'id', count: 'exact' })
   )
+
+  // Ohne Profilzeile bleibt spaeter jedes Update wirkungslos -- unter anderem
+  // consent_email_sent, an dem der Versand des Zustimmungsnachweises haengt.
+  // Frueher lief das stillschweigend ins Leere.
+  if (!profileCreated) {
+    console.error('register: no profile row for user', user.id)
+    return NextResponse.json({ error: 'profile_not_created' }, { status: 500 })
+  }
 
   const consentRecorded = await recordConsent(user.id, 'signup', { headers: req.headers })
 

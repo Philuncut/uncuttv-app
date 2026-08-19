@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
+import { createAdminClient, getUserEmail, reportWrite } from '@/lib/supabase/admin'
 import { cancelUnverifiedTrial } from '@/lib/subscriptions'
 import {
   sendWillkommenEmail,
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       // Willkommen-Email nur einmalig nach Checkout
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('email, welcome_email_sent')
+        .select('welcome_email_sent')
         .eq('id', userId)
         .single()
 
@@ -60,15 +60,19 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      if (profile?.email && !profile.welcome_email_sent) {
-        await sendWillkommenEmail(profile.email)
-        reportWrite(
-          'checkout.session.completed: profiles.welcome_email_sent',
-          await supabase
-            .from('profiles')
-            .update({ welcome_email_sent: true }, { count: 'exact' })
-            .eq('id', userId)
-        )
+      if (!profile?.welcome_email_sent) {
+        const email = await getUserEmail(userId)
+
+        if (email) {
+          await sendWillkommenEmail(email)
+          reportWrite(
+            'checkout.session.completed: profiles.welcome_email_sent',
+            await supabase
+              .from('profiles')
+              .update({ welcome_email_sent: true }, { count: 'exact' })
+              .eq('id', userId)
+          )
+        }
       }
       break
     }
@@ -131,27 +135,16 @@ export async function POST(req: NextRequest) {
           .eq('stripe_subscription_id', sub.id)
       )
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .single()
+      const email = await getUserEmail(userId)
 
-      if (profileError) {
-        console.error(
-          'customer.subscription.deleted: profile lookup failed -',
-          profileError.message
-        )
-      }
-
-      if (profile?.email) {
+      if (email) {
         const subAny = sub as any
         const endDate = subAny.current_period_end
           ? new Date(subAny.current_period_end * 1000).toLocaleDateString('de-AT', {
               day: '2-digit', month: '2-digit', year: 'numeric'
             })
           : ''
-        await sendAboGekuendigtEmail(profile.email, endDate)
+        await sendAboGekuendigtEmail(email, endDate)
       }
       break
     }
@@ -170,21 +163,10 @@ export async function POST(req: NextRequest) {
           .eq('id', userId)
       )
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .single()
+      const email = await getUserEmail(userId)
 
-      if (profileError) {
-        console.error(
-          'invoice.payment_failed: profile lookup failed -',
-          profileError.message
-        )
-      }
-
-      if (profile?.email) {
-        await sendZahlungFehlgeschlagenEmail(profile.email)
+      if (email) {
+        await sendZahlungFehlgeschlagenEmail(email)
       }
       break
     }
@@ -197,7 +179,7 @@ export async function POST(req: NextRequest) {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('email, age_verified')
+        .select('age_verified')
         .eq('id', userId)
         .single()
 
@@ -207,6 +189,8 @@ export async function POST(req: NextRequest) {
           profileError.message
         )
       }
+
+      const email = await getUserEmail(userId)
 
       const endDate = sub.trial_end
         ? new Date(sub.trial_end * 1000).toLocaleDateString('de-AT', {
@@ -221,14 +205,14 @@ export async function POST(req: NextRequest) {
       if (!profile?.age_verified) {
         await cancelUnverifiedTrial(sub)
 
-        if (profile?.email) {
-          await sendVerifikationAusstehendEmail(profile.email, endDate)
+        if (email) {
+          await sendVerifikationAusstehendEmail(email, endDate)
         }
         break
       }
 
-      if (profile.email && sub.trial_end) {
-        await sendTestphaseEndetEmail(profile.email, endDate)
+      if (email && sub.trial_end) {
+        await sendTestphaseEndetEmail(email, endDate)
       }
       break
     }

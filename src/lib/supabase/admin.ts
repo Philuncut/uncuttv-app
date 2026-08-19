@@ -34,6 +34,26 @@ export function createAdminClient(): SupabaseClient {
   return cached
 }
 
+/**
+ * Liefert die E-Mail-Adresse eines Nutzers aus auth.users.
+ *
+ * Die Tabelle public.profiles hat KEINE email-Spalte -- die Adresse liegt
+ * ausschliesslich in auth.users und ist nur ueber die Admin-API erreichbar.
+ * Fuer Kontomails ist das ohnehin die massgebliche Quelle: Stripes
+ * customer.email ist eine Kopie vom Zeitpunkt der Anlage und kann abweichen.
+ */
+export async function getUserEmail(userId: string): Promise<string | null> {
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.admin.getUserById(userId)
+
+  if (error) {
+    console.error(`getUserEmail: lookup failed for ${userId} -`, error.message)
+    return null
+  }
+
+  return data.user?.email ?? null
+}
+
 export type WriteResult = {
   error: { message: string } | null
   count: number | null
