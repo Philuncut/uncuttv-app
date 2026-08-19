@@ -50,11 +50,13 @@ export interface Profile {
 }
 
 /**
- * public.subscriptions -- gespiegelt aus den Stripe-Webhooks.
+ * public.subscriptions -- gespiegelt aus den Stripe-Webhooks, abgeglichen
+ * gegen das reale Schema.
  *
- * TODO: gegen das reale Schema abgleichen. Der Webhook schreibt alle hier
- * gelisteten Spalten; mindestens stripe_customer_id fehlt in der Datenbank
- * (siehe Fehler "Could not find the 'stripe_customer_id' column").
+ * Auf stripe_subscription_id liegt ein eindeutiger Index
+ * (subscriptions_stripe_subscription_id_key). Der Upsert im Stripe-Webhook
+ * setzt darauf mit onConflict auf -- faellt der Index weg, scheitert er mit
+ * "no unique or exclusion constraint matching the ON CONFLICT specification".
  */
 export interface Subscription {
   id: string
@@ -69,6 +71,7 @@ export interface Subscription {
   current_period_end: string | null
   canceled_at: string | null
   created_at: string
+  updated_at: string | null
 }
 
 /**
