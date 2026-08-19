@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import crypto from 'crypto'
 
 /** Laufzeitkonstanter Vergleich, damit die Signatur nicht per Timing erraten werden kann. */
@@ -48,15 +48,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No user ID' }, { status: 400 })
   }
 
-  const supabase = await createClient()
-
   if (status === 'approved') {
-    const { error } = await supabase
+    const admin = createAdminClient()
+    const result = await admin
       .from('profiles')
-      .upsert({ id: vendorData, age_verified: true })
-    if (error) {
-      console.error('Veriff webhook: profile upsert failed', error.message)
-    }
+      .upsert({ id: vendorData, age_verified: true }, { count: 'exact' })
+    reportWrite('Veriff webhook: profiles.age_verified', result)
   }
 
   return NextResponse.json({ received: true })

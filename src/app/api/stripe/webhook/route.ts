@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import {
   sendWillkommenEmail,
   sendZahlungFehlgeschlagenEmail,
@@ -26,7 +26,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  // Service-Role: ein Stripe-Webhook bringt kein Nutzer-Cookie mit, der
+  // Cookie-Client traefe unter RLS null Zeilen.
+  const supabase = createAdminClient()
 
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -34,20 +36,37 @@ export async function POST(req: NextRequest) {
       const userId = session.metadata?.supabase_user_id
       if (!userId) break
 
-      await supabase.from('profiles').update({
-        subscription_status: 'trialing',
-      }).eq('id', userId)
+      reportWrite(
+        'checkout.session.completed: profiles.subscription_status',
+        await supabase
+          .from('profiles')
+          .update({ subscription_status: 'trialing' }, { count: 'exact' })
+          .eq('id', userId)
+      )
 
       // Willkommen-Email nur einmalig nach Checkout
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email, welcome_email_sent')
         .eq('id', userId)
         .single()
 
+      if (profileError) {
+        console.error(
+          'checkout.session.completed: profile lookup failed -',
+          profileError.message
+        )
+      }
+
       if (profile?.email && !profile.welcome_email_sent) {
         await sendWillkommenEmail(profile.email)
-        await supabase.from('profiles').update({ welcome_email_sent: true }).eq('id', userId)
+        reportWrite(
+          'checkout.session.completed: profiles.welcome_email_sent',
+          await supabase
+            .from('profiles')
+            .update({ welcome_email_sent: true }, { count: 'exact' })
+            .eq('id', userId)
+        )
       }
       break
     }
@@ -59,22 +78,29 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      await supabase.from('profiles').update({
-        subscription_status: sub.status,
-      }).eq('id', userId)
+      reportWrite(
+        `${event.type}: profiles.subscription_status`,
+        await supabase
+          .from('profiles')
+          .update({ subscription_status: sub.status }, { count: 'exact' })
+          .eq('id', userId)
+      )
 
       const subAny = sub as any
-      await supabase.from('subscriptions').upsert({
-        user_id: userId,
-        stripe_subscription_id: sub.id,
-        stripe_customer_id: sub.customer as string,
-        stripe_price_id: sub.items.data[0].price.id,
-        status: sub.status,
-        trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
-        trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
-        current_period_start: subAny.current_period_start ? new Date(subAny.current_period_start * 1000).toISOString() : null,
-        current_period_end: subAny.current_period_end ? new Date(subAny.current_period_end * 1000).toISOString() : null,
-      }, { onConflict: 'stripe_subscription_id' })
+      reportWrite(
+        `${event.type}: subscriptions upsert`,
+        await supabase.from('subscriptions').upsert({
+          user_id: userId,
+          stripe_subscription_id: sub.id,
+          stripe_customer_id: sub.customer as string,
+          stripe_price_id: sub.items.data[0].price.id,
+          status: sub.status,
+          trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
+          trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
+          current_period_start: subAny.current_period_start ? new Date(subAny.current_period_start * 1000).toISOString() : null,
+          current_period_end: subAny.current_period_end ? new Date(subAny.current_period_end * 1000).toISOString() : null,
+        }, { onConflict: 'stripe_subscription_id', count: 'exact' })
+      )
       break
     }
 
@@ -84,20 +110,37 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      await supabase.from('profiles').update({
-        subscription_status: 'canceled',
-      }).eq('id', userId)
+      reportWrite(
+        'customer.subscription.deleted: profiles.subscription_status',
+        await supabase
+          .from('profiles')
+          .update({ subscription_status: 'canceled' }, { count: 'exact' })
+          .eq('id', userId)
+      )
 
-      await supabase.from('subscriptions').update({
-        status: 'canceled',
-        canceled_at: new Date().toISOString(),
-      }).eq('stripe_subscription_id', sub.id)
+      reportWrite(
+        'customer.subscription.deleted: subscriptions.status',
+        await supabase
+          .from('subscriptions')
+          .update({
+            status: 'canceled',
+            canceled_at: new Date().toISOString(),
+          }, { count: 'exact' })
+          .eq('stripe_subscription_id', sub.id)
+      )
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email')
         .eq('id', userId)
         .single()
+
+      if (profileError) {
+        console.error(
+          'customer.subscription.deleted: profile lookup failed -',
+          profileError.message
+        )
+      }
 
       if (profile?.email) {
         const subAny = sub as any
@@ -117,15 +160,26 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      await supabase.from('profiles').update({
-        subscription_status: 'past_due',
-      }).eq('id', userId)
+      reportWrite(
+        'invoice.payment_failed: profiles.subscription_status',
+        await supabase
+          .from('profiles')
+          .update({ subscription_status: 'past_due' }, { count: 'exact' })
+          .eq('id', userId)
+      )
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email')
         .eq('id', userId)
         .single()
+
+      if (profileError) {
+        console.error(
+          'invoice.payment_failed: profile lookup failed -',
+          profileError.message
+        )
+      }
 
       if (profile?.email) {
         await sendZahlungFehlgeschlagenEmail(profile.email)
@@ -139,11 +193,18 @@ export async function POST(req: NextRequest) {
       const userId = customer.metadata?.supabase_user_id
       if (!userId) break
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email')
         .eq('id', userId)
         .single()
+
+      if (profileError) {
+        console.error(
+          'customer.subscription.trial_will_end: profile lookup failed -',
+          profileError.message
+        )
+      }
 
       if (profile?.email && sub.trial_end) {
         const endDate = new Date(sub.trial_end * 1000).toLocaleDateString('de-AT', {
