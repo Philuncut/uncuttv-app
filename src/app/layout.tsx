@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { siteUrl } from '@/lib/env'
 import './globals.css'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://uncuttv.app'
+const base = siteUrl()
 
 export const metadata: Metadata = {
+  metadataBase: new URL(base),
   title: 'UncutTV – Independent Film Streaming',
   description: 'Kino ohne Kompromisse. Unabhängig. So wie Film sein sollte.',
   keywords: ['independent film', 'indie kino', 'streaming', 'arthouse'],
@@ -16,11 +18,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'UncutTV – Independent Film Streaming',
     description: 'Kino ohne Kompromisse. Unabhängig. So wie Film sein sollte.',
-    url: siteUrl,
+    url: base,
     siteName: 'UncutTV',
     images: [
       {
-        url: `${siteUrl}/opengraph-image.svg`,
+        url: `${base}/opengraph-image.svg`,
         width: 1200,
         height: 630,
         alt: 'UncutTV – Independent Film Streaming',

@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { isMaintenanceMode } from './src/lib/env'
 import { proxy } from './src/proxy'
 
 function isMaintenanceBypass(pathname: string): boolean {
@@ -12,6 +13,8 @@ function isMaintenanceBypass(pathname: string): boolean {
   if (/^\/(de|en)\/auth\/change-password(?:\/|$)/.test(pathname)) return true
   if (/^\/(de|en)\/auth\/login(?:\/|$)/.test(pathname)) return true
   if (/^\/(de|en)\/auth\/verify-age(?:\/|$)/.test(pathname)) return true
+  // Deckt auch /robots.txt und /sitemap.xml ab: Crawler sollen im Maintenance-
+  // Modus das echte `Disallow: /` sehen und keinen Redirect.
   if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json|webmanifest|woff2?)$/i.test(pathname)) {
     return true
   }
@@ -19,7 +22,7 @@ function isMaintenanceBypass(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
+  if (isMaintenanceMode()) {
     const pathname = request.nextUrl.pathname
     if (!isMaintenanceBypass(pathname)) {
       return NextResponse.redirect(new URL('/maintenance', request.url))

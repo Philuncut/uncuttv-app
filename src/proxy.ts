@@ -1,29 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-function isMaintenanceBypass(pathname: string): boolean {
-  if (pathname === '/favicon.ico') return true
-  if (pathname.startsWith('/maintenance')) return true
-  if (pathname.startsWith('/_next/')) return true
-  if (pathname.startsWith('/api/')) return true
-  if (pathname === '/auth/callback' || pathname.startsWith('/auth/callback/')) return true
-  if (/^\/(de|en)\/auth\/forgot-password(?:\/|$)/.test(pathname)) return true
-  if (/^\/(de|en)\/auth\/change-password(?:\/|$)/.test(pathname)) return true
-  if (/^\/(de|en)\/auth\/login(?:\/|$)/.test(pathname)) return true
-  if (/^\/(de|en)\/auth\/verify-age(?:\/|$)/.test(pathname)) return true
-  if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|json|webmanifest|woff2?)$/i.test(pathname)) {
-    return true
-  }
-  return false
-}
-
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const pathLocale = (pathname.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
-
-  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true' && !isMaintenanceBypass(pathname)) {
-    return NextResponse.redirect(new URL('/maintenance', request.url))
-  }
 
   let supabaseResponse = NextResponse.next({ request })
   const supabase = createServerClient(
