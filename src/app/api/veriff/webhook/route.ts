@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
+import { restoreAgeGatedSubscription } from '@/lib/subscriptions'
 import crypto from 'crypto'
 
 /** Laufzeitkonstanter Vergleich, damit die Signatur nicht per Timing erraten werden kann. */
@@ -70,6 +71,13 @@ export async function POST(req: NextRequest) {
     `Veriff webhook: profiles age_verification (${status})`,
     await admin.from('profiles').upsert(record, { count: 'exact' })
   )
+
+  // Wurde das Abo wegen fehlender Verifikation zum Ende der Testphase
+  // gekuendigt, wird das jetzt zurueckgenommen. Eine vom Nutzer selbst
+  // ausgeloeste Kuendigung bleibt bestehen.
+  if (status === 'approved') {
+    await restoreAgeGatedSubscription(vendorData)
+  }
 
   return NextResponse.json({ received: true })
 }

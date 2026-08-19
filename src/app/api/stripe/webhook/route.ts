@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
+import { cancelUnverifiedTrial } from '@/lib/subscriptions'
 import {
   sendWillkommenEmail,
   sendZahlungFehlgeschlagenEmail,
   sendAboGekuendigtEmail,
   sendTestphaseEndetEmail,
+  sendVerifikationAusstehendEmail,
 } from '@/lib/emails'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -195,7 +197,7 @@ export async function POST(req: NextRequest) {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('email')
+        .select('email, age_verified')
         .eq('id', userId)
         .single()
 
@@ -206,10 +208,26 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      if (profile?.email && sub.trial_end) {
-        const endDate = new Date(sub.trial_end * 1000).toLocaleDateString('de-AT', {
-          day: '2-digit', month: '2-digit', year: 'numeric'
-        })
+      const endDate = sub.trial_end
+        ? new Date(sub.trial_end * 1000).toLocaleDateString('de-AT', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+          })
+        : ''
+
+      // Ohne Altersverifikation darf die Testphase nicht in ein bezahltes Abo
+      // kippen: wir duerften die Inhalte gar nicht ausliefern. Stripe feuert
+      // dieses Ereignis drei Tage vor Ablauf -- der einzige Haken vor der
+      // ersten Abbuchung. Danach waere nur noch eine Erstattung moeglich.
+      if (!profile?.age_verified) {
+        await cancelUnverifiedTrial(sub)
+
+        if (profile?.email) {
+          await sendVerifikationAusstehendEmail(profile.email, endDate)
+        }
+        break
+      }
+
+      if (profile.email && sub.trial_end) {
         await sendTestphaseEndetEmail(profile.email, endDate)
       }
       break
