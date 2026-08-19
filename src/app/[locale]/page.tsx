@@ -5,6 +5,7 @@ import Hero from '@/components/home/Hero'
 import UspSection from '@/components/home/UspSection'
 import PricingSection from '@/components/home/PricingSection'
 import ManifestoSection from '@/components/home/ManifestoSection'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
@@ -16,7 +17,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       .from('subscriptions')
       .select('id')
       .eq('user_id', user.id)
-      .eq('status', 'active')
+      .in('status', ACCESS_GRANTING_STATUSES)
       .limit(1)
 
     if (activeSubs && activeSubs.length > 0) {

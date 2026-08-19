@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -49,7 +50,7 @@ export async function restoreAgeGatedSubscription(userId: string): Promise<void>
     .from('subscriptions')
     .select('stripe_subscription_id')
     .eq('user_id', userId)
-    .in('status', ['trialing', 'active'])
+    .in('status', ACCESS_GRANTING_STATUSES)
     .limit(5)
 
   if (error) {

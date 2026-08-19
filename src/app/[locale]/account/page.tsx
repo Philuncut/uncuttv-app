@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 import AccountActions from './AccountActions'
 
 export default async function AccountPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -12,24 +13,15 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
     redirect(`/${locale}/auth/login`)
   }
 
-  // Fetch subscription data
-  const { data: sub } = await supabase
+  // Eine Abfrage statt zwei hintereinander: dieselbe Semantik, aber die
+  // Regel steht in ACCESS_GRANTING_STATUSES statt hier als Sonderfall.
+  const { data: activeSub } = await supabase
     .from('subscriptions')
     .select('status, stripe_price_id, current_period_end, trial_end')
     .eq('user_id', user.id)
-    .eq('status', 'active')
+    .in('status', ACCESS_GRANTING_STATUSES)
     .limit(1)
     .maybeSingle()
-
-  // Also check for trialing
-  const activeSub = sub ?? (await supabase
-    .from('subscriptions')
-    .select('status, stripe_price_id, current_period_end, trial_end')
-    .eq('user_id', user.id)
-    .eq('status', 'trialing')
-    .limit(1)
-    .maybeSingle()
-  ).data
 
   const isTrialing = activeSub?.status === 'trialing'
   const periodEnd = activeSub?.current_period_end

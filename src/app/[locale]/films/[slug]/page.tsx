@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import FilmPlayer from './FilmPlayer'
 import FilmHero from './FilmHero'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 
 function normalizeCountryArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
@@ -87,7 +88,7 @@ export default async function FilmSlugPage({
     .from('subscriptions')
     .select('id')
     .eq('user_id', user.id)
-    .eq('status', 'active')
+    .in('status', ACCESS_GRANTING_STATUSES)
     .limit(1)
 
   const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)

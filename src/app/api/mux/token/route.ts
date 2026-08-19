@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
     .from('subscriptions')
     .select('id')
     .eq('user_id', user.id)
-    .eq('status', 'active')
+    .in('status', ACCESS_GRANTING_STATUSES)
     .limit(1)
 
   const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)

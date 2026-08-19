@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -46,7 +47,7 @@ export async function proxy(request: NextRequest) {
     .from('subscriptions')
     .select('id')
     .eq('user_id', user.id)
-    .eq('status', 'active')
+    .in('status', ACCESS_GRANTING_STATUSES)
     .limit(1)
 
   let hasAccess = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
