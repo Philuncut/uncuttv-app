@@ -39,7 +39,7 @@ export default function AGBPage() {
           Allgemeine Geschäftsbedingungen der UncutTV GmbH
         </p>
         <p style={{ fontSize: '0.78rem', color: 'var(--grey)', marginBottom: '48px' }}>
-          Stand: 7. Juli 2025 · <span style={{ color: 'var(--red)' }}>Vorabversion – noch nicht rechtsverbindlich geprüft</span>
+          Stand: 7. Juli 2025
         </p>
 
         <Section title="1. Geltungsbereich">
@@ -105,20 +105,101 @@ export default function AGBPage() {
           </p>
         </Section>
 
-        <Section title="7. Widerrufsrecht">
+        <Section title="7. Rücktrittsrecht (Widerrufsrecht)">
+          <h3 style={subheadStyle}>7.1 Rücktrittsrecht</h3>
           <p style={textStyle}>
-            Als Verbraucher steht dir grundsätzlich ein 14-tägiges Widerrufsrecht zu.
-            Mit der Registrierung und dem Start der kostenlosen Testphase stimmst du zu,
-            dass die Dienstleistung sofort beginnt. Das Widerrufsrecht erlischt mit Beginn
-            der Dienstleistungserbringung, sofern du der vorzeitigen Ausführung ausdrücklich
-            zugestimmt hast.
+            Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen von diesem
+            Vertrag zurückzutreten. Die Rücktrittsfrist beträgt vierzehn Tage ab dem Tag
+            des Vertragsabschlusses.
           </p>
-          <p style={{ ...textStyle, marginTop: '12px' }}>
-            Widerrufsadresse: UncutTV GmbH, Kalchgruben 4/11, 6094 Axams –{' '}
+
+          <h3 style={subheadStyle}>7.2 Ausübung des Rücktrittsrechts</h3>
+          <p style={textStyle}>
+            Um dein Rücktrittsrecht auszuüben, musst du uns mittels einer eindeutigen
+            Erklärung über deinen Entschluss, von diesem Vertrag zurückzutreten, informieren.
+            Die Erklärung kannst du per E-Mail oder Post an uns richten:
+          </p>
+          <p style={addressStyle}>
+            UncutTV GmbH<br />
+            Kalchgruben 4/11<br />
+            6094 Axams<br />
+            Österreich<br />
+            E-Mail:{' '}
             <a href="mailto:office@uncuttv.at" style={{ color: 'var(--red)', textDecoration: 'none' }}>
               office@uncuttv.at
             </a>
           </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Du kannst dafür das unten stehende Muster-Rücktrittsformular verwenden, das jedoch
+            nicht vorgeschrieben ist. Zur Wahrung der Rücktrittsfrist reicht es aus, dass du die
+            Mitteilung über die Ausübung des Rücktrittsrechts vor Ablauf der Rücktrittsfrist
+            absendest.
+          </p>
+
+          <h3 style={subheadStyle}>7.3 Vorzeitiges Erlöschen des Rücktrittsrechts</h3>
+          <p style={textStyle}>
+            Bei Verträgen über die Bereitstellung digitaler Inhalte und digitaler
+            Dienstleistungen erlischt dein Rücktrittsrecht vorzeitig, wenn
+          </p>
+          <ul style={listStyle}>
+            <li>
+              du ausdrücklich verlangt hast, dass wir mit der Vertragserfüllung vor Ablauf
+              der Rücktrittsfrist beginnen,
+            </li>
+            <li>du zur Kenntnis genommen hast, dass du dadurch dein Rücktrittsrecht verlierst, und</li>
+            <li>wir mit der Vertragserfüllung begonnen haben.</li>
+          </ul>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Beide Erklärungen holen wir im Bestellvorgang ausdrücklich von dir ein und
+            bestätigen sie dir zusammen mit der Vertragsbestätigung.
+          </p>
+
+          <h3 style={subheadStyle}>7.4 Folgen des Rücktritts</h3>
+          <p style={textStyle}>
+            Wenn du von diesem Vertrag zurücktrittst, erstatten wir dir alle Zahlungen, die wir
+            von dir erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag,
+            an dem die Mitteilung über deinen Rücktritt bei uns eingegangen ist. Für die
+            Rückzahlung verwenden wir dasselbe Zahlungsmittel, das du bei der ursprünglichen
+            Transaktion eingesetzt hast, es sei denn, es wurde ausdrücklich etwas anderes
+            vereinbart. In keinem Fall werden dir wegen der Rückzahlung Entgelte berechnet.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Hast du verlangt, dass die Dienstleistung während der Rücktrittsfrist beginnen soll,
+            so hast du uns einen angemessenen Betrag zu zahlen, der dem Anteil der bis zum
+            Zeitpunkt deines Rücktritts bereits erbrachten Leistungen im Vergleich zum
+            Gesamtumfang der vertraglich vereinbarten Leistungen entspricht.
+          </p>
+
+          <div style={formBoxStyle}>
+            <div style={formTitleStyle}>Muster-Rücktrittsformular</div>
+            <p style={{ ...textStyle, fontStyle: 'italic', marginBottom: '16px' }}>
+              (Wenn du den Vertrag widerrufen willst, fülle bitte dieses Formular aus und sende
+              es zurück.)
+            </p>
+            <p style={textStyle}>
+              An: UncutTV GmbH, Kalchgruben 4/11, 6094 Axams, Österreich<br />
+              E-Mail:{' '}
+              <a href="mailto:office@uncuttv.at" style={{ color: 'var(--red)', textDecoration: 'none' }}>
+                office@uncuttv.at
+              </a>
+            </p>
+            <p style={{ ...textStyle, marginTop: '16px' }}>
+              Hiermit trete ich / treten wir (*) von dem von mir / uns (*) abgeschlossenen
+              Vertrag über die Erbringung der folgenden Dienstleistung zurück:
+            </p>
+            <div style={{ marginTop: '16px' }}>
+              <div style={formFieldStyle}>Bestellt am (*) / erhalten am (*):</div>
+              <div style={formFieldStyle}>Name des / der Verbraucher(s):</div>
+              <div style={formFieldStyle}>Anschrift des / der Verbraucher(s):</div>
+              <div style={formFieldStyle}>
+                Unterschrift des / der Verbraucher(s) (nur bei Mitteilung auf Papier):
+              </div>
+              <div style={formFieldStyle}>Datum:</div>
+            </div>
+            <p style={{ ...textStyle, fontSize: '0.78rem', marginTop: '16px' }}>
+              (*) Unzutreffendes streichen.
+            </p>
+          </div>
         </Section>
 
         <Section title="8. Nutzungsrechte">
@@ -203,6 +284,47 @@ const listStyle: React.CSSProperties = {
   lineHeight: 2,
   paddingLeft: '20px',
   margin: '8px 0 0 0',
+}
+
+const subheadStyle: React.CSSProperties = {
+  fontSize: '0.8rem',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  color: 'var(--warm-white)',
+  margin: '24px 0 8px 0',
+}
+
+const addressStyle: React.CSSProperties = {
+  fontSize: '0.88rem',
+  color: 'var(--grey-light)',
+  lineHeight: 1.8,
+  margin: '12px 0 0 0',
+  paddingLeft: '16px',
+  borderLeft: '2px solid rgba(255,255,255,0.12)',
+}
+
+const formBoxStyle: React.CSSProperties = {
+  marginTop: '28px',
+  padding: '24px',
+  border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(255,255,255,0.03)',
+}
+
+const formTitleStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  letterSpacing: '0.15em',
+  textTransform: 'uppercase',
+  color: 'var(--red)',
+  marginBottom: '12px',
+}
+
+const formFieldStyle: React.CSSProperties = {
+  fontSize: '0.88rem',
+  color: 'var(--grey-light)',
+  lineHeight: 1.8,
+  paddingBottom: '6px',
+  marginBottom: '14px',
+  borderBottom: '1px solid rgba(255,255,255,0.14)',
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
