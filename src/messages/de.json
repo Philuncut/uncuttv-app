@@ -33,7 +33,9 @@
       "devices": "iOS, Android, Smart TV, Web",
       "cancel": "Monatlich kündbar – keine Bindung",
       "content": "Exklusiver Indie-Content aus aller Welt"
-    }
+    },
+    "checkoutLoading": "Wird geöffnet …",
+    "checkoutError": "Der Checkout konnte nicht gestartet werden. Bitte versuch es noch einmal."
   },
   "manifesto": {
     "quote": "Das Independent Kino hat die mutigsten Stimmen der Welt — sie verdienen eine Bühne ohne Filter.",
@@ -143,5 +145,25 @@
     "resubmissionText": "Die Aufnahmen waren nicht auswertbar. Achte auf gutes Licht, halte den Ausweis vollständig ins Bild und vermeide Spiegelungen.",
     "retry": "Erneut versuchen",
     "needHelp": "Klappt es nicht? Schreib uns an <support>support@uncuttv.at</support>."
+  },
+  "subscribe": {
+    "title": "ABO ABSCHLIESSEN",
+    "subtitle": "Für den Zugang zu allen Filmen brauchst du ein aktives Abo. Die ersten sieben Tage sind kostenlos, danach kannst du jederzeit zum Monatsende kündigen.",
+    "voucherHint": "Du hast einen Gutscheincode? <redeem>Hier einlösen</redeem>."
+  },
+  "paymentFailed": {
+    "title": "ZAHLUNG FEHLGESCHLAGEN",
+    "lead": "Deine Zahlung konnte nicht ausgeführt werden. Es wurde nichts abgebucht.",
+    "accessNote": "Wir versuchen die Abbuchung in den nächsten Tagen automatisch erneut. Bis dahin bleibt dein Zugang bestehen — bleibt die Zahlung offen, wird er pausiert.",
+    "reasonsTitle": "Häufige Ursachen",
+    "reason1": "Die Karte ist abgelaufen oder wurde gesperrt",
+    "reason2": "Das Limit oder die Deckung reicht nicht aus",
+    "reason3": "Die Bank hat die Zahlung abgelehnt, etwa wegen fehlender Freigabe",
+    "reason4": "Rechnungsadresse oder Prüfziffer stimmen nicht überein",
+    "updatePayment": "Zahlungsdaten aktualisieren",
+    "portalLoading": "Wird geöffnet …",
+    "portalError": "Die Zahlungsverwaltung konnte nicht geöffnet werden. Bitte versuch es noch einmal.",
+    "backToCheckout": "Zurück zum Abo",
+    "needHelp": "Kommst du nicht weiter? Schreib uns an <support>support@uncuttv.at</support>."
   }
 }

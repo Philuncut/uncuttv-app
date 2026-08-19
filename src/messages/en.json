@@ -33,7 +33,9 @@
       "devices": "iOS, Android, Smart TV, Web",
       "cancel": "Cancel monthly – no commitment",
       "content": "Exclusive indie content from around the world"
-    }
+    },
+    "checkoutLoading": "Opening …",
+    "checkoutError": "Checkout could not be started. Please try again."
   },
   "manifesto": {
     "quote": "Independent cinema has the boldest voices in the world — they deserve a stage without filters.",
@@ -143,5 +145,25 @@
     "resubmissionText": "The images could not be evaluated. Use good lighting, fit the whole ID in frame and avoid reflections.",
     "retry": "Try again",
     "needHelp": "Not working? Write to us at <support>support@uncuttv.at</support>."
+  },
+  "subscribe": {
+    "title": "COMPLETE YOUR SUBSCRIPTION",
+    "subtitle": "You need an active subscription to access all films. The first seven days are free, after that you can cancel at the end of any month.",
+    "voucherHint": "Got a voucher code? <redeem>Redeem it here</redeem>."
+  },
+  "paymentFailed": {
+    "title": "PAYMENT FAILED",
+    "lead": "Your payment could not be processed. Nothing was charged.",
+    "accessNote": "We will automatically retry over the next few days. Your access stays active until then — if the payment remains open, it will be paused.",
+    "reasonsTitle": "Common causes",
+    "reason1": "The card has expired or has been blocked",
+    "reason2": "The limit or the available balance is not sufficient",
+    "reason3": "The bank declined the payment, for example because authorisation was missing",
+    "reason4": "Billing address or security code do not match",
+    "updatePayment": "Update payment details",
+    "portalLoading": "Opening …",
+    "portalError": "The billing portal could not be opened. Please try again.",
+    "backToCheckout": "Back to subscription",
+    "needHelp": "Still stuck? Write to us at <support>support@uncuttv.at</support>."
   }
 }
