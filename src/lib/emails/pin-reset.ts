@@ -1,3 +1,7 @@
+import { siteUrl } from '@/lib/env'
+
+const base = siteUrl()
+
 export function PinResetEmail({ code }: { code: string }) {
   return `
 <!DOCTYPE html>
@@ -63,9 +67,9 @@ export function PinResetEmail({ code }: { code: string }) {
             <td align="center" style="padding-top:24px;">
               <p style="font-size:0.72rem;color:#4b5563;margin:0;line-height:1.8;">
                 UncutTV GmbH · Kalchgruben 4/11 · 6094 Axams · Österreich · ATU81526957<br/>
-                <a href="https://uncuttv.vercel.app/de/impressum" style="color:#4b5563;">Impressum</a> ·
-                <a href="https://uncuttv.vercel.app/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
-                <a href="https://uncuttv.vercel.app/de/agb" style="color:#4b5563;">AGB</a>
+                <a href="${base}/de/impressum" style="color:#4b5563;">Impressum</a> ·
+                <a href="${base}/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
+                <a href="${base}/de/agb" style="color:#4b5563;">AGB</a>
               </p>
             </td>
           </tr>

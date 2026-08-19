@@ -2,25 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 
+/** Laufzeitkonstanter Vergleich, damit die Signatur nicht per Timing erraten werden kann. */
+function signaturesMatch(expected: string, received: string): boolean {
+  const a = Buffer.from(expected, 'utf8')
+  const b = Buffer.from(received, 'utf8')
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.VERIFF_SECRET_KEY!
   const body = await req.text()
-  const signature = req.headers.get('x-hmac-signature') || ''
+  const signature = (req.headers.get('x-hmac-signature') || '').toLowerCase()
 
-  // Verify webhook signature
   const expectedSig = crypto
     .createHmac('sha256', secret)
     .update(Buffer.from(body))
     .digest('hex')
     .toLowerCase()
 
-  console.log('Veriff webhook received')
-  console.log('Signature match:', signature === expectedSig)
-  console.log('Body:', body)
-
-  // Temporär: Signatur-Check nur loggen, nicht blockieren
-  if (signature !== expectedSig) {
-    console.log('Signature mismatch – proceeding anyway for debugging')
+  // Ohne gueltige Signatur wird nichts verarbeitet: dieser Endpunkt setzt
+  // age_verified und ist damit die Jugendschutz-Grenze der Anwendung.
+  if (!signaturesMatch(expectedSig, signature)) {
+    console.warn('Veriff webhook: signature mismatch, request rejected')
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   let event: any
@@ -30,8 +35,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  console.log('Veriff event:', JSON.stringify(event))
-
   // Version 1.0 format: event.verification
   // Version 2.0 format: event.data.verification
   const verification = event.verification || event.data?.verification
@@ -40,8 +43,6 @@ export async function POST(req: NextRequest) {
   }
 
   const { status, vendorData } = verification
-
-  console.log('Status:', status, 'VendorData:', vendorData)
 
   if (!vendorData) {
     return NextResponse.json({ error: 'No user ID' }, { status: 400 })
@@ -53,7 +54,9 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase
       .from('profiles')
       .upsert({ id: vendorData, age_verified: true })
-    console.log('Supabase upsert error:', error)
+    if (error) {
+      console.error('Veriff webhook: profile upsert failed', error.message)
+    }
   }
 
   return NextResponse.json({ received: true })

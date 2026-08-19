@@ -1,3 +1,7 @@
+import { siteUrl } from '@/lib/env'
+
+const base = siteUrl()
+
 export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate: string }) {
   return `
 <!DOCTYPE html>
@@ -58,7 +62,7 @@ export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate
               <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
                 <tr>
                   <td style="background:#E50914;padding:14px 32px;">
-                    <a href="https://uncuttv.vercel.app/de/films" style="color:#f0ece4;text-decoration:none;font-size:0.88rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
+                    <a href="${base}/de/films" style="color:#f0ece4;text-decoration:none;font-size:0.88rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
                       Weiter Filme schauen →
                     </a>
                   </td>
@@ -68,7 +72,7 @@ export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate
               <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                 <tr>
                   <td style="border:1px solid rgba(255,255,255,0.08);padding:12px 24px;">
-                    <a href="https://uncuttv.vercel.app/de/account" style="color:#9ca3af;text-decoration:none;font-size:0.82rem;letter-spacing:0.06em;">
+                    <a href="${base}/de/account" style="color:#9ca3af;text-decoration:none;font-size:0.82rem;letter-spacing:0.06em;">
                       Abo verwalten / kündigen
                     </a>
                   </td>
@@ -88,9 +92,9 @@ export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate
             <td align="center" style="padding-top:24px;">
               <p style="font-size:0.72rem;color:#4b5563;margin:0;line-height:1.8;">
                 UncutTV GmbH · Kalchgruben 4/11 · 6094 Axams · Österreich<br/>
-                <a href="https://uncuttv.vercel.app/de/impressum" style="color:#4b5563;">Impressum</a> ·
-                <a href="https://uncuttv.vercel.app/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
-                <a href="https://uncuttv.vercel.app/de/agb" style="color:#4b5563;">AGB</a>
+                <a href="${base}/de/impressum" style="color:#4b5563;">Impressum</a> ·
+                <a href="${base}/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
+                <a href="${base}/de/agb" style="color:#4b5563;">AGB</a>
               </p>
             </td>
           </tr>

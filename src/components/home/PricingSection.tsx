@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+/**
+ * Der Jahrestarif ist ausgeblendet, weil AGB Paragraph 4 nur den Monatstarif
+ * beschreibt. Auf true setzen, sobald die AGB ihn abdecken - Umschalter,
+ * Jahrespreis und Ersparnis-Hinweis erscheinen dann wieder.
+ */
+const SHOW_YEARLY_PLAN = false
+
 export default function PricingSection() {
   const t = useTranslations('pricing')
   const pathname = usePathname()
@@ -27,13 +34,14 @@ export default function PricingSection() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const isYearly = plan === 'yearly'
+  const isYearly = SHOW_YEARLY_PLAN && plan === 'yearly'
+  const effectivePlan = isYearly ? 'yearly' : 'monthly'
 
   async function handleCheckout() {
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan: effectivePlan }),
     })
     const { url } = await res.json()
     if (url) window.location.href = url
@@ -63,12 +71,14 @@ export default function PricingSection() {
       <p style={{
         fontFamily: 'var(--font-body)', fontWeight: 300,
         fontSize: '1rem', letterSpacing: '0.08em',
-        color: 'var(--grey)', marginBottom: '32px',
+        color: 'var(--grey)',
+        marginBottom: SHOW_YEARLY_PLAN ? '32px' : (isMobile ? '32px' : '48px'),
       }}>
         {t('subtitle')}
       </p>
 
       {/* Toggle */}
+      {SHOW_YEARLY_PLAN && (
       <div style={{
         display: 'inline-flex', marginBottom: isMobile ? '32px' : '48px',
         border: '1px solid rgba(255,255,255,0.12)',
@@ -106,6 +116,7 @@ export default function PricingSection() {
           </span>
         </button>
       </div>
+      )}
 
       <div style={{
         maxWidth: '480px', margin: '0 auto',

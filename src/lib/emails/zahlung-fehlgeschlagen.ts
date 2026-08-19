@@ -1,3 +1,7 @@
+import { siteUrl } from '@/lib/env'
+
+const base = siteUrl()
+
 export function ZahlungFehlgeschlagenEmail({ email }: { email: string }) {
   return `
 <!DOCTYPE html>
@@ -55,7 +59,7 @@ export function ZahlungFehlgeschlagenEmail({ email }: { email: string }) {
               <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                 <tr>
                   <td style="background:#E50914;padding:14px 32px;">
-                    <a href="https://uncuttv.vercel.app/de/payment-failed" style="color:#f0ece4;text-decoration:none;font-size:0.88rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
+                    <a href="${base}/de/payment-failed" style="color:#f0ece4;text-decoration:none;font-size:0.88rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">
                       Zahlungsmethode aktualisieren →
                     </a>
                   </td>
@@ -75,9 +79,9 @@ export function ZahlungFehlgeschlagenEmail({ email }: { email: string }) {
             <td align="center" style="padding-top:24px;">
               <p style="font-size:0.72rem;color:#4b5563;margin:0;line-height:1.8;">
                 UncutTV GmbH · Kalchgruben 4/11 · 6094 Axams · Österreich<br/>
-                <a href="https://uncuttv.vercel.app/de/impressum" style="color:#4b5563;">Impressum</a> ·
-                <a href="https://uncuttv.vercel.app/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
-                <a href="https://uncuttv.vercel.app/de/agb" style="color:#4b5563;">AGB</a>
+                <a href="${base}/de/impressum" style="color:#4b5563;">Impressum</a> ·
+                <a href="${base}/de/datenschutz" style="color:#4b5563;">Datenschutz</a> ·
+                <a href="${base}/de/agb" style="color:#4b5563;">AGB</a>
               </p>
             </td>
           </tr>
