@@ -1,5 +1,6 @@
 import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import { LEGAL_VERSION, type ConsentKind } from '@/lib/legal'
+import { sendRegistrierungEmail } from '@/lib/emails'
 
 /**
  * Serverseitig, niemals aus dem Browser: waere der Zeitstempel vom Client
@@ -47,4 +48,71 @@ export async function recordConsent(
       { count: 'exact' }
     )
   )
+}
+
+/**
+ * Verschickt den Zustimmungsnachweis nach bestaetigter E-Mail-Adresse --
+ * garantiert hoechstens einmal pro Konto.
+ *
+ * Die Einmaligkeit haengt am Flag profiles.consent_email_sent, nicht an der
+ * consents-Tabelle: consents ist ein append-only Rechtsnachweis und soll
+ * nicht zum Zustellprotokoll umgewidmet werden. Das Flag folgt damit dem
+ * Muster, das welcome_email_sent bereits vorgibt.
+ *
+ * Das Setzen ist zugleich der Anspruch: das Update greift nur, solange das
+ * Flag false ist. Laufen zwei Anfragen parallel, trifft genau eine davon
+ * eine Zeile und verschickt.
+ */
+export async function sendConsentReceiptOnce(
+  userId: string,
+  email: string | undefined
+): Promise<void> {
+  if (!email) {
+    console.error('consent receipt: user has no email', userId)
+    return
+  }
+
+  const admin = createAdminClient()
+
+  const { error: claimError, count } = await admin
+    .from('profiles')
+    .update({ consent_email_sent: true }, { count: 'exact' })
+    .eq('id', userId)
+    .eq('consent_email_sent', false)
+
+  if (claimError) {
+    console.error('consent receipt: claim failed -', claimError.message)
+    return
+  }
+
+  // Null Zeilen heisst: schon verschickt, oder es gibt keine Profilzeile.
+  if (!count) return
+
+  const { data: consent, error: consentError } = await admin
+    .from('consents')
+    .select('legal_version, accepted_at')
+    .eq('user_id', userId)
+    .eq('kind', 'signup')
+    .order('accepted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (consentError) {
+    console.error('consent receipt: consent lookup failed -', consentError.message)
+  }
+  if (!consent) {
+    console.error('consent receipt: no signup consent on record for user', userId)
+  }
+
+  const legalVersion = consent?.legal_version ?? LEGAL_VERSION
+  const acceptedAt = new Date(consent?.accepted_at ?? Date.now()).toLocaleString('de-AT', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+
+  try {
+    await sendRegistrierungEmail(email, legalVersion, acceptedAt)
+  } catch (mailError) {
+    console.error('consent receipt: send failed -', mailError)
+  }
 }

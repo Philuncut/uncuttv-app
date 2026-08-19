@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendConsentReceiptOnce } from '@/lib/consents'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -30,6 +31,14 @@ export async function GET(request: NextRequest) {
   if (user) {
     if (type === 'recovery') {
       return NextResponse.redirect(`${origin}/${locale}/auth/change-password`)
+    }
+
+    // Erst jetzt ist die Adresse bestaetigt: der Zustimmungsnachweis geht
+    // nicht an unbestaetigte Postfaecher. Intern gegen Mehrfachversand
+    // abgesichert, weil diese Route auch von anderen E-Mail-Links erreicht
+    // wird.
+    if (type === 'signup') {
+      await sendConsentReceiptOnce(user.id, user.email)
     }
 
     const { data: profile } = await supabase

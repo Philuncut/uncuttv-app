@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import { recordConsent } from '@/lib/consents'
-import { LEGAL_VERSION } from '@/lib/legal'
-import { sendRegistrierungEmail } from '@/lib/emails'
 import { siteUrl } from '@/lib/env'
 
 const MIN_PASSWORD_LENGTH = 8
@@ -88,17 +86,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'consent_not_recorded' }, { status: 500 })
   }
 
-  try {
-    await sendRegistrierungEmail(
-      email,
-      LEGAL_VERSION,
-      new Date().toLocaleString('de-AT', { dateStyle: 'medium', timeStyle: 'short' })
-    )
-  } catch (mailError) {
-    // Die Registrierung selbst ist gelungen; eine fehlgeschlagene Mail darf
-    // sie nicht zurueckdrehen.
-    console.error('register: confirmation mail failed -', mailError)
-  }
-
+  // Hier geht bewusst keine Mail raus: den Aktivierungslink verschickt
+  // Supabase, und der Zustimmungsnachweis folgt erst nach bestaetigter
+  // Adresse aus /auth/callback. So bekommt der Nutzer eine Mail statt zwei,
+  // und der Nachweis erreicht nur bestaetigte Postfaecher.
   return NextResponse.json({ ok: true })
 }

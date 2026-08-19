@@ -77,7 +77,7 @@
     "forgotPassword": "Forgot password?",
     "register": "Create account",
     "registerSuccessTitle": "ALMOST THERE",
-    "registerSuccessText": "We sent you an email. Confirm your address in it and you are good to go.",
+    "registerSuccessText": "We sent you an email. Confirm your address in it, then you can sign in.",
     "passwordMismatch": "The passwords do not match.",
     "passwordTooShort": "The password must be at least 8 characters long.",
     "registerError": "Registration failed. Please try again."
