@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { recordConsent } from '@/lib/consents'
 import { siteUrl } from '@/lib/env'
 
@@ -68,21 +68,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  // Kein email-Feld: public.profiles hat keine solche Spalte, die Adresse
-  // liegt in auth.users. Der Upsert legt nur die Zeile an, falls kein
-  // Datenbank-Trigger das bereits erledigt hat.
+  // Die Profilzeile legt der Trigger on_auth_user_created (handle_new_user)
+  // beim Signup an -- hier wird sie deshalb nur geprueft, nicht geschrieben.
+  //
+  // Die Pruefung bleibt trotzdem: greift der Trigger nicht, laufen spaeter
+  // saemtliche Updates auf null Zeilen, was PostgREST nicht als Fehler
+  // meldet. Betroffen waere unter anderem consent_email_sent, an dem der
+  // Versand des Zustimmungsnachweises haengt -- die Registrierung saehe nach
+  // aussen erfolgreich aus, waehrend der Nachweis nie ankommt.
   const admin = createAdminClient()
-  const profileCreated = reportWrite(
-    'register: profiles upsert',
-    await admin.from('profiles').upsert({ id: user.id }, { onConflict: 'id', count: 'exact' })
-  )
+  const { data: profileRow, error: profileError } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle()
 
-  // Ohne Profilzeile bleibt spaeter jedes Update wirkungslos -- unter anderem
-  // consent_email_sent, an dem der Versand des Zustimmungsnachweises haengt.
-  // Frueher lief das stillschweigend ins Leere.
-  if (!profileCreated) {
-    console.error('register: no profile row for user', user.id)
-    return NextResponse.json({ error: 'profile_not_created' }, { status: 500 })
+  if (profileError || !profileRow) {
+    console.error(
+      'register: profile row missing after signUp for user',
+      user.id,
+      profileError ? `- ${profileError.message}` : '- trigger did not fire'
+    )
+    return NextResponse.json({ error: 'profile_missing' }, { status: 500 })
   }
 
   const consentRecorded = await recordConsent(user.id, 'signup', { headers: req.headers })
