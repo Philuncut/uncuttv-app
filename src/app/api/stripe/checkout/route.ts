@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -37,10 +38,24 @@ export async function POST(req: NextRequest) {
     })
     customerId = customer.id
 
-    await supabase
-      .from('profiles')
-      .update({ stripe_customer_id: customerId })
-      .eq('id', user.id)
+    // Systemwert von Stripe, nicht vom Nutzer: mit Service-Role schreiben,
+    // damit die Zuordnung nicht an einer UPDATE-Policy der eigenen Zeile
+    // haengt. Schlaegt der Write fehl, legt jeder weitere Checkout einen
+    // neuen Stripe-Customer an -- deshalb hier hart abbrechen.
+    const written = reportWrite(
+      'stripe/checkout: profiles.stripe_customer_id',
+      await createAdminClient()
+        .from('profiles')
+        .update({ stripe_customer_id: customerId }, { count: 'exact' })
+        .eq('id', user.id)
+    )
+
+    if (!written) {
+      return NextResponse.json(
+        { error: 'Kundenzuordnung konnte nicht gespeichert werden' },
+        { status: 500 }
+      )
+    }
   }
 
   const priceId = isYearly
