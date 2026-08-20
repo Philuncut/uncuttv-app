@@ -36,22 +36,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'no_customer' }, { status: 404 })
     }
 
-    // Bewusst nur Karte, nicht automatic_payment_methods.
+    // Folgt der Dashboard-Konfiguration, damit Apple Pay und Google Pay
+    // erscheinen. Beide sind keine eigenen payment_method_types, sondern
+    // Wallets auf 'card' -- die entstehende Zahlungsmethode ist eine Karte.
     //
-    // checkout/route.ts legt Abos mit payment_method_types: ['card'] an, und
-    // Stripe Checkout uebertraegt das auf das entstehende Abo. Eine hier per
-    // Elements hinterlegte SEPA-Methode liesse sich zwar speichern und als
-    // Standard setzen, die Verlaengerung wuerde aber scheitern -- der Kunde
-    // saehe eine bestaetigte Zahlungsmethode und bekaeme trotzdem eine
-    // fehlgeschlagene Abbuchung.
+    // allow_redirects: 'never' schliesst alle Verfahren aus, die den Kunden
+    // auf eine fremde Seite schicken. Das haelt gezielt KLARNA heraus, das im
+    // Dashboard aktiv ist und hier nicht angeboten werden soll. Karten und
+    // Wallets bleiben, 3D-Secure laeuft im Stripe-Dialog und ist kein
+    // Redirect im Sinne dieses Schalters.
     //
-    // SEPA kommt erst dazu, wenn Mandatstext, Glaeubiger-ID und der Umgang
-    // mit Ruecklastschriften geklaert sind -- und dann auch im Checkout, nicht
-    // nur hier.
+    // ACHTUNG SEPA: SEPA-Lastschrift braucht keinen Redirect und wuerde hier
+    // deshalb NICHT herausgefiltert. Aktuell ist sie im Dashboard aus, also
+    // greift das nicht. Wer sie einschaltet, muss vorher Mandatstext,
+    // Glaeubiger-ID und den Umgang mit Ruecklastschriften klaeren UND den
+    // Checkout mitziehen: dort steht payment_method_types: ['card'], und
+    // Stripe uebertraegt das auf das Abo -- eine hier hinterlegte
+    // SEPA-Methode liesse sich sonst speichern, die Verlaengerung wuerde
+    // aber scheitern.
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       usage: 'off_session',
-      payment_method_types: ['card'],
+      automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
       metadata: { supabase_user_id: user.id },
     })
 

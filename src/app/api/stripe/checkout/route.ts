@@ -63,6 +63,22 @@ export async function POST(req: NextRequest) {
     : process.env.STRIPE_PRICE_ID!
 
   // Create checkout session
+  //
+  // 'card' bleibt bewusst stehen und schliesst Apple Pay und Google Pay NICHT
+  // aus: Stripe Checkout blendet beide von selbst ein, sobald Karte akzeptiert
+  // wird und das Geraet sie unterstuetzt. Sie sind Wallets auf 'card', keine
+  // eigenen Typen.
+  //
+  // Wuerde man payment_method_types weglassen, folgte Checkout der
+  // Dashboard-Konfiguration -- und damit erschiene Klarna, das dort aktiv ist.
+  // Checkout Sessions kennen kein automatic_payment_methods und damit auch
+  // kein allow_redirects, es gibt hier also keinen Schalter, um Klarna
+  // gezielt herauszuhalten. Der Weg dafuer waere eine eigene Payment Method
+  // Configuration im Dashboard, referenziert ueber payment_method_configuration.
+  //
+  // Zweiter Grund: Stripe uebertraegt diese Liste auf das entstehende Abo
+  // (subscription.payment_settings.payment_method_types). Ein Weglassen
+  // wuerde neue Abos anders konfigurieren als alle bestehenden.
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
