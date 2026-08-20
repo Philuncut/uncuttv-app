@@ -58,7 +58,7 @@
     "youthProtection": "Youth Protection",
     "copyright": "© 2026 UncutTV GmbH. All rights reserved.",
     "ageBadge": "18+",
-    "cancelContracts": "Verträge hier kündigen"
+    "cancelContracts": "Cancel contracts here"
   },
   "auth": {
     "welcomeBack": "WELCOME BACK",
@@ -191,11 +191,11 @@
     "terminationNextPossible": "At the next possible date",
     "terminationSpecific": "On a specific date",
     "terminationDateLabel": "Date",
-    "submit": "Kündigen",
+    "submit": "Cancel",
     "reviewTitle": "REVIEW YOUR DETAILS",
-    "reviewIntro": "Please check your details. Your cancellation is only declared once you click “Jetzt kündigen”.",
+    "reviewIntro": "Please check your details. Your cancellation is only declared once you click “Cancel now”.",
     "reviewBack": "Change details",
-    "confirmSubmit": "Jetzt kündigen",
+    "confirmSubmit": "Cancel now",
     "sending": "Sending …",
     "doneTitle": "CANCELLATION RECEIVED",
     "doneIntro": "We have received your cancellation. A confirmation has been sent to the address you provided.",
