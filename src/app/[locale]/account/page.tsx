@@ -39,7 +39,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
   // der Stripe-Metadaten -- hier waere ein Stripe-Aufruf pro Seitenaufruf.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('age_verified')
+    .select('age_verified, full_name')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -172,7 +172,12 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
 
         {/* 2) Zahlungsmethode */}
         <Section title={t('sectionPayment')}>
-          <PaymentMethodSection locale={locale} current={currentPaymentMethod} />
+          <PaymentMethodSection
+            locale={locale}
+            current={currentPaymentMethod}
+            email={user.email ?? ''}
+            name={profile?.full_name ?? null}
+          />
         </Section>
 
         {/* 3) Passwort aendern */}

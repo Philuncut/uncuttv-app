@@ -62,26 +62,21 @@ export async function POST(req: NextRequest) {
     ? process.env.STRIPE_YEARLY_PRICE_ID!
     : process.env.STRIPE_PRICE_ID!
 
-  // Create checkout session
+  // Feste Liste statt Dashboard-Steuerung: so steht im Code, was angeboten
+  // wird, und eine Aenderung im Dashboard veraendert den Checkout nicht
+  // unbemerkt.
   //
-  // 'card' bleibt bewusst stehen und schliesst Apple Pay und Google Pay NICHT
-  // aus: Stripe Checkout blendet beide von selbst ein, sobald Karte akzeptiert
-  // wird und das Geraet sie unterstuetzt. Sie sind Wallets auf 'card', keine
-  // eigenen Typen.
+  // Apple Pay und Google Pay stehen NICHT in der Liste und erscheinen
+  // trotzdem -- sie sind Wallets auf 'card', keine eigenen Typen. Stripe
+  // Checkout blendet sie von selbst ein, sobald das Geraet sie unterstuetzt.
   //
-  // Wuerde man payment_method_types weglassen, folgte Checkout der
-  // Dashboard-Konfiguration -- und damit erschiene Klarna, das dort aktiv ist.
-  // Checkout Sessions kennen kein automatic_payment_methods und damit auch
-  // kein allow_redirects, es gibt hier also keinen Schalter, um Klarna
-  // gezielt herauszuhalten. Der Weg dafuer waere eine eigene Payment Method
-  // Configuration im Dashboard, referenziert ueber payment_method_configuration.
-  //
-  // Zweiter Grund: Stripe uebertraegt diese Liste auf das entstehende Abo
-  // (subscription.payment_settings.payment_method_types). Ein Weglassen
-  // wuerde neue Abos anders konfigurieren als alle bestehenden.
+  // Stripe uebertraegt diese Liste auf das entstehende Abo
+  // (subscription.payment_settings.payment_method_types). Bestehende Abos
+  // tragen noch ['card'] und muessen nachgezogen werden, wenn ihre Inhaber
+  // spaeter auf SEPA oder PayPal wechseln sollen.
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
-    payment_method_types: ['card'],
+    payment_method_types: ['card', 'paypal', 'klarna', 'sepa_debit'],
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
     subscription_data: isYearly ? {} : { trial_period_days: 7 },

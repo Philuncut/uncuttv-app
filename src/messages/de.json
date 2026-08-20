@@ -290,6 +290,16 @@
     "paymentNetworkError": "Verbindungsfehler. Bitte prüf deine Internetverbindung und versuch es noch einmal.",
     "paymentSaveError": "Die Zahlungsmethode wurde bestätigt, konnte aber nicht übernommen werden. Bitte schreib uns an office@uncuttv.at.",
     "paymentInvoices": "Rechnungen ansehen",
-    "paymentInvoicesLoading": "Wird geöffnet …"
+    "paymentInvoicesLoading": "Wird geöffnet …",
+    "paymentPaypal": "PayPal ({email})",
+    "paymentPaypalNoEmail": "PayPal",
+    "paymentKlarna": "Klarna",
+    "paymentLink": "Link ({email})",
+    "paymentLinkNoEmail": "Link",
+    "paymentApplePay": "Apple Pay",
+    "paymentGooglePay": "Google Pay",
+    "paymentVia": "über {brand} •••• {last4}",
+    "paymentCardFallback": "Karte",
+    "paymentUnknown": "Hinterlegte Zahlungsmethode ({type})"
   }
 }

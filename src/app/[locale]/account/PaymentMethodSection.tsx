@@ -58,12 +58,50 @@ const APPEARANCE: Appearance = {
   },
 }
 
+/**
+ * Beschriftung der hinterlegten Zahlungsmethode.
+ *
+ * Unbekannte Typen laufen in den Rueckfall statt leer zu bleiben -- Stripe
+ * fuehrt laufend neue ein, und der Abschnitt darf davon nicht kaputtgehen.
+ */
+function describeMethod(
+  pm: StoredPaymentMethod,
+  t: ReturnType<typeof useTranslations<'account'>>
+): string {
+  switch (pm.type) {
+    case 'card':
+      if (pm.wallet === 'apple_pay') return t('paymentApplePay')
+      if (pm.wallet === 'google_pay') return t('paymentGooglePay')
+      return `${pm.brand ?? t('paymentCardFallback')} •••• ${pm.last4 ?? '••••'}`
+
+    case 'sepa_debit':
+      return t('paymentSepa', { last4: pm.last4 ?? '••••' })
+
+    case 'paypal':
+      return pm.email ? t('paymentPaypal', { email: pm.email }) : t('paymentPaypalNoEmail')
+
+    case 'link':
+      return pm.email ? t('paymentLink', { email: pm.email }) : t('paymentLinkNoEmail')
+
+    case 'klarna':
+      return t('paymentKlarna')
+
+    default:
+      return t('paymentUnknown', { type: pm.type })
+  }
+}
+
 export default function PaymentMethodSection({
   locale,
   current,
+  email,
+  name,
 }: {
   locale: string
   current: StoredPaymentMethod | null
+  /** Vorbelegung der Rechnungsdaten -- SEPA verlangt Name und E-Mail. */
+  email: string
+  name: string | null
 }) {
   const t = useTranslations('account')
   const supabase = createClient()
@@ -171,24 +209,24 @@ export default function PaymentMethodSection({
 
         {current ? (
           <div style={{ fontSize: '0.95rem', color: 'var(--warm-white)', lineHeight: 1.7 }}>
-            {current.type === 'sepa_debit' ? (
-              t('paymentSepa', { last4: current.last4 ?? '••••' })
-            ) : (
-              <>
-                <span style={{ textTransform: 'capitalize' }}>{current.brand ?? 'Karte'}</span>
-                {' •••• '}
-                {current.last4 ?? '••••'}
-                {current.expMonth && current.expYear && (
-                  <span
-                    style={{ display: 'block', fontSize: '0.8rem', color: 'var(--grey)', marginTop: '4px' }}
-                  >
-                    {t('paymentExpires', {
-                      month: String(current.expMonth).padStart(2, '0'),
-                      year: String(current.expYear),
-                    })}
-                  </span>
-                )}
-              </>
+            <span>{describeMethod(current, t)}</span>
+
+            {/* Zusatzzeile nur, wo es etwas zu ergaenzen gibt. */}
+            {current.type === 'card' && current.wallet && current.last4 && (
+              <span style={detailStyle}>
+                {t('paymentVia', {
+                  brand: current.brand ?? t('paymentCardFallback'),
+                  last4: current.last4,
+                })}
+              </span>
+            )}
+            {current.type === 'card' && current.expMonth && current.expYear && (
+              <span style={detailStyle}>
+                {t('paymentExpires', {
+                  month: String(current.expMonth).padStart(2, '0'),
+                  year: String(current.expYear),
+                })}
+              </span>
             )}
           </div>
         ) : (
@@ -217,6 +255,8 @@ export default function PaymentMethodSection({
       {clientSecret && elementsOptions ? (
         <Elements stripe={stripePromise} options={elementsOptions}>
           <PaymentMethodForm
+            email={email}
+            name={name}
             onDone={() => {
               setClientSecret(null)
               setSuccess(true)
@@ -269,10 +309,14 @@ export default function PaymentMethodSection({
 }
 
 function PaymentMethodForm({
+  email,
+  name,
   onDone,
   onCancel,
   onError,
 }: {
+  email: string
+  name: string | null
   onDone: () => void
   onCancel: () => void
   onError: (message: string) => void
@@ -349,7 +393,20 @@ function PaymentMethodForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <PaymentElement options={{ layout: 'tabs' }} />
+      {/* SEPA verlangt Name und E-Mail des Kontoinhabers. Vorbelegt, damit
+          der Kunde sie nicht erneut eintippen muss; fehlende Angaben
+          erfragt das Element weiterhin selbst. */}
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          defaultValues: {
+            billingDetails: {
+              email,
+              ...(name ? { name } : {}),
+            },
+          },
+        }}
+      />
 
       <button
         type="submit"
@@ -386,4 +443,11 @@ function PaymentMethodForm({
       </button>
     </form>
   )
+}
+
+const detailStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.8rem',
+  color: 'var(--grey)',
+  marginTop: '4px',
 }

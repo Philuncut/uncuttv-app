@@ -5,13 +5,27 @@ import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
 export type StoredPaymentMethod = {
-  /** 'card' | 'sepa_debit' | ... -- steuert, welche Felder gefuellt sind. */
+  /** 'card' | 'sepa_debit' | 'paypal' | 'klarna' | 'link' | sonstiges. */
   type: string
-  /** Kartenmarke bzw. Bankname, bereits klein geschrieben wie von Stripe geliefert. */
+  /** Kartenmarke, klein geschrieben wie von Stripe geliefert. */
   brand: string | null
+  /** Letzte vier Stellen von Karte bzw. IBAN. */
   last4: string | null
   expMonth: number | null
   expYear: number | null
+  /** Bei PayPal und Link die hinterlegte Adresse. */
+  email: string | null
+  /** 'apple_pay' | 'google_pay' | ... -- Karten, die ueber eine Wallet kamen. */
+  wallet: string | null
+}
+
+const EMPTY: Omit<StoredPaymentMethod, 'type'> = {
+  brand: null,
+  last4: null,
+  expMonth: null,
+  expYear: null,
+  email: null,
+  wallet: null,
 }
 
 /**
@@ -59,28 +73,57 @@ export async function getActiveSubscriptionId(userId: string): Promise<string | 
   return data?.stripe_subscription_id ?? null
 }
 
+/**
+ * Uebersetzt eine Stripe-PaymentMethod in das, was die Kontoseite zeigt.
+ *
+ * Der Rueckfall am Ende ist wichtig: Stripe fuehrt laufend neue Typen ein,
+ * und ein unbekannter Typ darf hier weder leer bleiben noch werfen -- die
+ * Kontoseite wuerde sonst an der Zahlungsmethode scheitern.
+ */
 function describe(pm: Stripe.PaymentMethod): StoredPaymentMethod {
-  if (pm.type === 'card' && pm.card) {
-    return {
-      type: 'card',
-      brand: pm.card.brand,
-      last4: pm.card.last4,
-      expMonth: pm.card.exp_month,
-      expYear: pm.card.exp_year,
-    }
-  }
+  switch (pm.type) {
+    case 'card':
+      return {
+        ...EMPTY,
+        type: 'card',
+        brand: pm.card?.brand ?? null,
+        last4: pm.card?.last4 ?? null,
+        expMonth: pm.card?.exp_month ?? null,
+        expYear: pm.card?.exp_year ?? null,
+        // Apple Pay und Google Pay sind Karten. Ohne diese Angabe saehe der
+        // Kunde die Marke der hinterlegten Karte und nicht die Wallet, ueber
+        // die er tatsaechlich bezahlt.
+        wallet: pm.card?.wallet?.type ?? null,
+      }
 
-  if (pm.type === 'sepa_debit' && pm.sepa_debit) {
-    return {
-      type: 'sepa_debit',
-      brand: pm.sepa_debit.bank_code ?? null,
-      last4: pm.sepa_debit.last4 ?? null,
-      expMonth: null,
-      expYear: null,
-    }
-  }
+    case 'sepa_debit':
+      return {
+        ...EMPTY,
+        type: 'sepa_debit',
+        last4: pm.sepa_debit?.last4 ?? null,
+      }
 
-  return { type: pm.type, brand: null, last4: null, expMonth: null, expYear: null }
+    case 'paypal':
+      return {
+        ...EMPTY,
+        type: 'paypal',
+        email: pm.paypal?.payer_email ?? null,
+      }
+
+    case 'link':
+      return {
+        ...EMPTY,
+        type: 'link',
+        email: pm.link?.email ?? null,
+      }
+
+    case 'klarna':
+      // Klarna gibt keine anzeigbare Kennung heraus -- nur der Name.
+      return { ...EMPTY, type: 'klarna' }
+
+    default:
+      return { ...EMPTY, type: pm.type }
+  }
 }
 
 /**

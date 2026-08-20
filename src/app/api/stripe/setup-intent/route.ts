@@ -36,24 +36,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'no_customer' }, { status: 404 })
     }
 
-    // Folgt der Dashboard-Konfiguration, damit Apple Pay und Google Pay
-    // erscheinen. Beide sind keine eigenen payment_method_types, sondern
-    // Wallets auf 'card' -- die entstehende Zahlungsmethode ist eine Karte.
+    // Folgt der Dashboard-Konfiguration. Angeboten werden damit Karte, die
+    // Wallets Apple Pay und Google Pay (beides Karten, keine eigenen Typen)
+    // sowie SEPA-Lastschrift.
     //
     // allow_redirects: 'never' schliesst alle Verfahren aus, die den Kunden
-    // auf eine fremde Seite schicken. Das haelt gezielt KLARNA heraus, das im
-    // Dashboard aktiv ist und hier nicht angeboten werden soll. Karten und
-    // Wallets bleiben, 3D-Secure laeuft im Stripe-Dialog und ist kein
-    // Redirect im Sinne dieses Schalters.
+    // auf eine fremde Seite schicken -- also PayPal und Klarna. Das ist hier
+    // gewollt: der nachtraegliche Wechsel auf eines der beiden ist der
+    // Randfall, und eine Weiterleitung samt Rueckkehr-Behandlung im
+    // Kontobereich lohnt den Aufwand vorerst nicht. Wer im Checkout PayPal
+    // gewaehlt hat, verwaltet es ueber den Portal-Link "Rechnungen ansehen".
     //
-    // ACHTUNG SEPA: SEPA-Lastschrift braucht keinen Redirect und wuerde hier
-    // deshalb NICHT herausgefiltert. Aktuell ist sie im Dashboard aus, also
-    // greift das nicht. Wer sie einschaltet, muss vorher Mandatstext,
-    // Glaeubiger-ID und den Umgang mit Ruecklastschriften klaeren UND den
-    // Checkout mitziehen: dort steht payment_method_types: ['card'], und
-    // Stripe uebertraegt das auf das Abo -- eine hier hinterlegte
-    // SEPA-Methode liesse sich sonst speichern, die Verlaengerung wuerde
-    // aber scheitern.
+    // SEPA braucht keinen Redirect und bleibt deshalb verfuegbar. Das ist
+    // beabsichtigt -- die Methode ist im Checkout ebenfalls freigegeben.
+    // 3D-Secure laeuft im Stripe-Dialog und ist kein Redirect im Sinne
+    // dieses Schalters.
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       usage: 'off_session',

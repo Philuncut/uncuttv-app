@@ -290,6 +290,16 @@
     "paymentNetworkError": "Connection error. Please check your internet connection and try again.",
     "paymentSaveError": "The payment method was confirmed but could not be applied. Please write to office@uncuttv.at.",
     "paymentInvoices": "View invoices",
-    "paymentInvoicesLoading": "Opening …"
+    "paymentInvoicesLoading": "Opening …",
+    "paymentPaypal": "PayPal ({email})",
+    "paymentPaypalNoEmail": "PayPal",
+    "paymentKlarna": "Klarna",
+    "paymentLink": "Link ({email})",
+    "paymentLinkNoEmail": "Link",
+    "paymentApplePay": "Apple Pay",
+    "paymentGooglePay": "Google Pay",
+    "paymentVia": "via {brand} •••• {last4}",
+    "paymentCardFallback": "Card",
+    "paymentUnknown": "Payment method on file ({type})"
   }
 }
