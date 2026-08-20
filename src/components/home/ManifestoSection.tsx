@@ -13,7 +13,7 @@ export default function ManifestoSection() {
     }}>
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse at 50% 50%, rgba(229,9,20,0.04) 0%, transparent 60%)',
+        background: 'radial-gradient(ellipse at 50% 50%, rgba(var(--red-rgb),0.04) 0%, transparent 60%)',
       }} />
       <div style={{
         maxWidth: '800px', margin: '0 auto',

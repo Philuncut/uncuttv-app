@@ -33,6 +33,15 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
     .limit(1)
     .maybeSingle()
 
+  // Steuert nur, welche Variante der Kuendigungsabschnitt zeigt. Ob eine
+  // Kuendigung wirklich vom Altersgate stammt, entscheidet die Route anhand
+  // der Stripe-Metadaten -- hier waere ein Stripe-Aufruf pro Seitenaufruf.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('age_verified')
+    .eq('id', user.id)
+    .maybeSingle()
+
   const hasSubscription = Boolean(sub && SHOWN_STATUSES.includes(sub.status))
   const isYearly = sub?.stripe_price_id === process.env.STRIPE_YEARLY_PRICE_ID
   const canceling = Boolean(sub?.cancel_at_period_end)
@@ -58,6 +67,13 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
       ? (sub?.trial_end ?? sub?.current_period_end ?? null)
       : (sub?.current_period_end ?? sub?.trial_end ?? null)
   const accessUntilLabel = formatDate(accessUntil)
+
+  // Diese Seite wird pro Anfrage serverseitig gerendert; "jetzt" ist hier
+  // genau richtig und liefert fuer alle Betrachter denselben Stand. Im
+  // Client waere derselbe Ausdruck ein Hydrationsproblem -- deshalb steht er
+  // hier und wird als Prop weitergereicht.
+  // eslint-disable-next-line react-hooks/purity
+  const accessExpired = Boolean(accessUntil && new Date(accessUntil).getTime() <= Date.now())
 
   // cancel_at_period_end hat Vorrang vor dem rohen Stripe-Status: ein
   // gekuendigtes Abo bleibt bis zum Periodenende trialing bzw. active, wuerde
@@ -166,6 +182,8 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
               locale={locale}
               accessUntil={accessUntil}
               alreadyCanceled={canceling}
+              ageVerified={Boolean(profile?.age_verified)}
+              accessExpired={accessExpired}
             />
           </Section>
         )}

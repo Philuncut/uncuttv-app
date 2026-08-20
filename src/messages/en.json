@@ -262,6 +262,16 @@
     "cancelError": "The cancellation could not be carried out. Please try again or write to office@uncuttv.at.",
     "cancelAlready": "Your subscription is already cancelled.",
     "sectionDelete": "Delete account",
-    "canceledNoDate": "Access remains until the end of the current period."
+    "canceledNoDate": "Access remains until the end of the current period.",
+    "reactivateTitle": "Your subscription ends on {date}",
+    "reactivateIntro": "If you would like to keep watching, you can undo the cancellation until then. Nothing changes and your subscription simply continues.",
+    "reactivateButton": "Undo cancellation",
+    "reactivateSaving": "Undoing …",
+    "reactivateSuccess": "Your cancellation has been undone. Your subscription continues.",
+    "reactivateError": "The cancellation could not be undone. Please try again or write to office@uncuttv.at.",
+    "reactivateAgeGate": "Your subscription is ending because your age verification is missing. Once you complete it, your subscription continues automatically.",
+    "reactivateAgeGateCta": "Verify now",
+    "canceledExpired": "Your subscription has ended. You can start a new one at any time.",
+    "canceledExpiredCta": "Start a new subscription"
   }
 }

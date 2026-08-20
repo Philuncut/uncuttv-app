@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -18,11 +19,17 @@ export default function CancelSubscriptionSection({
   locale,
   accessUntil,
   alreadyCanceled,
+  ageVerified,
+  accessExpired,
 }: {
   locale: string
   /** ISO-Datum, bis zu dem der Zugang bestehen bleibt. Null, wenn unbekannt. */
   accessUntil: string | null
   alreadyCanceled: boolean
+  /** Steuert nur die Anzeige -- die verbindliche Pruefung macht die Route. */
+  ageVerified: boolean
+  /** Serverseitig ermittelt: Date.now() beim Rendern liefe zwischen Server und Client auseinander. */
+  accessExpired: boolean
 }) {
   const t = useTranslations('account')
   const router = useRouter()
@@ -32,17 +39,7 @@ export default function CancelSubscriptionSection({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
-
-  if (alreadyCanceled || done) {
-    return (
-      <p
-        role="status"
-        style={{ fontSize: '0.86rem', color: 'var(--grey-light)', lineHeight: 1.8, margin: 0 }}
-      >
-        {done ? t('cancelSuccess') : t('cancelAlready')}
-      </p>
-    )
-  }
+  const [reactivated, setReactivated] = useState(false)
 
   const formattedUntil = accessUntil
     ? new Date(accessUntil).toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', {
@@ -51,6 +48,128 @@ export default function CancelSubscriptionSection({
         year: 'numeric',
       })
     : null
+
+  async function handleReactivate() {
+    setError('')
+    setSaving(true)
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.access_token) {
+      window.location.href = `/${locale}/auth/login`
+      return
+    }
+
+    const res = await fetch('/api/stripe/reactivate-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }).catch(() => null)
+
+    const body = res && res.ok ? await res.json().catch(() => null) : null
+
+    setSaving(false)
+
+    if (!body?.ok) {
+      setError(t('reactivateError'))
+      return
+    }
+
+    setReactivated(true)
+    router.refresh()
+  }
+
+  // --- Gekuendigt: entweder zuruecknehmen, verifizieren oder neu abschliessen
+  if ((alreadyCanceled || done) && !reactivated) {
+    // Kuendigung stammt vom Altersgate: die darf hier nicht aufgehoben werden,
+    // sonst haette jemand ohne Verifikation wieder Zugang.
+    if (!ageVerified) {
+      return (
+        <>
+          <p style={noteStyle}>{t('reactivateAgeGate')}</p>
+          <Link
+            href={`/${locale}/auth/verify-age`}
+            className="btn-primary"
+            style={{
+              display: 'block',
+              width: '100%',
+              textAlign: 'center',
+              textDecoration: 'none',
+              marginTop: '18px',
+            }}
+          >
+            {t('reactivateAgeGateCta')}
+          </Link>
+        </>
+      )
+    }
+
+    // Zeitpunkt verstrichen: es gibt nichts mehr zurueckzunehmen.
+    if (accessExpired || !formattedUntil) {
+      return (
+        <>
+          <p style={noteStyle}>{t('canceledExpired')}</p>
+          <Link
+            href={`/${locale}/subscribe`}
+            className="btn-primary"
+            style={{
+              display: 'block',
+              width: '100%',
+              textAlign: 'center',
+              textDecoration: 'none',
+              marginTop: '18px',
+            }}
+          >
+            {t('canceledExpiredCta')}
+          </Link>
+        </>
+      )
+    }
+
+    return (
+      <>
+        <p style={{ ...noteStyle, color: 'var(--warm-white)', marginBottom: '8px' }}>
+          {t('reactivateTitle', { date: formattedUntil })}
+        </p>
+        <p style={noteStyle}>{t('reactivateIntro')}</p>
+
+        {error && (
+          <p style={{ fontSize: '0.82rem', color: 'var(--red)', lineHeight: 1.6, margin: '14px 0 0 0' }}>
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={handleReactivate}
+          disabled={saving}
+          className="btn-primary"
+          style={{
+            width: '100%',
+            textAlign: 'center',
+            display: 'block',
+            marginTop: '18px',
+            cursor: saving ? 'default' : 'pointer',
+            opacity: saving ? 0.6 : 1,
+          }}
+        >
+          {saving ? t('reactivateSaving') : t('reactivateButton')}
+        </button>
+      </>
+    )
+  }
+
+  if (reactivated) {
+    return (
+      <p role="status" style={{ ...noteStyle, color: '#22c55e' }}>
+        {t('reactivateSuccess')}
+      </p>
+    )
+  }
 
   async function handleCancel() {
     setError('')
@@ -108,8 +227,8 @@ export default function CancelSubscriptionSection({
       ) : (
         <div
           style={{
-            border: '1px solid rgba(229,9,20,0.4)',
-            background: 'rgba(229,9,20,0.06)',
+            border: '1px solid rgba(var(--red-rgb),0.4)',
+            background: 'rgba(var(--red-rgb),0.06)',
             padding: '20px 22px',
           }}
         >
@@ -180,4 +299,11 @@ const dangerButtonStyle: React.CSSProperties = {
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   cursor: 'pointer',
+}
+
+const noteStyle: React.CSSProperties = {
+  fontSize: '0.86rem',
+  color: 'var(--grey-light)',
+  lineHeight: 1.8,
+  margin: 0,
 }

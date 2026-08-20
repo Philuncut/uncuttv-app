@@ -41,15 +41,15 @@ export default function JugendschutzPage() {
 
         {/* 18+ Badge */}
         <div style={{
-          border: '1px solid rgba(229,9,20,0.3)',
-          background: 'rgba(229,9,20,0.04)',
+          border: '1px solid rgba(var(--red-rgb),0.3)',
+          background: 'rgba(var(--red-rgb),0.04)',
           padding: '28px 32px', marginBottom: '16px',
           position: 'relative', overflow: 'hidden',
         }}>
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0,
             height: '3px', background: 'var(--red)',
-            boxShadow: '0 0 20px rgba(229,9,20,0.8)',
+            boxShadow: '0 0 20px rgba(var(--red-rgb),0.8)',
           }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <span style={{

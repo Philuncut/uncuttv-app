@@ -446,8 +446,8 @@ export default function FilmPlayer({
     return (
       <div style={{
         padding: '24px',
-        background: 'rgba(229,9,20,0.1)',
-        border: '1px solid rgba(229,9,20,0.3)',
+        background: 'rgba(var(--red-rgb),0.1)',
+        border: '1px solid rgba(var(--red-rgb),0.3)',
         color: '#ff6b6b',
         marginTop: '16px',
       }}>

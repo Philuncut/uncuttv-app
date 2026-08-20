@@ -39,7 +39,7 @@ export default function UspSection() {
             letterSpacing: '-0.02em',
             userSelect: 'none',
             background: 'var(--anthrazit2)',
-            border: '1px solid rgba(229,9,20,0.15)',
+            border: '1px solid rgba(var(--red-rgb),0.15)',
             padding: isMobile ? '24px 32px 20px' : '48px 56px 40px',
             textAlign: 'center',
             position: 'relative',

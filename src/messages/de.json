@@ -262,6 +262,16 @@
     "cancelError": "Die Kündigung konnte nicht ausgeführt werden. Bitte versuch es noch einmal oder schreib uns an office@uncuttv.at.",
     "cancelAlready": "Dein Abo ist bereits gekündigt.",
     "sectionDelete": "Konto löschen",
-    "canceledNoDate": "Zugang besteht bis zum Ende der laufenden Periode."
+    "canceledNoDate": "Zugang besteht bis zum Ende der laufenden Periode.",
+    "reactivateTitle": "Dein Abo endet am {date}",
+    "reactivateIntro": "Wenn du weiterschauen möchtest, kannst du die Kündigung bis dahin zurücknehmen. Es ändert sich dann nichts, dein Abo läuft normal weiter.",
+    "reactivateButton": "Kündigung zurücknehmen",
+    "reactivateSaving": "Wird zurückgenommen …",
+    "reactivateSuccess": "Deine Kündigung wurde zurückgenommen. Dein Abo läuft weiter.",
+    "reactivateError": "Die Kündigung konnte nicht zurückgenommen werden. Bitte versuch es noch einmal oder schreib uns an office@uncuttv.at.",
+    "reactivateAgeGate": "Dein Abo endet, weil deine Altersverifikation fehlt. Sobald du sie abgeschlossen hast, läuft dein Abo automatisch weiter.",
+    "reactivateAgeGateCta": "Jetzt verifizieren",
+    "canceledExpired": "Dein Abo ist beendet. Du kannst jederzeit ein neues abschließen.",
+    "canceledExpiredCta": "Neues Abo abschließen"
   }
 }

@@ -9,8 +9,17 @@
   --anthrazit: #141414;
   --anthrazit2: #1c1c1c;
   --anthrazit3: #242424;
-  --red: #E50914;
-  --red-dark: #b0060f;
+  /* Akzentrot. Saettigung gegenueber dem urspruenglichen #E50914 von 92%
+     auf 74% zurueckgenommen -- das war die Quelle der Grellheit auf dem
+     dunklen Grund. Die Helligkeit bleibt fast gleich, damit rote Schrift auf
+     Schwarz lesbar bleibt; weisse Schrift auf rotem Button gewinnt dabei
+     sogar an Kontrast (4,79 auf 5,16). Zentrale Definition: nicht in
+     einzelnen Komponenten ueberschreiben, sonst laufen die Werte auseinander. */
+  --red: #d52029;
+  /* Dieselbe Farbe als Kanaele, damit rgba(var(--red-rgb), a) fuer Raender
+     und Flaechen dem Token folgt statt den Wert zu duplizieren. */
+  --red-rgb: 213, 32, 41;
+  --red-dark: #a01920;
   --warm-white: #f0ece4;
   --grey: #888;
   --grey-light: #bbb;

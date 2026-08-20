@@ -184,8 +184,8 @@ export default function ChangePasswordPage() {
               {error && (
                 <div
                   style={{
-                    background: 'rgba(229,9,20,0.1)',
-                    border: '1px solid rgba(229,9,20,0.3)',
+                    background: 'rgba(var(--red-rgb),0.1)',
+                    border: '1px solid rgba(var(--red-rgb),0.3)',
                     padding: '12px 16px',
                     marginBottom: '16px',
                     fontSize: '0.82rem',

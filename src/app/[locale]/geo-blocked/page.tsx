@@ -32,13 +32,13 @@ export default function GeoBlockedPage() {
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           height: '3px', background: 'var(--red)',
-          boxShadow: '0 0 20px rgba(229,9,20,0.8)',
+          boxShadow: '0 0 20px rgba(var(--red-rgb),0.8)',
         }} />
 
         <div style={{
           width: '56px', height: '56px', borderRadius: '50%',
-          background: 'rgba(229,9,20,0.12)',
-          border: '1px solid rgba(229,9,20,0.3)',
+          background: 'rgba(var(--red-rgb),0.12)',
+          border: '1px solid rgba(var(--red-rgb),0.3)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '1.5rem', marginBottom: '24px',
         }}>

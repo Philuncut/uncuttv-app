@@ -142,7 +142,7 @@ export default function PlanSelector() {
           maxWidth: '480px',
           margin: '0 auto',
           background: 'var(--anthrazit2)',
-          border: '1px solid rgba(229,9,20,0.25)',
+          border: '1px solid rgba(var(--red-rgb),0.25)',
           padding: isMobile ? '32px 24px' : '56px 48px',
           position: 'relative',
         }}

@@ -37,6 +37,31 @@ export async function cancelUnverifiedTrial(subscription: Stripe.Subscription): 
 }
 
 /**
+ * Nimmt eine vom Nutzer selbst ausgesprochene Kuendigung zurueck.
+ *
+ * Spiegelbild zu restoreAgeGatedSubscription(): dort wird ausschliesslich die
+ * MARKIERTE Kuendigung aufgehoben, hier ausschliesslich die UNMARKIERTE. Eine
+ * Kuendigung wegen fehlender Altersverifikation darf der Nutzer nicht selbst
+ * zuruecknehmen -- er bekaeme sonst unverifiziert wieder Zugang.
+ */
+export async function reactivateUserCancellation(
+  subscriptionId: string
+): Promise<'ok' | 'age_gated' | 'not_cancelled' | 'error'> {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+
+    if (!subscription.cancel_at_period_end) return 'not_cancelled'
+    if (subscription.metadata?.[AGE_GATE_FLAG] === 'true') return 'age_gated'
+
+    await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: false })
+    return 'ok'
+  } catch (error) {
+    console.error('reactivateUserCancellation: stripe call failed -', error)
+    return 'error'
+  }
+}
+
+/**
  * Nimmt eine wegen fehlender Verifikation gesetzte Kuendigung zurueck,
  * sobald das Alter bestaetigt ist.
  *
