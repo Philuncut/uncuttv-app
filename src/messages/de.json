@@ -215,6 +215,7 @@
     "errorReason": "Bitte gib den Grund für die außerordentliche Kündigung an.",
     "errorDate": "Bitte gib das gewünschte Datum an.",
     "errorDatePast": "Das Datum darf nicht in der Vergangenheit liegen.",
-    "errorSubmit": "Die Kündigung konnte nicht übermittelt werden. Bitte versuch es noch einmal oder schreib uns an office@uncuttv.at."
+    "errorSubmit": "Die Kündigung konnte nicht übermittelt werden. Bitte versuch es noch einmal oder schreib uns an office@uncuttv.at.",
+    "backHome": "Zur Startseite"
   }
 }

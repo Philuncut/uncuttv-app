@@ -231,3 +231,75 @@ body::before {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* --- Native Selects ------------------------------------------------------
+   <option> erbt die dunklen Formularfarben nicht: der Browser rendert die
+   aufgeklappte Liste im Systemfarbschema, heller Text landet dann auf weissem
+   Grund. Global gesetzt, damit auch kuenftige Selects lesbar sind. */
+select {
+  color: var(--warm-white);
+  background-color: var(--anthrazit2);
+}
+
+select option {
+  color: var(--warm-white);
+  background-color: var(--anthrazit2);
+}
+
+/* --- Druckansicht --------------------------------------------------------
+   Greift nur auf Seiten, die sich per body.print-document als druckbares
+   Dokument ausweisen. Die Abschlussseite der Kuendigung ist der Nachweis nach
+   Paragraph 312k Abs. 4 und muss auf Papier vollstaendig und lesbar sein. */
+@media print {
+  @page {
+    margin: 18mm;
+  }
+
+  body.print-document {
+    /* Die Seite setzt ihre Farben inline ueber CSS-Variablen. Werden die hier
+       umdefiniert, zieht der gesamte Baum automatisch nach -- statt jede
+       einzelne Regel ueberschreiben zu muessen. */
+    --black: #ffffff;
+    --anthrazit: #ffffff;
+    --anthrazit2: #ffffff;
+    --anthrazit3: #ffffff;
+    --warm-white: #000000;
+    --grey: #444444;
+    --grey-light: #000000;
+    --red: #000000;
+
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+  }
+
+  body.print-document nav,
+  body.print-document footer,
+  body.print-document .no-print {
+    display: none !important;
+  }
+
+  /* Die Navigation ist fixed positioniert und ueberlagerte die Ueberschrift.
+     Ohne sie faellt auch der dafuer reservierte Abstand oben weg. */
+  body.print-document main {
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  body.print-document .print-card {
+    background: #ffffff !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  body.print-document .print-row {
+    border-bottom: 1px solid #cccccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body.print-document h1 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}

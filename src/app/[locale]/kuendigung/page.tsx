@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -57,6 +58,15 @@ export default function CancellationPage() {
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
+
+  // Nur die Abschlussseite ist ein Dokument zum Ausdrucken. Die Klasse
+  // schaltet den @media print-Block in globals.css scharf, damit Navigation,
+  // Bedienelemente und dunkler Hintergrund im Ausdruck verschwinden.
+  useEffect(() => {
+    if (step !== 'done') return
+    document.body.classList.add('print-document')
+    return () => document.body.classList.remove('print-document')
+  }, [step])
 
   function handleReview(e: React.FormEvent) {
     e.preventDefault()
@@ -213,8 +223,14 @@ export default function CancellationPage() {
                 onChange={(e) => set('contract', e.target.value as Contract)}
                 style={inputStyle}
               >
-                <option value="monthly">{t('contractMonthly')}</option>
-                <option value="yearly">{t('contractYearly')}</option>
+                {/* Farben explizit: die aufgeklappte Liste rendert der Browser
+                    im Systemfarbschema, heller Text laege sonst auf weiss. */}
+                <option value="monthly" style={optionStyle}>
+                  {t('contractMonthly')}
+                </option>
+                <option value="yearly" style={optionStyle}>
+                  {t('contractYearly')}
+                </option>
               </select>
             </fieldset>
 
@@ -334,7 +350,7 @@ export default function CancellationPage() {
 
         {/* ---------------- Schritt 3: Abschluss ---------------- */}
         {step === 'done' && (
-          <div style={cardStyle}>
+          <div className="print-card" style={cardStyle}>
             <div style={{ marginBottom: '20px' }}>
               <div style={legendStyle}>{t('doneSummaryTitle')}</div>
             </div>
@@ -359,11 +375,25 @@ export default function CancellationPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="btn-primary"
+              className="btn-primary no-print"
               style={buttonStyle}
             >
               {t('donePrint')}
             </button>
+
+            {/* Ohne diesen Link endet die Strecke in einer Sackgasse. */}
+            <Link
+              href={`/${locale}`}
+              className="no-print"
+              style={{
+                ...secondaryButtonStyle,
+                display: 'block',
+                textAlign: 'center',
+                textDecoration: 'none',
+              }}
+            >
+              {t('backHome')}
+            </Link>
           </div>
         )}
       </div>
@@ -426,6 +456,7 @@ function SummaryList({ items }: { items: { label: string; value: string }[] }) {
       {items.map((item) => (
         <div
           key={item.label}
+          className="print-row"
           style={{
             padding: '12px 0',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -504,6 +535,12 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--warm-white)',
   fontSize: '0.9rem',
   outline: 'none',
+}
+
+/** Deckende Farben, weil rgba() im Dropdown auf den Systemhintergrund faellt. */
+const optionStyle: React.CSSProperties = {
+  color: 'var(--warm-white)',
+  backgroundColor: 'var(--anthrazit2)',
 }
 
 const hintStyle: React.CSSProperties = {

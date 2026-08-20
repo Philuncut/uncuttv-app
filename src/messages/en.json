@@ -215,6 +215,7 @@
     "errorReason": "Please state the reason for the extraordinary cancellation.",
     "errorDate": "Please enter the requested date.",
     "errorDatePast": "The date must not be in the past.",
-    "errorSubmit": "The cancellation could not be submitted. Please try again or write to office@uncuttv.at."
+    "errorSubmit": "The cancellation could not be submitted. Please try again or write to office@uncuttv.at.",
+    "backHome": "Back to homepage"
   }
 }
