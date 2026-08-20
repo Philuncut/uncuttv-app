@@ -85,8 +85,9 @@
     "sales": {
       "headline": "Kino ohne Kompromisse.",
       "text": "Unbegrenzt Filme streamen, die du bei den großen Anbietern nicht findest.",
-      "priceWithYearly": "{trialDays} Tage kostenlos testen. Danach ab {yearlyPerMonth} im Monat im Jahresabo — oder {monthly} monatlich, jederzeit kündbar.",
-      "priceMonthlyOnly": "{trialDays} Tage kostenlos testen. Danach {monthly} im Monat, jederzeit kündbar.",
+      "trialLead": "{trialDays} Tage kostenlos testen.",
+      "priceWithYearly": "Danach ab {yearlyPerMonth} im Monat im Jahresabo — oder {monthly} monatlich, jederzeit kündbar.",
+      "priceMonthlyOnly": "Danach {monthly} im Monat, jederzeit kündbar.",
       "cta": "JETZT {trialDays} TAGE KOSTENLOS TESTEN"
     }
   },

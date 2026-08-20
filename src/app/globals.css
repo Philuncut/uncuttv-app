@@ -241,6 +241,53 @@ body::before {
   }
 }
 
+/* --- Anmeldeseite --------------------------------------------------------
+   Zwei Spalten ab 1024px: links die Verkaufsflaeche, rechts das Formular.
+
+   Als CSS-Klasse und nicht per useState-Breakpoint wie sonst in diesem
+   Projekt: ein useState('isMobile') rendert im ersten Durchgang immer die
+   schmale Variante und springt nach der Hydration um. Auf der Anmeldeseite
+   waere genau das der erste Eindruck fuer Neukunden.
+
+   Die Reihenfolge im Markup ist die Reihenfolge auf schmalen Geraeten --
+   Verkauf zuerst, Formular darunter. Auf breiten Bildschirmen macht
+   flex-direction daraus linke und rechte Spalte, ohne order-Umsortierung:
+   die wuerde die Tabulator-Reihenfolge von der sichtbaren loesen. */
+.login-split {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Auf schmalen Geraeten fuellt der Knopf die Breite, auf breiten steht er
+   inhaltsbreit unter dem Text -- wie die Knoepfe der Startseite. */
+.login-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .login-split {
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(48px, 6vw, 96px);
+    max-width: 1120px;
+  }
+  /* Grundbreiten 55/45. Beide duerfen schrumpfen, weil die Spalten mit dem
+     Abstand dazwischen ueber 100% kaemen. */
+  .login-split__sell { flex: 0 1 55%; }
+  .login-split__form { flex: 0 1 45%; max-width: 420px; }
+
+  .login-cta {
+    display: inline-block;
+    width: auto;
+  }
+}
+
 /* --- Native Selects ------------------------------------------------------
    <option> erbt die dunklen Formularfarben nicht: der Browser rendert die
    aufgeklappte Liste im Systemfarbschema, heller Text landet dann auf weissem

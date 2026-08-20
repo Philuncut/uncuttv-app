@@ -85,8 +85,9 @@
     "sales": {
       "headline": "Cinema without compromise.",
       "text": "Stream unlimited films you won't find at the big providers.",
-      "priceWithYearly": "{trialDays} days free. Then from {yearlyPerMonth} a month on the annual plan — or {monthly} monthly, cancel anytime.",
-      "priceMonthlyOnly": "{trialDays} days free. Then {monthly} a month, cancel anytime.",
+      "trialLead": "{trialDays} days free.",
+      "priceWithYearly": "Then from {yearlyPerMonth} a month on the annual plan — or {monthly} monthly, cancel anytime.",
+      "priceMonthlyOnly": "Then {monthly} a month, cancel anytime.",
       "cta": "START YOUR {trialDays}-DAY FREE TRIAL"
     }
   },
