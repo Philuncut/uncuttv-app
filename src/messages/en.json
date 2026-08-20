@@ -115,7 +115,7 @@
   },
   "legal": {
     "consent": {
-      "signup": "PLACEHOLDER - final wording pending from legal counsel. I have read and accept the <agb>Terms</agb> and the <privacy>Privacy Policy</privacy>.",
+      "signup": "I accept the <agb>Terms and Conditions</agb>. I have read the <privacy>Privacy Policy</privacy>.",
       "signupRequired": "Please accept the Terms and the Privacy Policy.",
       "withdrawalWaiver": "PLACEHOLDER - final wording pending from legal counsel. I expressly request that UncutTV begins performance before the withdrawal period expires, and I acknowledge that I thereby lose my right of withdrawal.",
       "withdrawalWaiverRequired": "Please confirm the declaration regarding the right of withdrawal."

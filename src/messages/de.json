@@ -115,7 +115,7 @@
   },
   "legal": {
     "consent": {
-      "signup": "PLATZHALTER – finaler Wortlaut folgt vom Anwalt. Ich habe die <agb>AGB</agb> und die <privacy>Datenschutzerklärung</privacy> gelesen und stimme ihnen zu.",
+      "signup": "Ich akzeptiere die <agb>AGB</agb>. Die <privacy>Datenschutzerklärung</privacy> habe ich zur Kenntnis genommen.",
       "signupRequired": "Bitte stimme den AGB und der Datenschutzerklärung zu.",
       "withdrawalWaiver": "PLATZHALTER – finaler Wortlaut folgt vom Anwalt. Ich verlange ausdrücklich, dass UncutTV vor Ablauf der Rücktrittsfrist mit der Leistung beginnt, und nehme zur Kenntnis, dass ich damit mein Rücktrittsrecht verliere.",
       "withdrawalWaiverRequired": "Bitte bestätige die Erklärung zum Rücktrittsrecht."

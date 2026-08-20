@@ -1,14 +1,22 @@
 /**
- * Fassung der Rechtstexte (AGB, Datenschutzerklaerung, Ruecktrittsbelehrung).
+ * Fassung der Rechtstexte (AGB, Datenschutzerklaerung, Ruecktrittsbelehrung)
+ * UND des Zustimmungswortlauts unter legal.consent.* in den Message-Dateien.
  *
  * Bei jeder inhaltlichen Aenderung an einem dieser Texte hochzaehlen -- an
  * dieser einen Stelle. Jede gespeicherte Zustimmung traegt den Wert, der zum
  * Zeitpunkt der Zustimmung galt. Damit laesst sich beantworten, wer welcher
  * Fassung zugestimmt hat und wen man nach einer Aenderung erneut fragen muss.
  *
- * Format: ISO-Datum der Fassung, passend zum "Stand:" auf /agb.
+ * Aendert sich der angezeigte Text ohne Erhoehung, verweisen bestehende
+ * Zeilen in consents auf einen Wortlaut, den es so nie gab.
+ *
+ * Format: ISO-Datum der Fassung. Nicht identisch mit dem "Stand:" auf /agb --
+ * dieser Wert deckt auch Datenschutzerklaerung und Checkbox-Wortlaut ab, die
+ * sich unabhaengig von den AGB aendern koennen.
+ *
+ * 2026-08-20: finaler Wortlaut der Registrierungs-Checkbox (vorher Platzhalter)
  */
-export const LEGAL_VERSION = '2026-08-19'
+export const LEGAL_VERSION = '2026-08-20'
 
 /**
  * signup           - AGB + Datenschutzerklaerung, bei der Registrierung
