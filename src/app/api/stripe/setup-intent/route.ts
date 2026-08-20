@@ -13,10 +13,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02
  * automatische Abbuchung taugen, wenn der Kunde nicht anwesend ist. Ohne das
  * wuerde Stripe sie nur fuer Zahlungen mit Anwesenheit freigeben und die
  * Verlaengerung scheitern lassen.
- *
- * automatic_payment_methods folgt der Konfiguration im Stripe-Dashboard;
- * zusammen mit usage: 'off_session' filtert Stripe auf die Methoden, die
- * wiederkehrende Abbuchungen ueberhaupt zulassen.
  */
 export async function POST(request: Request) {
   try {
@@ -40,10 +36,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'no_customer' }, { status: 404 })
     }
 
+    // Bewusst nur Karte, nicht automatic_payment_methods.
+    //
+    // checkout/route.ts legt Abos mit payment_method_types: ['card'] an, und
+    // Stripe Checkout uebertraegt das auf das entstehende Abo. Eine hier per
+    // Elements hinterlegte SEPA-Methode liesse sich zwar speichern und als
+    // Standard setzen, die Verlaengerung wuerde aber scheitern -- der Kunde
+    // saehe eine bestaetigte Zahlungsmethode und bekaeme trotzdem eine
+    // fehlgeschlagene Abbuchung.
+    //
+    // SEPA kommt erst dazu, wenn Mandatstext, Glaeubiger-ID und der Umgang
+    // mit Ruecklastschriften geklaert sind -- und dann auch im Checkout, nicht
+    // nur hier.
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
       usage: 'off_session',
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card'],
       metadata: { supabase_user_id: user.id },
     })
 
