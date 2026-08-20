@@ -272,6 +272,24 @@
     "reactivateAgeGate": "Dein Abo endet, weil deine Altersverifikation fehlt. Sobald du sie abgeschlossen hast, läuft dein Abo automatisch weiter.",
     "reactivateAgeGateCta": "Jetzt verifizieren",
     "canceledExpired": "Dein Abo ist beendet. Du kannst jederzeit ein neues abschließen.",
-    "canceledExpiredCta": "Neues Abo abschließen"
+    "canceledExpiredCta": "Neues Abo abschließen",
+    "paymentCurrent": "Hinterlegte Zahlungsmethode",
+    "paymentNone": "Es ist noch keine Zahlungsmethode hinterlegt.",
+    "paymentExpires": "Gültig bis {month}/{year}",
+    "paymentSepa": "SEPA-Lastschrift •••• {last4}",
+    "paymentChange": "Zahlungsmethode ändern",
+    "paymentAdd": "Zahlungsmethode hinterlegen",
+    "paymentCancel": "Abbrechen",
+    "paymentSave": "Speichern",
+    "paymentSaving": "Wird gespeichert …",
+    "paymentPreparing": "Wird vorbereitet …",
+    "paymentSuccess": "Deine Zahlungsmethode wurde aktualisiert.",
+    "paymentSetupError": "Das Formular konnte nicht geladen werden. Bitte versuch es noch einmal.",
+    "paymentDeclined": "Deine Zahlungsmethode wurde abgelehnt. Bitte prüf die Daten oder nimm eine andere Karte.",
+    "paymentAuthFailed": "Die Bestätigung deiner Bank wurde abgebrochen oder ist fehlgeschlagen. Bitte versuch es noch einmal.",
+    "paymentNetworkError": "Verbindungsfehler. Bitte prüf deine Internetverbindung und versuch es noch einmal.",
+    "paymentSaveError": "Die Zahlungsmethode wurde bestätigt, konnte aber nicht übernommen werden. Bitte schreib uns an office@uncuttv.at.",
+    "paymentInvoices": "Rechnungen ansehen",
+    "paymentInvoicesLoading": "Wird geöffnet …"
   }
 }

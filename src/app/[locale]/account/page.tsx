@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { getDefaultPaymentMethod } from '@/lib/payment-methods'
 import AccountActions from './AccountActions'
 import PaymentMethodSection from './PaymentMethodSection'
 import ChangePasswordSection from './ChangePasswordSection'
@@ -41,6 +42,10 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
     .select('age_verified')
     .eq('id', user.id)
     .maybeSingle()
+
+  // Serverseitig bei Stripe geholt: der Browser bekommt nur Marke, letzte
+  // vier Ziffern und Ablauf zu sehen, nie die Kunden- oder Methoden-ID.
+  const currentPaymentMethod = await getDefaultPaymentMethod(user.id)
 
   const hasSubscription = Boolean(sub && SHOWN_STATUSES.includes(sub.status))
   const isYearly = sub?.stripe_price_id === process.env.STRIPE_YEARLY_PRICE_ID
@@ -167,7 +172,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
 
         {/* 2) Zahlungsmethode */}
         <Section title={t('sectionPayment')}>
-          <PaymentMethodSection locale={locale} />
+          <PaymentMethodSection locale={locale} current={currentPaymentMethod} />
         </Section>
 
         {/* 3) Passwort aendern */}

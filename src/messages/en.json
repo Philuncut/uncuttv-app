@@ -272,6 +272,24 @@
     "reactivateAgeGate": "Your subscription is ending because your age verification is missing. Once you complete it, your subscription continues automatically.",
     "reactivateAgeGateCta": "Verify now",
     "canceledExpired": "Your subscription has ended. You can start a new one at any time.",
-    "canceledExpiredCta": "Start a new subscription"
+    "canceledExpiredCta": "Start a new subscription",
+    "paymentCurrent": "Payment method on file",
+    "paymentNone": "No payment method on file yet.",
+    "paymentExpires": "Valid until {month}/{year}",
+    "paymentSepa": "SEPA Direct Debit •••• {last4}",
+    "paymentChange": "Change payment method",
+    "paymentAdd": "Add payment method",
+    "paymentCancel": "Cancel",
+    "paymentSave": "Save",
+    "paymentSaving": "Saving …",
+    "paymentPreparing": "Preparing …",
+    "paymentSuccess": "Your payment method has been updated.",
+    "paymentSetupError": "The form could not be loaded. Please try again.",
+    "paymentDeclined": "Your payment method was declined. Please check the details or use a different card.",
+    "paymentAuthFailed": "The confirmation from your bank was cancelled or failed. Please try again.",
+    "paymentNetworkError": "Connection error. Please check your internet connection and try again.",
+    "paymentSaveError": "The payment method was confirmed but could not be applied. Please write to office@uncuttv.at.",
+    "paymentInvoices": "View invoices",
+    "paymentInvoicesLoading": "Opening …"
   }
 }
