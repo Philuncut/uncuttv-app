@@ -17,6 +17,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [billingLoading, setBillingLoading] = useState(false)
+  const [billingError, setBillingError] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
   const mobileNavRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
@@ -94,20 +95,40 @@ export default function Navbar() {
   }
 
   async function handleBilling() {
-    setDropdownOpen(false)
-    setMobileNavOpen(false)
+    setBillingError('')
     setBillingLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) return
+
+      if (!session?.access_token) {
+        setDropdownOpen(false)
+        setMobileNavOpen(false)
+        router.push(`/${locale}/auth/login`)
+        return
+      }
+
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-      })
-      const data = await res.json().catch(() => ({}))
-      if (data.url) window.location.href = data.url
+        body: JSON.stringify({ locale }),
+      }).catch(() => null)
+
+      const data = res && res.ok ? await res.json().catch(() => null) : null
+
+      // Das Menue bleibt im Fehlerfall offen, sonst waere die Meldung nicht
+      // zu sehen. Ein Menuepunkt, der wortlos nichts tut, ist schlimmer als
+      // eine Fehlermeldung.
+      if (!data?.url) {
+        setBillingError(t('billingError'))
+        return
+      }
+
+      setDropdownOpen(false)
+      setMobileNavOpen(false)
+      window.location.href = data.url
     } finally {
       setBillingLoading(false)
     }
@@ -296,6 +317,20 @@ export default function Navbar() {
                 <DropdownButton onClick={handleBilling} disabled={billingLoading}>
                   {billingLoading ? '…' : t('billing')}
                 </DropdownButton>
+                {billingError && (
+                  <p
+                    role="alert"
+                    style={{
+                      margin: 0,
+                      padding: '4px 16px 10px',
+                      fontSize: '0.72rem',
+                      lineHeight: 1.5,
+                      color: 'var(--red)',
+                    }}
+                  >
+                    {billingError}
+                  </p>
+                )}
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', margin: '4px 0' }} />
                 <DropdownButton onClick={handleSignOut}>
                   {t('signOut')}

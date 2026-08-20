@@ -36,7 +36,11 @@ export default function PaymentFailedPage() {
 
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ locale }),
       }).catch(() => null)
 
       const body = res && res.ok ? await res.json().catch(() => null) : null

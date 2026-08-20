@@ -9,7 +9,8 @@
     "changePassword": "Passwort ändern",
     "billing": "Zahlungsmethode",
     "signOut": "Abmelden",
-    "openMenu": "Menü öffnen"
+    "openMenu": "Menü öffnen",
+    "billingError": "Die Zahlungsverwaltung konnte nicht geöffnet werden. Bitte versuch es noch einmal."
   },
   "hero": {
     "eyebrow": "Indie Film Plattform",

@@ -9,7 +9,8 @@
     "changePassword": "Change Password",
     "billing": "Billing",
     "signOut": "Sign Out",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "billingError": "The billing portal could not be opened. Please try again."
   },
   "hero": {
     "eyebrow": "Indie Film Platform",
