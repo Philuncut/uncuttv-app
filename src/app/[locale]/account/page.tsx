@@ -48,17 +48,31 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
 
   const trialEnd = formatDate(sub?.trial_end)
   const periodEnd = formatDate(sub?.current_period_end)
-  const accessUntil = sub?.current_period_end ?? sub?.trial_end ?? null
 
+  // Waehrend der Testphase endet der Zugang mit trial_end, danach mit
+  // current_period_end. Die beiden koennen auseinanderliegen, und
+  // current_period_end fehlt bei manchen Abos ganz -- deshalb in beide
+  // Richtungen ein Fallback statt einer festen Reihenfolge.
+  const accessUntil =
+    sub?.status === 'trialing'
+      ? (sub?.trial_end ?? sub?.current_period_end ?? null)
+      : (sub?.current_period_end ?? sub?.trial_end ?? null)
+  const accessUntilLabel = formatDate(accessUntil)
+
+  // cancel_at_period_end hat Vorrang vor dem rohen Stripe-Status: ein
+  // gekuendigtes Abo bleibt bis zum Periodenende trialing bzw. active, wuerde
+  // hier also faelschlich als laufend erscheinen.
   const statusLabel = !sub
     ? ''
-    : sub.status === 'trialing'
-      ? t('statusTrialing')
-      : sub.status === 'active'
-        ? t('statusActive')
-        : sub.status === 'past_due'
-          ? t('statusPastDue')
-          : t('statusCanceled')
+    : canceling
+      ? t('statusCanceled')
+      : sub.status === 'trialing'
+        ? t('statusTrialing')
+        : sub.status === 'active'
+          ? t('statusActive')
+          : sub.status === 'past_due'
+            ? t('statusPastDue')
+            : t('statusCanceled')
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--black)', padding: '110px 20px 64px' }}>
@@ -86,22 +100,33 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
               <Row label={t('statusLabel')} value={statusLabel} highlight={sub.status === 'past_due'} />
 
               <div style={{ marginTop: '16px' }}>
-                {canceling && periodEnd && (
-                  <p style={noteStyle}>{t('canceledUntil', { date: periodEnd })}</p>
-                )}
-
-                {!canceling && sub.status === 'trialing' && trialEnd && (
+                {/* Der gekuendigte Zweig ersetzt die Datumszeile, statt sie zu
+                    unterdruecken -- ohne Datum bleibt sonst gar nichts stehen. */}
+                {canceling ? (
                   <p style={noteStyle}>
-                    {t('trialUntil', { date: trialEnd })} {t('trialThenBilling')}
+                    {accessUntilLabel
+                      ? t('canceledUntil', { date: accessUntilLabel })
+                      : t('canceledNoDate')}
                   </p>
-                )}
+                ) : (
+                  <>
+                    {sub.status === 'trialing' && (
+                      <p style={noteStyle}>
+                        {trialEnd ? `${t('trialUntil', { date: trialEnd })} ` : ''}
+                        {t('trialThenBilling')}
+                      </p>
+                    )}
 
-                {!canceling && sub.status === 'active' && periodEnd && (
-                  <p style={noteStyle}>{t('nextBilling', { date: periodEnd })}</p>
+                    {sub.status === 'active' && periodEnd && (
+                      <p style={noteStyle}>{t('nextBilling', { date: periodEnd })}</p>
+                    )}
+                  </>
                 )}
 
                 {sub.status === 'past_due' && (
-                  <p style={{ ...noteStyle, color: 'var(--red)' }}>{t('pastDueHint')}</p>
+                  <p style={{ ...noteStyle, color: 'var(--red)', marginTop: '10px' }}>
+                    {t('pastDueHint')}
+                  </p>
                 )}
               </div>
             </>

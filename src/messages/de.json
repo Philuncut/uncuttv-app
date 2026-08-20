@@ -230,7 +230,7 @@
     "trialUntil": "Testphase läuft bis {date}.",
     "trialThenBilling": "Danach beginnt die Abrechnung.",
     "nextBilling": "Nächste Abrechnung am {date}.",
-    "canceledUntil": "Gekündigt, Zugang noch bis {date}.",
+    "canceledUntil": "Zugang noch bis {date}.",
     "pastDueHint": "Deine letzte Zahlung ist fehlgeschlagen. Aktualisiere deine Zahlungsmethode weiter unten, damit dein Zugang bestehen bleibt.",
     "noSubscription": "Du hast derzeit kein aktives Abo.",
     "subscribeCta": "Jetzt abonnieren",
@@ -261,6 +261,7 @@
     "cancelSuccess": "Dein Abo wurde gekündigt.",
     "cancelError": "Die Kündigung konnte nicht ausgeführt werden. Bitte versuch es noch einmal oder schreib uns an office@uncuttv.at.",
     "cancelAlready": "Dein Abo ist bereits gekündigt.",
-    "sectionDelete": "Konto löschen"
+    "sectionDelete": "Konto löschen",
+    "canceledNoDate": "Zugang besteht bis zum Ende der laufenden Periode."
   }
 }

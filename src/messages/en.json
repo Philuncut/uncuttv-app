@@ -230,7 +230,7 @@
     "trialUntil": "Your trial runs until {date}.",
     "trialThenBilling": "Billing starts after that.",
     "nextBilling": "Next billing on {date}.",
-    "canceledUntil": "Cancelled, access until {date}.",
+    "canceledUntil": "Access until {date}.",
     "pastDueHint": "Your last payment failed. Update your payment method below to keep your access.",
     "noSubscription": "You currently have no active subscription.",
     "subscribeCta": "Subscribe now",
@@ -261,6 +261,7 @@
     "cancelSuccess": "Your subscription has been cancelled.",
     "cancelError": "The cancellation could not be carried out. Please try again or write to office@uncuttv.at.",
     "cancelAlready": "Your subscription is already cancelled.",
-    "sectionDelete": "Delete account"
+    "sectionDelete": "Delete account",
+    "canceledNoDate": "Access remains until the end of the current period."
   }
 }

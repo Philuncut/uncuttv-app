@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     const { data: subscription } = await admin
       .from('subscriptions')
-      .select('stripe_subscription_id, current_period_end, trial_end')
+      .select('stripe_subscription_id, status, current_period_end, trial_end')
       .eq('user_id', user.id)
       .in('status', ACCESS_GRANTING_STATUSES)
       .order('created_at', { ascending: false })
@@ -63,10 +63,23 @@ export async function POST(request: Request) {
         .eq('stripe_subscription_id', subscription.stripe_subscription_id)
     )
 
-    const updatedAny = updated as unknown as { current_period_end?: number }
-    const accessUntil = updatedAny.current_period_end
-      ? new Date(updatedAny.current_period_end * 1000).toISOString()
-      : (subscription.current_period_end ?? subscription.trial_end ?? null)
+    // Waehrend der Testphase endet der Zugang mit trial_end, danach mit
+    // current_period_end. Letzteres liegt bei neueren Stripe-Versionen auf
+    // dem Item statt auf der Subscription.
+    const updatedAny = updated as unknown as {
+      current_period_end?: number
+      items?: { data?: { current_period_end?: number }[] }
+    }
+    const stripePeriodEnd =
+      updatedAny.current_period_end ?? updatedAny.items?.data?.[0]?.current_period_end ?? null
+
+    const accessUntil =
+      subscription.status === 'trialing'
+        ? (subscription.trial_end ??
+          (stripePeriodEnd ? new Date(stripePeriodEnd * 1000).toISOString() : null))
+        : (stripePeriodEnd
+            ? new Date(stripePeriodEnd * 1000).toISOString()
+            : (subscription.current_period_end ?? subscription.trial_end ?? null))
 
     return NextResponse.json({ ok: true, accessUntil })
   } catch (err) {

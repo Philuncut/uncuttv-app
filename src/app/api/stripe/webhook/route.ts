@@ -93,6 +93,14 @@ export async function POST(req: NextRequest) {
       )
 
       const subAny = sub as any
+      // Stripe fuehrt current_period_start/end inzwischen auf dem
+      // Subscription-Item statt auf der Subscription. Ohne diesen Fallback
+      // landen beide Felder als null in der Datenbank -- daran fehlte auf der
+      // Kontoseite die Datumszeile.
+      const item = subAny.items?.data?.[0]
+      const periodStart = subAny.current_period_start ?? item?.current_period_start ?? null
+      const periodEnd = subAny.current_period_end ?? item?.current_period_end ?? null
+
       reportWrite(
         `${event.type}: subscriptions upsert`,
         await supabase.from('subscriptions').upsert({
@@ -104,8 +112,8 @@ export async function POST(req: NextRequest) {
           cancel_at_period_end: sub.cancel_at_period_end ?? false,
           trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
           trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
-          current_period_start: subAny.current_period_start ? new Date(subAny.current_period_start * 1000).toISOString() : null,
-          current_period_end: subAny.current_period_end ? new Date(subAny.current_period_end * 1000).toISOString() : null,
+          current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+          current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
         }, { onConflict: 'stripe_subscription_id', count: 'exact' })
       )
       break
