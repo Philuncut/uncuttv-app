@@ -1,8 +1,33 @@
 import { siteUrl } from '@/lib/env'
+import { PRICING, formatPrice } from '@/lib/pricing'
 
 const base = siteUrl()
 
-export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate: string }) {
+/**
+ * Preis und Laufzeitaussage haengen am Tarif. Frueher stand hier fest
+ * "19,90/Monat" und "Monatlich kuendbar, keine Mindestlaufzeit" -- seit die
+ * Testphase auch fuer das Jahresabo gilt, ging genau das an Jahreskunden mit
+ * zwoelf Monaten Laufzeit raus. Die Betraege kommen aus src/lib/pricing.ts.
+ */
+export function TestphaseEndetEmail({
+  email,
+  endDate,
+  plan = 'monthly',
+}: {
+  email: string
+  endDate: string
+  plan?: 'monthly' | 'yearly'
+}) {
+  const isYearly = plan === 'yearly'
+
+  const renewalPrice = isYearly
+    ? `${formatPrice(PRICING.yearlyCents, 'de')} im Jahr`
+    : `${formatPrice(PRICING.monthlyCents, 'de')} im Monat`
+
+  const termLine = isYearly
+    ? 'Zwölf Monate Laufzeit, Kündigung zum Laufzeitende'
+    : 'Monatlich kündbar, keine Mindestlaufzeit'
+
   return `
 <!DOCTYPE html>
 <html lang="de">
@@ -38,7 +63,7 @@ export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate
               </h1>
 
               <p style="font-size:0.92rem;color:#9ca3af;line-height:1.8;margin:0 0 24px 0;">
-                Deine 7-tägige kostenlose Testphase bei UncutTV endet am <strong style="color:#f0ece4;">${endDate}</strong>. Danach wird dein Abo automatisch für <strong style="color:#f0ece4;">€19,90/Monat</strong> verlängert.
+                Deine ${PRICING.trialDays}-tägige kostenlose Testphase bei UncutTV endet am <strong style="color:#f0ece4;">${endDate}</strong>. Danach wird dein Abo automatisch für <strong style="color:#f0ece4;">${renewalPrice}</strong> verlängert.
               </p>
 
               <!-- Info Box -->
@@ -48,7 +73,7 @@ export function TestphaseEndetEmail({ email, endDate }: { email: string; endDate
                     <p style="font-size:0.72rem;letter-spacing:0.1em;color:#9ca3af;margin:0 0 10px 0;text-transform:uppercase;">Dein Abo</p>
                     <p style="font-size:0.82rem;color:#6b7280;line-height:2;margin:0;">
                       ✓ Unbegrenzter Zugang zu allen Filmen<br/>
-                      ✓ Monatlich kündbar, keine Mindestlaufzeit<br/>
+                      ✓ ${termLine}<br/>
                       ✓ Kündigung jederzeit über „Mein Konto"
                     </p>
                   </td>

@@ -1,15 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { PRICING, formatAmount } from '@/lib/pricing'
 
-const FEATURES = [
-  { title: 'Weltweites Indie-Kino', desc: 'Unabhängige Filme aus aller Welt' },
-  { title: 'HD & 4K Streaming', desc: 'Adaptives Bitrate-Streaming für jede Verbindung' },
-  { title: 'Ab 18 Jahren', desc: 'Unzensierter, erwachsener Content ohne Beschränkungen' },
-  { title: 'Alle Geräte', desc: 'Web, iOS, Android, Smart TV' },
-]
+/**
+ * Die vier Zeilen standen bis hierher als deutsche Zeichenketten im Code und
+ * erschienen deshalb auch auf der englischen Seite auf Deutsch. Zwei davon
+ * waren zusaetzlich unrichtig: "Alle Geraete / Web, iOS, Android, Smart TV"
+ * -- es gibt keine iOS-App, LG und Samsung sind in Entwicklung -- und
+ * "HD & 4K Streaming", obwohl genau ein Titel im Katalog in 4K vorliegt.
+ */
+const FEATURE_KEYS = ['indie', 'quality', 'adult', 'devices'] as const
 
 export default function UspSection() {
+  const t = useTranslations('usp')
+  const locale = useLocale()
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -46,14 +52,14 @@ export default function UspSection() {
             width: isMobile ? '100%' : 'auto',
           }}>
             <sup style={{ fontSize: '0.35em', color: 'var(--red)', verticalAlign: 'super' }}>€</sup>
-            19,90
+            {formatAmount(PRICING.monthlyCents, locale)}
             <div style={{
               fontFamily: 'var(--font-body)', fontWeight: 300,
               fontSize: '0.85rem', letterSpacing: '0.18em',
               textTransform: 'uppercase', color: 'var(--grey)',
               marginTop: '8px', textAlign: 'center',
             }}>
-              pro Monat
+              {t('perMonth')}
             </div>
           </div>
         </div>
@@ -66,27 +72,28 @@ export default function UspSection() {
             letterSpacing: '0.04em', lineHeight: 1.05,
             marginBottom: '16px', color: 'var(--warm-white)',
           }}>
-            Film wie er sein sollte.<br />KEIN KOMPROMISS.
+            {t('title1')}<br />{t('title2')}
           </h2>
 
           <p style={{
             fontSize: '0.92rem', lineHeight: 1.8,
             color: 'var(--grey-light)', marginBottom: '24px', maxWidth: '480px',
           }}>
-            UncutTV ist die Streaming-Plattform für Independent-Film. Keine Mainstream-Produktionen,
-            kein Studio-Diktat – nur echtes, unabhängiges Kino aus aller Welt.
+            {t('intro')}
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {FEATURES.map((f) => (
-              <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+            {FEATURE_KEYS.map((key) => (
+              <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                 <div style={{
                   width: '6px', height: '6px', borderRadius: '50%',
                   background: 'var(--red)', marginTop: '7px', flexShrink: 0,
                 }} />
                 <div style={{ fontSize: '0.88rem', color: 'var(--grey-light)', lineHeight: 1.6 }}>
-                  <strong style={{ color: 'var(--warm-white)', fontWeight: 500 }}>{f.title}</strong>
-                  {' – '}{f.desc}
+                  <strong style={{ color: 'var(--warm-white)', fontWeight: 500 }}>
+                    {t(`features.${key}Title`)}
+                  </strong>
+                  {' – '}{t(`features.${key}Desc`)}
                 </div>
               </div>
             ))}

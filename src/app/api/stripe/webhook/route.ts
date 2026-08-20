@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient, getUserEmail, reportWrite } from '@/lib/supabase/admin'
-import { cancelUnverifiedTrial } from '@/lib/subscriptions'
+import { cancelUnverifiedTrial, planFromSubscription } from '@/lib/subscriptions'
 import { handleDisputeCreated, handleDisputeClosed, handleMandateUpdated } from '@/lib/disputes'
 import {
   sendWillkommenEmail,
@@ -64,8 +64,26 @@ export async function POST(req: NextRequest) {
       if (!profile?.welcome_email_sent) {
         const email = await getUserEmail(userId)
 
+        // Die Sitzung traegt den Tarif nicht bei sich: amount_total ist
+        // waehrend der Testphase 0, die Positionen sind nicht mitgeliefert.
+        // Deshalb das Abo nachladen -- lieber ein Aufruf mehr als eine Mail
+        // mit dem falschen Preis.
+        let plan: 'monthly' | 'yearly' = 'monthly'
+        if (typeof session.subscription === 'string') {
+          try {
+            plan = planFromSubscription(
+              await stripe.subscriptions.retrieve(session.subscription)
+            )
+          } catch (err) {
+            console.error(
+              'checkout.session.completed: subscription lookup failed -',
+              err instanceof Error ? err.message : err
+            )
+          }
+        }
+
         if (email) {
-          await sendWillkommenEmail(email)
+          await sendWillkommenEmail(email, plan)
           reportWrite(
             'checkout.session.completed: profiles.welcome_email_sent',
             await supabase
@@ -241,7 +259,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (email && sub.trial_end) {
-        await sendTestphaseEndetEmail(email, endDate)
+        await sendTestphaseEndetEmail(email, endDate, planFromSubscription(sub))
       }
       break
     }

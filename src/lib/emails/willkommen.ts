@@ -1,8 +1,26 @@
 import { siteUrl } from '@/lib/env'
+import { PRICING, formatPrice } from '@/lib/pricing'
 
 const base = siteUrl()
 
-export function WillkommenEmail({ email }: { email: string }) {
+/**
+ * Die Verlaengerungszusage haengt am Tarif. Frueher stand hier fest
+ * "19,90/Monat ... jederzeit kuendigen" -- seit die Testphase auch fuer das
+ * Jahresabo gilt, bekamen Jahreskunden denselben Satz mit falschem Preis und
+ * falscher Laufzeit. Beide Betraege kommen aus src/lib/pricing.ts.
+ */
+export function WillkommenEmail({
+  email,
+  plan = 'monthly',
+}: {
+  email: string
+  plan?: 'monthly' | 'yearly'
+}) {
+  const renewal =
+    plan === 'yearly'
+      ? `Nach der Testphase wird dein Abo automatisch für <strong style="color:#f0ece4;">${formatPrice(PRICING.yearlyCents, 'de')} im Jahr</strong> verlängert. Die Laufzeit beträgt zwölf Monate.`
+      : `Nach der Testphase wird dein Abo automatisch für <strong style="color:#f0ece4;">${formatPrice(PRICING.monthlyCents, 'de')} im Monat</strong> verlängert. Du kannst jederzeit kündigen.`
+
   return `
 <!DOCTYPE html>
 <html lang="de">
@@ -38,11 +56,11 @@ export function WillkommenEmail({ email }: { email: string }) {
               </h1>
 
               <p style="font-size:0.92rem;color:#9ca3af;line-height:1.8;margin:0 0 24px 0;">
-                Dein Konto wurde erfolgreich erstellt. Du hast jetzt <strong style="color:#f0ece4;">7 Tage kostenlosen Zugang</strong> zu Europas erstem Streaming-Portal für Independent-Horror und Extremkino.
+                Dein Konto wurde erfolgreich erstellt. Du hast jetzt <strong style="color:#f0ece4;">${PRICING.trialDays} Tage kostenlosen Zugang</strong> zu Europas erstem Streaming-Portal für Independent-Horror und Extremkino.
               </p>
 
               <p style="font-size:0.92rem;color:#9ca3af;line-height:1.8;margin:0 0 32px 0;">
-                Nach der Testphase wird dein Abo automatisch für <strong style="color:#f0ece4;">€19,90/Monat</strong> verlängert. Du kannst jederzeit kündigen.
+                ${renewal}
               </p>
 
               <!-- CTA Button -->

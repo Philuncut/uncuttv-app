@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { PRICING } from '@/lib/pricing'
 import { RegistrierungEmail } from './registrierung'
 import { WillkommenEmail } from './willkommen'
 import { ZahlungFehlgeschlagenEmail } from './zahlung-fehlgeschlagen'
@@ -29,12 +30,12 @@ export async function sendRegistrierungEmail(
   })
 }
 
-export async function sendWillkommenEmail(email: string) {
+export async function sendWillkommenEmail(email: string, plan: 'monthly' | 'yearly' = 'monthly') {
   return resend.emails.send({
     from: `UncutTV <${FROM}>`,
     to: email,
-    subject: 'Willkommen bei UncutTV – Deine 7 Tage beginnen jetzt',
-    html: WillkommenEmail({ email }),
+    subject: `Willkommen bei UncutTV – Deine ${PRICING.trialDays} Tage beginnen jetzt`,
+    html: WillkommenEmail({ email, plan }),
   })
 }
 
@@ -56,12 +57,16 @@ export async function sendAboGekuendigtEmail(email: string, endDate: string) {
   })
 }
 
-export async function sendTestphaseEndetEmail(email: string, endDate: string) {
+export async function sendTestphaseEndetEmail(
+  email: string,
+  endDate: string,
+  plan: 'monthly' | 'yearly' = 'monthly'
+) {
   return resend.emails.send({
     from: `UncutTV <${FROM}>`,
     to: email,
     subject: 'Deine UncutTV-Testphase endet bald',
-    html: TestphaseEndetEmail({ email, endDate }),
+    html: TestphaseEndetEmail({ email, endDate, plan }),
   })
 }
 

@@ -106,3 +106,20 @@ export async function restoreAgeGatedSubscription(userId: string): Promise<void>
     }
   }
 }
+
+/**
+ * Welcher Tarif steckt hinter einem Abo.
+ *
+ * Gelesen wird das Abrechnungsintervall aus Stripe und nicht die Preis-ID aus
+ * der Umgebung: eine Preisaenderung heisst bei Stripe neues Preisobjekt und
+ * neue ID, ein Vergleich mit STRIPE_YEARLY_PRICE_ID wuerde alle Altvertraege
+ * ploetzlich als Monatsabo ausweisen. Das Intervall bleibt.
+ *
+ * Faellt im Zweifel auf 'monthly' zurueck. Das ist die vorsichtige Richtung:
+ * die Monatsaussagen (19,90 im Monat, jederzeit kuendbar) sind fuer einen
+ * Jahreskunden zwar falsch, versprechen ihm aber weniger, als er gekauft hat.
+ */
+export function planFromSubscription(subscription: Stripe.Subscription): 'monthly' | 'yearly' {
+  const interval = subscription.items?.data?.[0]?.price?.recurring?.interval
+  return interval === 'year' ? 'yearly' : 'monthly'
+}

@@ -29,15 +29,6 @@ export default function PlanSelector() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const FEATURES = [
-    t('features.streaming'),
-    t('features.quality'),
-    t('features.new'),
-    t('features.devices'),
-    t('features.cancel'),
-    t('features.content'),
-  ]
-
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
@@ -55,6 +46,25 @@ export default function PlanSelector() {
   const yearlySavingsPercent = Math.round(
     (YEARLY_SAVINGS_CENTS / (PRICING.monthlyCents * 12)) * 100
   )
+
+  // Steht bewusst hinter isYearly: die fuenfte Zeile haengt am Tarif.
+  // "Monatlich kuendbar - keine Bindung" stand frueher fest in der Liste und
+  // wurde auch beim Jahrestarif angezeigt, der zwoelf Monate laeuft. Der
+  // Jahrestarif nennt dort jetzt seine Ersparnis statt seiner Laufzeit --
+  // die steht im Checkout und in den AGB, in einer Vorteilsliste haette sie
+  // als Einschraenkung gewirkt.
+  const FEATURES = [
+    t('features.streaming'),
+    t('features.quality'),
+    t('features.new'),
+    t('features.devices'),
+    isYearly
+      ? t('features.yearlySavings', {
+          savings: formatPrice(YEARLY_SAVINGS_CENTS, locale),
+        })
+      : t('features.cancelMonthly'),
+    t('features.content'),
+  ]
 
   async function handleCheckout() {
     setError('')

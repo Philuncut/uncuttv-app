@@ -15,21 +15,38 @@
     "tagline2": "So wie Film sein sollte.",
     "cta_primary": "Jetzt ansehen",
     "cta_secondary": "Mehr erfahren",
-    "price_label": "/ Monat · Unbegrenzt · Keine Bindung"
+    "price_label": "/ Monat · Unbegrenzt · monatlich kündbar"
+  },
+  "usp": {
+    "title1": "Film wie er sein sollte.",
+    "title2": "KEIN KOMPROMISS.",
+    "intro": "UncutTV ist die Streaming-Plattform für Independent-Film. Keine Mainstream-Produktionen, kein Studio-Diktat – nur echtes, unabhängiges Kino aus aller Welt.",
+    "perMonth": "pro Monat",
+    "features": {
+      "indieTitle": "Weltweites Indie-Kino",
+      "indieDesc": "Unabhängige Filme aus aller Welt",
+      "qualityTitle": "Gestochen scharfes Bild",
+      "qualityDesc": "Adaptives Bitrate-Streaming, ausgewählte Titel in 4K",
+      "adultTitle": "Ab 18 Jahren",
+      "adultDesc": "Unzensierter, erwachsener Content ohne Beschränkungen",
+      "devicesTitle": "Auf deinen Geräten",
+      "devicesDesc": "Web, Android & Amazon Fire TV"
+    }
   },
   "pricing": {
     "eyebrow": "Mitgliedschaft",
     "title": "EINFACH. FAIR. UNCUT.",
-    "subtitle": "Ein Abo. Alles drin. Jeden Monat kündbar.",
+    "subtitle": "Ein Abo. Alles drin. Monatlich oder im Jahr.",
     "headline": "Bereit für echtes Kino?",
     "cta": "Jetzt 7 Tage kostenlos testen",
     "disclaimer": "UncutTV ist ausschließlich für Personen ab 18 Jahren. Altersverifikation erforderlich.",
     "features": {
       "streaming": "Unbegrenztes Streaming aller Filme",
-      "quality": "HD & 4K Streaming auf allen Geräten",
+      "quality": "Gestochen scharfes Streaming, ausgewählte Titel in 4K",
       "new": "Neue Filme jeden Monat",
-      "devices": "iOS, Android, Smart TV, Web",
-      "cancel": "Monatlich kündbar – keine Bindung",
+      "devices": "Web, Android & Amazon Fire TV",
+      "cancelMonthly": "Monatlich kündbar – keine Bindung",
+      "yearlySavings": "Ein Jahr streamen, {savings} gespart",
       "content": "Exklusiver Indie-Content aus aller Welt"
     },
     "checkoutLoading": "Wird geöffnet …",

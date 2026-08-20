@@ -15,21 +15,38 @@
     "tagline2": "The way film was meant to be.",
     "cta_primary": "Watch Now",
     "cta_secondary": "Learn More",
-    "price_label": "/ month · Unlimited · Cancel anytime"
+    "price_label": "/ month · Unlimited · cancel monthly"
+  },
+  "usp": {
+    "title1": "Film as it should be.",
+    "title2": "NO COMPROMISE.",
+    "intro": "UncutTV is the streaming platform for independent film. No mainstream productions, no studio dictate – just real, independent cinema from around the world.",
+    "perMonth": "per month",
+    "features": {
+      "indieTitle": "Indie cinema worldwide",
+      "indieDesc": "Independent films from around the world",
+      "qualityTitle": "Razor-sharp picture",
+      "qualityDesc": "Adaptive bitrate streaming, selected titles in 4K",
+      "adultTitle": "18 and over",
+      "adultDesc": "Uncensored, adult content without restrictions",
+      "devicesTitle": "On your devices",
+      "devicesDesc": "Web, Android & Amazon Fire TV"
+    }
   },
   "pricing": {
     "eyebrow": "Membership",
     "title": "SIMPLE. FAIR. UNCUT.",
-    "subtitle": "One subscription. Everything included. Cancel anytime.",
+    "subtitle": "One subscription. Everything included. Monthly or yearly.",
     "headline": "Ready for real cinema?",
     "cta": "Start your 7-day free trial",
     "disclaimer": "UncutTV is exclusively for persons aged 18 and over. Age verification required.",
     "features": {
       "streaming": "Unlimited streaming of all films",
-      "quality": "HD & 4K streaming on all devices",
+      "quality": "Razor-sharp streaming, selected titles in 4K",
       "new": "New films every month",
-      "devices": "iOS, Android, Smart TV, Web",
-      "cancel": "Cancel monthly – no commitment",
+      "devices": "Web, Android & Amazon Fire TV",
+      "cancelMonthly": "Cancel monthly – no commitment",
+      "yearlySavings": "A full year of streaming, {savings} saved",
       "content": "Exclusive indie content from around the world"
     },
     "checkoutLoading": "Opening …",
