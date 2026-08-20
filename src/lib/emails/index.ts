@@ -6,6 +6,7 @@ import { AboGekuendigtEmail } from './abo-gekuendigt'
 import { TestphaseEndetEmail } from './testphase-endet'
 import { VerifikationAusstehendEmail } from './verifikation-ausstehend'
 import { PinResetEmail } from './pin-reset'
+import { InternNotificationEmail } from './intern'
 import {
   KuendigungBestaetigungEmail,
   KuendigungInternEmail,
@@ -73,8 +74,26 @@ export async function sendVerifikationAusstehendEmail(email: string, endDate: st
   })
 }
 
-/** Empfaenger der internen Kuendigungs-Benachrichtigung. */
+/** Empfaenger aller internen Benachrichtigungen. */
 const CANCELLATION_NOTIFY = 'office@uncuttv.at'
+
+/**
+ * Interne Meldung ans Backoffice. Fehlschlaege werden geloggt, nicht geworfen
+ * -- ein Webhook darf daran nicht scheitern und von Stripe wiederholt werden.
+ */
+export async function sendInternNotification(
+  subject: string,
+  title: string,
+  intro: string,
+  rows: { label: string; value: string }[]
+) {
+  return resend.emails.send({
+    from: `UncutTV <${FROM}>`,
+    to: CANCELLATION_NOTIFY,
+    subject,
+    html: InternNotificationEmail({ title, intro, rows }),
+  })
+}
 
 export async function sendKuendigungBestaetigungEmail(
   email: string,

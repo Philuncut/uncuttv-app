@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
+import { hasSubscriptionAccess } from '@/lib/access'
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -66,14 +66,7 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const { data: activeSubscriptions } = await adminDb
-    .from('subscriptions')
-    .select('id')
-    .eq('user_id', user.id)
-    .in('status', ACCESS_GRANTING_STATUSES)
-    .limit(1)
-
-  const hasSubscription = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
+  const hasSubscription = await hasSubscriptionAccess(adminDb, user.id)
 
   const playbackId = req.nextUrl.searchParams.get('playbackId')
   const filmId = req.nextUrl.searchParams.get('filmId')

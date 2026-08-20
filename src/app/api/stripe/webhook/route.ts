@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient, getUserEmail, reportWrite } from '@/lib/supabase/admin'
 import { cancelUnverifiedTrial } from '@/lib/subscriptions'
+import { handleDisputeCreated, handleDisputeClosed, handleMandateUpdated } from '@/lib/disputes'
 import {
   sendWillkommenEmail,
   sendZahlungFehlgeschlagenEmail,
@@ -177,6 +178,25 @@ export async function POST(req: NextRequest) {
       if (email) {
         await sendZahlungFehlgeschlagenEmail(email)
       }
+      break
+    }
+
+    // SEPA-Zahlungen sind acht Wochen ohne Angabe von Gruenden anfechtbar und
+    // werden dann automatisch anerkannt. Stripe aendert dabei den Abo-Status
+    // NICHT -- ohne diesen Zweig behielte der Kunde seinen Zugang.
+    case 'charge.dispute.created': {
+      await handleDisputeCreated(event.data.object as Stripe.Dispute)
+      break
+    }
+
+    case 'charge.dispute.closed': {
+      await handleDisputeClosed(event.data.object as Stripe.Dispute)
+      break
+    }
+
+    // Storniertes SEPA-Mandat oder widerrufene PayPal-Vereinbarung.
+    case 'mandate.updated': {
+      await handleMandateUpdated(event.data.object as Stripe.Mandate)
       break
     }
 

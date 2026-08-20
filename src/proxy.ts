@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
+import { hasSubscriptionAccess } from '@/lib/access'
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -43,14 +43,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${pathLocale}/auth/login`, request.url))
   }
 
-  const { data: activeSubscriptions } = await supabase
-    .from('subscriptions')
-    .select('id')
-    .eq('user_id', user.id)
-    .in('status', ACCESS_GRANTING_STATUSES)
-    .limit(1)
-
-  let hasAccess = Boolean(activeSubscriptions && activeSubscriptions.length > 0)
+  let hasAccess = await hasSubscriptionAccess(supabase, user.id)
 
   if (!hasAccess) {
     const { data: vouchers } = await supabase

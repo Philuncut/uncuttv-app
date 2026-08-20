@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 /**
  * Abo-Status, die Zugang zu den Inhalten geben.
  *
@@ -20,3 +22,26 @@
 export const ACCESS_GRANTING_STATUSES = ['active', 'trialing'] as const
 
 export type AccessGrantingStatus = (typeof ACCESS_GRANTING_STATUSES)[number]
+
+/**
+ * Zweite Bedingung neben dem Status: subscriptions.access_blocked_reason.
+ *
+ * Der Status allein reicht nicht. Wird eine Zahlung angefochten, holt sich der
+ * Kunde das Geld zurueck -- Stripe laesst das Abo dabei aber auf 'active'.
+ * Die Sperre steht deshalb in einem eigenen Feld, das kein spaeteres
+ * customer.subscription.updated ueberschreibt.
+ */
+export async function hasSubscriptionAccess(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('id')
+    .eq('user_id', userId)
+    .in('status', ACCESS_GRANTING_STATUSES)
+    .is('access_blocked_reason', null)
+    .limit(1)
+
+  return Boolean(data && data.length > 0)
+}
