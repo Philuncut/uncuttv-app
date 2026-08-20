@@ -23,6 +23,9 @@ export default function Footer() {
     { label: t('privacy'), href: `${base}/datenschutz` },
     { label: t('terms'), href: `${base}/agb` },
     { label: t('youthProtection'), href: `${base}/jugendschutz` },
+    // Paragraph 312k BGB: Beschriftung und leichte Auffindbarkeit sind
+    // vorgeschrieben, deshalb direkt im Footer statt in einem Untermenue.
+    { label: t('cancelContracts'), href: locale === 'en' ? `${base}/cancel` : `${base}/kuendigung` },
   ]
 
   const [isMobile, setIsMobile] = useState(false)

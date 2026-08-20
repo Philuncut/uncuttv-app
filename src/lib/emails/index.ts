@@ -6,6 +6,11 @@ import { AboGekuendigtEmail } from './abo-gekuendigt'
 import { TestphaseEndetEmail } from './testphase-endet'
 import { VerifikationAusstehendEmail } from './verifikation-ausstehend'
 import { PinResetEmail } from './pin-reset'
+import {
+  KuendigungBestaetigungEmail,
+  KuendigungInternEmail,
+  type CancellationSummary,
+} from './kuendigung'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM || 'noreply@uncuttv.at'
@@ -65,6 +70,32 @@ export async function sendVerifikationAusstehendEmail(email: string, endDate: st
     to: email,
     subject: 'Altersverifikation fehlt – dein Zugang endet sonst',
     html: VerifikationAusstehendEmail({ email, endDate }),
+  })
+}
+
+/** Empfaenger der internen Kuendigungs-Benachrichtigung. */
+const CANCELLATION_NOTIFY = 'office@uncuttv.at'
+
+export async function sendKuendigungBestaetigungEmail(
+  email: string,
+  summary: CancellationSummary
+) {
+  return resend.emails.send({
+    from: `UncutTV <${FROM}>`,
+    to: email,
+    subject: 'Bestätigung deiner Kündigung – UncutTV',
+    html: KuendigungBestaetigungEmail(summary),
+  })
+}
+
+export async function sendKuendigungInternEmail(
+  summary: CancellationSummary & { locale: string; ip: string | null }
+) {
+  return resend.emails.send({
+    from: `UncutTV <${FROM}>`,
+    to: CANCELLATION_NOTIFY,
+    subject: 'Neue Kündigung eingegangen – manuell bearbeiten',
+    html: KuendigungInternEmail(summary),
   })
 }
 

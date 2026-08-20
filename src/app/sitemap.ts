@@ -15,6 +15,9 @@ const PUBLIC_PATHS: { path: string; changeFrequency: ChangeFrequency; priority: 
   { path: '/genres', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/subscribe', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/faq', changeFrequency: 'monthly', priority: 0.5 },
+  // Paragraph 312k BGB verlangt leichte Auffindbarkeit -- gehoert deshalb in
+  // die Sitemap, auch wenn die Seite kein Marketingziel ist.
+  { path: '/kuendigung', changeFrequency: 'yearly', priority: 0.4 },
   { path: '/agb', changeFrequency: 'yearly', priority: 0.3 },
   { path: '/datenschutz', changeFrequency: 'yearly', priority: 0.3 },
   { path: '/impressum', changeFrequency: 'yearly', priority: 0.3 },
