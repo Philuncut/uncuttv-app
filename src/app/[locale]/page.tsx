@@ -5,6 +5,7 @@ import Hero from '@/components/home/Hero'
 import UspSection from '@/components/home/UspSection'
 import PricingSection from '@/components/home/PricingSection'
 import ManifestoSection from '@/components/home/ManifestoSection'
+import FilmmakersSection from '@/components/home/FilmmakersSection'
 import { hasSubscriptionAccess } from '@/lib/access'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -23,6 +24,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <Hero />
       <UspSection />
       <ManifestoSection />
+      <FilmmakersSection />
       <PricingSection />
       <Footer />
     </main>

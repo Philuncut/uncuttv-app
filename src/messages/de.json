@@ -56,6 +56,10 @@
     "quote": "Das Independent Kino hat die mutigsten Stimmen der Welt — sie verdienen eine Bühne ohne Filter.",
     "source": "Das UncutTV Manifest"
   },
+  "filmmakers": {
+    "title": "Dein Abo geht an die Filmemacher.",
+    "text": "Wir rechnen nach Sehdauer ab — jeder Film, den du schaust, zahlt an den Regisseur, der ihn gemacht hat. Für unabhängige Filme, die es weder auf eine Scheibe noch zu den großen Anbietern schaffen, gibt es das sonst nirgends."
+  },
   "footer": {
     "description": "Die Streaming-Plattform für Independent-Film. Unabhängig. Ungefiltert. Fair.",
     "platform": "Plattform",

@@ -56,6 +56,10 @@
     "quote": "Independent cinema has the boldest voices in the world — they deserve a stage without filters.",
     "source": "The UncutTV Manifesto"
   },
+  "filmmakers": {
+    "title": "Your subscription goes to the filmmakers.",
+    "text": "We settle by watch time — every film you watch pays the director who made it. For independent films that never get a physical release and never reach the major platforms, there is nowhere else this happens."
+  },
   "footer": {
     "description": "The streaming platform for independent film. Unfiltered. Uncensored. Fair.",
     "platform": "Platform",
