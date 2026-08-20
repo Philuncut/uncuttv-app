@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient, reportWrite } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
+import { PRICING } from '@/lib/pricing'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -79,7 +80,10 @@ export async function POST(req: NextRequest) {
     payment_method_types: ['card', 'paypal', 'klarna', 'sepa_debit'],
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
-    subscription_data: isYearly ? {} : { trial_period_days: 7 },
+    // Testphase fuer beide Tarife. Frueher bekam sie nur das Monatsabo --
+    // seit der Verkaufsblock auf der Anmeldeseite "7 Tage kostenlos testen"
+    // vor beide Preise stellt, muss der Satz auch fuer den Jahresweg stimmen.
+    subscription_data: { trial_period_days: PRICING.trialDays },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/de/welcome?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/de/subscribe`,
     locale: 'de',

@@ -2,6 +2,18 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { hasSubscriptionAccess } from '@/lib/access'
 
+/**
+ * Alle Seiten, die denselben Filmkatalog zeigen und deshalb dasselbe Gate
+ * brauchen. Ohne Anmeldung liefert die Datenbank hier nichts zurueck -- die
+ * Seiten waren dann nicht geschuetzt, sondern nur leer. Die Segmente heissen
+ * in beiden Sprachen gleich, es gibt keine uebersetzten Pfade.
+ *
+ * Neue Katalogseite? Hier eintragen, sonst faellt sie durch dasselbe Loch.
+ */
+const GATED_SEGMENTS = ['films', 'neuheiten', 'genres'] as const
+
+const GATED_PATH = new RegExp(`^/(?:de|en)/(?:${GATED_SEGMENTS.join('|')})(?:/|$)`)
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const pathLocale = (pathname.match(/^\/(de|en)(?:\/|$)/)?.[1]) ?? 'de'
@@ -35,7 +47,7 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
-  if (!pathname.includes('/films')) {
+  if (!GATED_PATH.test(pathname)) {
     return supabaseResponse
   }
 

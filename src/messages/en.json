@@ -81,7 +81,14 @@
     "registerSuccessText": "We sent you an email. Confirm your address in it, then you can sign in.",
     "passwordMismatch": "The passwords do not match.",
     "passwordTooShort": "The password must be at least 8 characters long.",
-    "registerError": "Registration failed. Please try again."
+    "registerError": "Registration failed. Please try again.",
+    "sales": {
+      "headline": "Cinema without compromise.",
+      "text": "Stream unlimited films you won't find at the big providers.",
+      "priceWithYearly": "{trialDays} days free. Then from {yearlyPerMonth} a month on the annual plan — or {monthly} monthly, cancel anytime.",
+      "priceMonthlyOnly": "{trialDays} days free. Then {monthly} a month, cancel anytime.",
+      "cta": "START YOUR {trialDays}-DAY FREE TRIAL"
+    }
   },
   "filmsPage": {
     "featuredWatchNow": "Watch Now",

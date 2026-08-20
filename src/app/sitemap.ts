@@ -6,13 +6,12 @@ type ChangeFrequency = NonNullable<MetadataRoute.Sitemap[number]['changeFrequenc
 
 /**
  * Nur oeffentlich erreichbare Seiten. Bewusst nicht enthalten:
- * /films (Subscription-Gate), /account, /welcome, /redeem, /payment-failed,
+ * /films, /neuheiten, /genres (Login- bzw. Subscription-Gate in src/proxy.ts),
+ * /account, /welcome, /redeem, /payment-failed,
  * /geo-blocked (personalisiert bzw. transaktional) und /auth/* (Formulare).
  */
 const PUBLIC_PATHS: { path: string; changeFrequency: ChangeFrequency; priority: number }[] = [
   { path: '', changeFrequency: 'daily', priority: 1 },
-  { path: '/neuheiten', changeFrequency: 'daily', priority: 0.9 },
-  { path: '/genres', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/subscribe', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/faq', changeFrequency: 'monthly', priority: 0.5 },
   // Paragraph 312k BGB verlangt leichte Auffindbarkeit -- gehoert deshalb in

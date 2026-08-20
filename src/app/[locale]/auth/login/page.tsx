@@ -5,6 +5,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import {
+  PRICING,
+  SHOW_YEARLY_PLAN,
+  YEARLY_PER_MONTH_CENTS,
+  formatPrice,
+} from '@/lib/pricing'
 
 export default function LoginPage() {
   const params = useParams()
@@ -15,6 +21,25 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Preise kommen aus src/lib/pricing.ts, nicht aus den Uebersetzungen: eine
+  // Preisaenderung soll nicht zwei Sprachdateien anfassen muessen. Das
+  // Monatsaequivalent des Jahresabos wird gerechnet, nicht getippt.
+  //
+  // Ist der Jahrestarif abgeschaltet, faellt die Zeile auf den Monatspreis
+  // zurueck -- sonst bewirbt die Seite einen Tarif, den der Checkout nicht
+  // anbietet. "Jederzeit kuendbar" haengt in beiden Varianten am Monatsabo:
+  // das Jahresabo laeuft zwoelf Monate.
+  const salesPriceLine = SHOW_YEARLY_PLAN
+    ? t('sales.priceWithYearly', {
+        trialDays: PRICING.trialDays,
+        yearlyPerMonth: formatPrice(YEARLY_PER_MONTH_CENTS, locale),
+        monthly: formatPrice(PRICING.monthlyCents, locale),
+      })
+    : t('sales.priceMonthlyOnly', {
+        trialDays: PRICING.trialDays,
+        monthly: formatPrice(PRICING.monthlyCents, locale),
+      })
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -148,6 +173,58 @@ export default function LoginPage() {
               {t('registerNow')}
             </Link>
           </div>
+        </div>
+
+        {/*
+          Verkaufsflaeche fuer Neukunden. Auf dieser Seite landet seit dem
+          Content-Gate in src/proxy.ts jeder, der /films, /neuheiten oder
+          /genres ohne Konto aufruft -- also genau die Leute, die das Angebot
+          noch nicht kennen. Der Zeiger "Noch kein Konto? Jetzt registrieren"
+          im Kasten darueber bleibt fuer die, die schon wissen, was sie wollen.
+
+          Bewusst abgesetzt: eigener Rahmen, Abstand zum Anmeldekasten, damit
+          der Block nicht als Teil des Formulars gelesen wird.
+        */}
+        <div style={{
+          marginTop: '32px',
+          background: 'var(--anthrazit2)',
+          border: '1px solid rgba(var(--red-rgb),0.25)',
+          padding: '36px 32px',
+          textAlign: 'center',
+          position: 'relative',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(to right, transparent, var(--red), transparent)',
+          }} />
+
+          <h2 style={{
+            fontFamily: 'var(--font-display)', fontSize: '1.5rem',
+            letterSpacing: '0.06em', color: 'var(--warm-white)', marginBottom: '12px',
+          }}>
+            {t('sales.headline')}
+          </h2>
+
+          <p style={{
+            fontSize: '0.88rem', lineHeight: 1.7, color: 'var(--grey-light)',
+            letterSpacing: '0.03em', marginBottom: '16px',
+          }}>
+            {t('sales.text')}
+          </p>
+
+          <p style={{
+            fontSize: '0.78rem', lineHeight: 1.7, color: 'var(--grey)',
+            letterSpacing: '0.04em', marginBottom: '24px',
+          }}>
+            {salesPriceLine}
+          </p>
+
+          <Link href={`/${locale}/auth/register`} className="btn-primary" style={{
+            display: 'block', width: '100%', textAlign: 'center',
+            textDecoration: 'none',
+          }}>
+            {t('sales.cta', { trialDays: PRICING.trialDays })}
+          </Link>
         </div>
 
         <p style={{

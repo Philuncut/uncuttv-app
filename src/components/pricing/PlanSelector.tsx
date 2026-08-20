@@ -3,17 +3,14 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-
-/**
- * Der Jahrestarif ist ausgeblendet, weil AGB Paragraph 4 nur den Monatstarif
- * beschreibt. Auf true setzen, sobald die AGB ihn abdecken - Umschalter,
- * Jahrespreis und Ersparnis-Hinweis erscheinen dann wieder.
- *
- * Steht hier und nicht in den einbindenden Seiten: Startseite und /subscribe
- * teilen sich diese Komponente, der Schalter darf nur an einer Stelle
- * existieren.
- */
-const SHOW_YEARLY_PLAN = false
+import {
+  PRICING,
+  SHOW_YEARLY_PLAN,
+  YEARLY_PER_MONTH_CENTS,
+  YEARLY_SAVINGS_CENTS,
+  formatAmount,
+  formatPrice,
+} from '@/lib/pricing'
 
 /**
  * Tarifauswahl mit Preis, Leistungen und Checkout-Button.
@@ -50,6 +47,14 @@ export default function PlanSelector() {
 
   const isYearly = SHOW_YEARLY_PLAN && plan === 'yearly'
   const effectivePlan = isYearly ? 'yearly' : 'monthly'
+
+  // Die grosse Zahl steht ohne Waehrungszeichen da, das haengt als <sup>
+  // daneben -- deshalb formatAmount und nicht formatPrice.
+  const priceCents = isYearly ? PRICING.yearlyCents : PRICING.monthlyCents
+  const priceDigits = formatAmount(priceCents, locale)
+  const yearlySavingsPercent = Math.round(
+    (YEARLY_SAVINGS_CENTS / (PRICING.monthlyCents * 12)) * 100
+  )
 
   async function handleCheckout() {
     setError('')
@@ -131,7 +136,7 @@ export default function PlanSelector() {
                 letterSpacing: '0.06em',
               }}
             >
-              -16%
+              -{yearlySavingsPercent}%
             </span>
           </button>
         </div>
@@ -170,7 +175,7 @@ export default function PlanSelector() {
             }}
           >
             <sup style={{ fontSize: '0.4em', color: 'var(--red)', verticalAlign: 'super' }}>€</sup>
-            {isYearly ? '199,90' : '19,90'}
+            {priceDigits}
           </div>
           <div
             style={{
@@ -180,7 +185,9 @@ export default function PlanSelector() {
               marginTop: '6px',
             }}
           >
-            {isYearly ? 'PRO JAHR · entspricht 16,66€/Monat' : 'PRO MONAT · 7 Tage kostenlos testen'}
+            {isYearly
+              ? `PRO JAHR · entspricht ${formatPrice(YEARLY_PER_MONTH_CENTS, locale)}/Monat`
+              : `PRO MONAT · ${PRICING.trialDays} Tage kostenlos testen`}
           </div>
           {isYearly && (
             <div
@@ -191,7 +198,7 @@ export default function PlanSelector() {
                 letterSpacing: '0.06em',
               }}
             >
-              Du sparst 38,90€ im Vergleich zum Monatsabo
+              Du sparst {formatPrice(YEARLY_SAVINGS_CENTS, locale)} im Vergleich zum Monatsabo
             </div>
           )}
         </div>
