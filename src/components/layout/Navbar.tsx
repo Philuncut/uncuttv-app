@@ -16,8 +16,6 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [billingLoading, setBillingLoading] = useState(false)
-  const [billingError, setBillingError] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
   const mobileNavRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
@@ -94,45 +92,6 @@ export default function Navbar() {
     router.push(`/${locale}/auth/login`)
   }
 
-  async function handleBilling() {
-    setBillingError('')
-    setBillingLoading(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session?.access_token) {
-        setDropdownOpen(false)
-        setMobileNavOpen(false)
-        router.push(`/${locale}/auth/login`)
-        return
-      }
-
-      const res = await fetch('/api/stripe/portal', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ locale }),
-      }).catch(() => null)
-
-      const data = res && res.ok ? await res.json().catch(() => null) : null
-
-      // Das Menue bleibt im Fehlerfall offen, sonst waere die Meldung nicht
-      // zu sehen. Ein Menuepunkt, der wortlos nichts tut, ist schlimmer als
-      // eine Fehlermeldung.
-      if (!data?.url) {
-        setBillingError(t('billingError'))
-        return
-      }
-
-      setDropdownOpen(false)
-      setMobileNavOpen(false)
-      window.location.href = data.url
-    } finally {
-      setBillingLoading(false)
-    }
-  }
 
   const displayName = user?.email ?? t('myAccount')
   const shortName = displayName.length > 22 ? displayName.slice(0, 20) + '…' : displayName
@@ -308,29 +267,8 @@ export default function Navbar() {
                 >
                   {t('myAccount')}
                 </DropdownLink>
-                <DropdownLink
-                  href={`/${locale}/auth/change-password`}
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  {t('changePassword')}
-                </DropdownLink>
-                <DropdownButton onClick={handleBilling} disabled={billingLoading}>
-                  {billingLoading ? '…' : t('billing')}
-                </DropdownButton>
-                {billingError && (
-                  <p
-                    role="alert"
-                    style={{
-                      margin: 0,
-                      padding: '4px 16px 10px',
-                      fontSize: '0.72rem',
-                      lineHeight: 1.5,
-                      color: 'var(--red)',
-                    }}
-                  >
-                    {billingError}
-                  </p>
-                )}
+                {/* Passwort und Zahlungsmethode leben jetzt auf der Kontoseite:
+                    ein Ort fuer alles, was das Konto betrifft. */}
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', margin: '4px 0' }} />
                 <DropdownButton onClick={handleSignOut}>
                   {t('signOut')}

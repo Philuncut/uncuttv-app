@@ -101,6 +101,7 @@ export async function POST(req: NextRequest) {
           stripe_customer_id: sub.customer as string,
           stripe_price_id: sub.items.data[0].price.id,
           status: sub.status,
+          cancel_at_period_end: sub.cancel_at_period_end ?? false,
           trial_start: sub.trial_start ? new Date(sub.trial_start * 1000).toISOString() : null,
           trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
           current_period_start: subAny.current_period_start ? new Date(subAny.current_period_start * 1000).toISOString() : null,

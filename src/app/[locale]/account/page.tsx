@@ -1,190 +1,250 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
-import { ACCESS_GRANTING_STATUSES } from '@/lib/access'
 import AccountActions from './AccountActions'
+import PaymentMethodSection from './PaymentMethodSection'
+import ChangePasswordSection from './ChangePasswordSection'
+import CancelSubscriptionSection from './CancelSubscriptionSection'
+
+/** Status, zu denen die Kontoseite einen Abo-Block zeigt. */
+const SHOWN_STATUSES = ['trialing', 'active', 'past_due']
 
 export default async function AccountPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'account' })
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     redirect(`/${locale}/auth/login`)
   }
 
-  // Eine Abfrage statt zwei hintereinander: dieselbe Semantik, aber die
-  // Regel steht in ACCESS_GRANTING_STATUSES statt hier als Sonderfall.
-  const { data: activeSub } = await supabase
+  // Neueste Zeile ohne Statusfilter: past_due und gekuendigte Abos sollen
+  // hier sichtbar sein, nicht als "kein Abo" verschwinden.
+  const { data: sub } = await supabase
     .from('subscriptions')
-    .select('status, stripe_price_id, current_period_end, trial_end')
+    .select('status, stripe_price_id, trial_end, current_period_end, cancel_at_period_end')
     .eq('user_id', user.id)
-    .in('status', ACCESS_GRANTING_STATUSES)
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  const isTrialing = activeSub?.status === 'trialing'
-  const periodEnd = activeSub?.current_period_end
-    ? new Date(activeSub.current_period_end)
-    : activeSub?.trial_end
-      ? new Date(activeSub.trial_end)
+  const hasSubscription = Boolean(sub && SHOWN_STATUSES.includes(sub.status))
+  const isYearly = sub?.stripe_price_id === process.env.STRIPE_YEARLY_PRICE_ID
+  const canceling = Boolean(sub?.cancel_at_period_end)
+
+  const formatDate = (value: string | null | undefined) =>
+    value
+      ? new Date(value).toLocaleDateString(locale === 'de' ? 'de-AT' : 'en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
       : null
 
-  const formatDate = (d: Date) =>
-    locale === 'de'
-      ? d.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      : d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+  const trialEnd = formatDate(sub?.trial_end)
+  const periodEnd = formatDate(sub?.current_period_end)
+  const accessUntil = sub?.current_period_end ?? sub?.trial_end ?? null
 
-  const c = locale === 'de' ? {
-    title: 'MEIN KONTO',
-    changePassword: 'Passwort ändern',
-    subscription: 'Abonnement',
-    monthly: 'Monatsabo',
-    price: '19,90\u00a0€ / Monat',
-    trial: 'Kostenlose Testphase',
-    renewsOn: 'Verlängert sich am',
-    trialEnds: 'Testphase endet am',
-    noSub: 'Kein aktives Abonnement',
-    subscribe: 'Jetzt abonnieren',
-    back: 'Zurück zu Filmen',
-  } : {
-    title: 'MY ACCOUNT',
-    changePassword: 'Change Password',
-    subscription: 'Subscription',
-    monthly: 'Monthly Plan',
-    price: '€19.90 / month',
-    trial: 'Free Trial',
-    renewsOn: 'Renews on',
-    trialEnds: 'Trial ends on',
-    noSub: 'No active subscription',
-    subscribe: 'Subscribe now',
-    back: 'Back to films',
-  }
+  const statusLabel = !sub
+    ? ''
+    : sub.status === 'trialing'
+      ? t('statusTrialing')
+      : sub.status === 'active'
+        ? t('statusActive')
+        : sub.status === 'past_due'
+          ? t('statusPastDue')
+          : t('statusCanceled')
 
+  return (
+    <main style={{ minHeight: '100vh', background: 'var(--black)', padding: '110px 20px 64px' }}>
+      <div style={{ maxWidth: '620px', margin: '0 auto' }}>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.9rem, 6vw, 2.8rem)',
+            letterSpacing: '0.05em',
+            color: 'var(--warm-white)',
+            margin: '0 0 8px 0',
+          }}
+        >
+          {t('title')}
+        </h1>
+        <p style={{ fontSize: '0.86rem', color: 'var(--grey)', margin: '0 0 36px 0' }}>
+          {user.email}
+        </p>
+
+        {/* 1) Abo-Status */}
+        <Section title={t('sectionSubscription')}>
+          {hasSubscription && sub ? (
+            <>
+              <Row label={t('planLabel')} value={isYearly ? t('planYearly') : t('planMonthly')} />
+              <Row label={t('statusLabel')} value={statusLabel} highlight={sub.status === 'past_due'} />
+
+              <div style={{ marginTop: '16px' }}>
+                {canceling && periodEnd && (
+                  <p style={noteStyle}>{t('canceledUntil', { date: periodEnd })}</p>
+                )}
+
+                {!canceling && sub.status === 'trialing' && trialEnd && (
+                  <p style={noteStyle}>
+                    {t('trialUntil', { date: trialEnd })} {t('trialThenBilling')}
+                  </p>
+                )}
+
+                {!canceling && sub.status === 'active' && periodEnd && (
+                  <p style={noteStyle}>{t('nextBilling', { date: periodEnd })}</p>
+                )}
+
+                {sub.status === 'past_due' && (
+                  <p style={{ ...noteStyle, color: 'var(--red)' }}>{t('pastDueHint')}</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <p style={{ ...noteStyle, marginBottom: '18px' }}>{t('noSubscription')}</p>
+              <Link
+                href={`/${locale}/subscribe`}
+                className="btn-primary"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                }}
+              >
+                {t('subscribeCta')}
+              </Link>
+            </>
+          )}
+        </Section>
+
+        {/* 2) Zahlungsmethode */}
+        <Section title={t('sectionPayment')}>
+          <PaymentMethodSection locale={locale} />
+        </Section>
+
+        {/* 3) Passwort aendern */}
+        <Section title={t('sectionPassword')}>
+          <ChangePasswordSection />
+        </Section>
+
+        {/* 4) Abo kuendigen -- nur wenn es etwas zu kuendigen gibt */}
+        {hasSubscription && (
+          <Section title={t('sectionCancel')}>
+            <CancelSubscriptionSection
+              locale={locale}
+              accessUntil={accessUntil}
+              alreadyCanceled={canceling}
+            />
+          </Section>
+        )}
+
+        {/* 5) Konto loeschen -- optisch abgesetzt am Seitenende */}
+        <div
+          style={{
+            marginTop: '48px',
+            paddingTop: '28px',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '0.68rem',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              color: 'var(--grey)',
+              marginBottom: '14px',
+            }}
+          >
+            {t('sectionDelete')}
+          </div>
+          <AccountActions locale={locale} />
+        </div>
+
+        <div style={{ marginTop: '32px', textAlign: 'center' }}>
+          <Link
+            href={`/${locale}/films`}
+            style={{ color: 'var(--grey)', fontSize: '0.82rem', textDecoration: 'none' }}
+          >
+            {t('backToFilms')}
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section
+      style={{
+        background: 'var(--anthrazit2)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        padding: '26px 24px',
+        marginBottom: '16px',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(to right, transparent, var(--red), transparent)',
+        }}
+      />
+      <h2
+        style={{
+          fontSize: '0.68rem',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          color: 'var(--red)',
+          margin: '0 0 16px 0',
+        }}
+      >
+        {title}
+      </h2>
+      {children}
+    </section>
+  )
+}
+
+function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div
       style={{
-        minHeight: '100vh',
-        background: 'var(--black)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        paddingTop: '100px',
+        justifyContent: 'space-between',
+        gap: '16px',
+        padding: '10px 0',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 1 }}>
-        <Link
-          href={`/${locale}/films`}
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '2.2rem',
-            letterSpacing: '0.08em',
-            color: 'var(--warm-white)',
-            textDecoration: 'none',
-            display: 'block',
-            textAlign: 'center',
-            marginBottom: '48px',
-          }}
-        >
-          UNCUT<span style={{ color: 'var(--red)' }}>TV</span>
-        </Link>
-
-        <div
-          style={{
-            background: 'var(--anthrazit2)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            padding: '48px 40px',
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.5rem',
-              letterSpacing: '0.06em',
-              marginBottom: '32px',
-              color: 'var(--warm-white)',
-            }}
-          >
-            {c.title}
-          </h1>
-
-          {/* Subscription Status */}
-          <div style={{ padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div
-              style={{
-                fontSize: '0.68rem',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: '#d40000',
-                marginBottom: '8px',
-              }}
-            >
-              {c.subscription}
-            </div>
-            {activeSub ? (
-              <div>
-                <div style={{ fontSize: '0.95rem', color: 'var(--warm-white)', marginBottom: '4px' }}>
-                  {isTrialing ? c.trial : c.monthly} — {c.price}
-                </div>
-                {periodEnd && (
-                  <div style={{ fontSize: '0.82rem', color: 'var(--grey)' }}>
-                    {isTrialing ? c.trialEnds : c.renewsOn} {formatDate(periodEnd)}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--grey)', marginBottom: '10px' }}>
-                  {c.noSub}
-                </div>
-                <Link
-                  href={`/${locale}/subscribe`}
-                  style={{
-                    display: 'inline-block',
-                    padding: '10px 20px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    background: '#d40000',
-                    color: '#fff',
-                    textDecoration: 'none',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  {c.subscribe}
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Change Password */}
-          <Link
-            href={`/${locale}/auth/change-password`}
-            style={{
-              display: 'block',
-              padding: '14px 0',
-              fontSize: '0.9rem',
-              color: 'var(--warm-white)',
-              textDecoration: 'none',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {c.changePassword}
-          </Link>
-
-          {/* Delete Account (client component) */}
-          <AccountActions locale={locale} />
-
-          <p style={{ marginTop: '28px', textAlign: 'center' }}>
-            <Link href={`/${locale}/films`} style={{ color: 'var(--grey)', fontSize: '0.82rem' }}>
-              {c.back}
-            </Link>
-          </p>
-        </div>
-      </div>
+      <span style={{ fontSize: '0.8rem', color: 'var(--grey)' }}>{label}</span>
+      <span
+        style={{
+          fontSize: '0.9rem',
+          color: highlight ? 'var(--red)' : 'var(--warm-white)',
+          textAlign: 'right',
+        }}
+      >
+        {value}
+      </span>
     </div>
   )
+}
+
+const noteStyle: React.CSSProperties = {
+  fontSize: '0.86rem',
+  color: 'var(--grey-light)',
+  lineHeight: 1.8,
+  margin: 0,
 }

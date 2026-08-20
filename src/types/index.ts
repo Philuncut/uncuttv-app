@@ -65,6 +65,8 @@ export interface Subscription {
   stripe_subscription_id: string | null
   stripe_price_id: string | null
   status: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete' | 'unpaid'
+  /** Gekuendigt zum Periodenende. Nicht aus status ableitbar -- das bleibt bis dahin active. */
+  cancel_at_period_end: boolean
   trial_start: string | null
   trial_end: string | null
   current_period_start: string | null
