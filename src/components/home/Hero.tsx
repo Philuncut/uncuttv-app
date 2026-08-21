@@ -48,21 +48,42 @@ export default function Hero() {
       padding: isMobile ? '0 20px 48px' : '0 48px 80px',
       overflow: isMobile ? 'hidden' : 'visible',
     }}>
-      {/* Hintergrundbild: Kellerraum mit Roehrenfernseher. Das Motiv sitzt in der
-          rechten Bildhaelfte, deshalb rechtsbuendig ausgerichtet -- links bleibt
-          die ruhige, dunkle Flaeche, auf der der Text steht. */}
-      <Image
-        src="/hero-tv-room.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        style={{
-          objectFit: 'cover',
-          objectPosition: 'right center',
-          zIndex: 0,
-        }}
-      />
+      {/* Hintergrundbild: Kellerraum mit Roehrenfernseher.
+          Waagrecht rechtsbuendig -- das Motiv sitzt in der rechten Bildhaelfte
+          (Schirm bei x 66-80 %), links bleibt die ruhige dunkle Flaeche fuer den Text.
+
+          Senkrecht: die Bildbox ist mit 1400 px hoeher als die Sektion und oben
+          verankert. Der Schirm liegt bei 30-63 % der Bildhoehe, das Karussell
+          endet 392 px unter der Sektionskante -- 0,30 x 1400 = 420 px, der
+          Fernseher steht also knapp darunter frei, der Schriftzug darauf bei
+          448-560 px. Bei 'inset: 0' waere die Box nur so hoch wie die Sektion
+          und der Schirm liefe hinter die Poster. Der Ueberstand nach unten wird
+          von der aeusseren Box abgeschnitten, weil die Sektion selbst
+          overflow: visible hat und das Bild sonst in den Abschnitt darunter
+          liefe. Mobil bleibt es bei Sektionshoehe -- dort ist das Bild ohnehin
+          fast vollstaendig abgedunkelt. */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0,
+          height: isMobile ? '100%' : '1400px',
+        }}>
+          <Image
+            src="/hero-tv-room.webp"
+            alt=""
+            fill
+            priority
+            /* Die Box ist hoeher als breit, das Bild wird also auf die Hoehe
+               skaliert: 1400 x 16/9 = 2488 px Darstellungsbreite, unabhaengig
+               vom Fenster. Mit 100vw wuerde next/image eine viel zu kleine
+               Fassung ausliefern. */
+            sizes="(max-width: 767px) 100vw, 2488px"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'right top',
+            }}
+          />
+        </div>
+      </div>
 
       {/* Verlauf und Schleier ueber dem Bild.
           Desktop: volles Schwarz bis 45 % Breite, danach weich auslaufend, damit
@@ -239,13 +260,16 @@ export default function Hero() {
           {/* Title */}
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: isMobile ? 'clamp(4rem, 22vw, 6rem)' : 'clamp(5rem, 10vw, 9rem)',
+            fontSize: isMobile ? 'clamp(3.5rem, 23vw, 11rem)' : 'clamp(5rem, 26vw, 11rem)',
             lineHeight: 0.9, letterSpacing: '0.02em',
             marginBottom: isMobile ? '12px' : '8px',
             color: 'var(--warm-white)',
+            // Ab Tablet-Breite bleibt die Zeile geschlossen. Darunter darf sie
+            // umbrechen -- ohne Leerzeichen gaebe es sonst keine Bruchstelle und
+            // das Wort liefe aus der Spalte.
+            whiteSpace: isMobile ? 'normal' : 'nowrap',
           }}>
-            UNCUT<br />
-            <span style={{ color: 'var(--red)' }}>TV</span>
+            UNCUT<wbr /><span style={{ color: 'var(--red)' }}>TV</span>
           </h1>
 
           {/* Tagline */}
