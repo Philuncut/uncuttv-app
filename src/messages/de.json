@@ -33,6 +33,13 @@
       "devicesDesc": "Web, Android & Amazon Fire TV"
     }
   },
+  "apps": {
+    "title": "Auf dem Fernseher und unterwegs.",
+    "text": "Hol dir die App und schau, wo du willst.",
+    "googlePlay": "Google Play",
+    "fireTv": "Amazon Fire TV",
+    "soon": "Apps für LG und Samsung sind in Entwicklung."
+  },
   "pricing": {
     "eyebrow": "Mitgliedschaft",
     "title": "EINFACH. FAIR. UNCUT.",

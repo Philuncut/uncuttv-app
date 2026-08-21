@@ -33,6 +33,13 @@
       "devicesDesc": "Web, Android & Amazon Fire TV"
     }
   },
+  "apps": {
+    "title": "On your TV and on the go.",
+    "text": "Get the app and watch wherever you like.",
+    "googlePlay": "Google Play",
+    "fireTv": "Amazon Fire TV",
+    "soon": "Apps for LG and Samsung are in development."
+  },
   "pricing": {
     "eyebrow": "Membership",
     "title": "SIMPLE. FAIR. UNCUT.",

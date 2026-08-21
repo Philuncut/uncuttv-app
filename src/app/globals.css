@@ -369,6 +369,67 @@ body::before {
   box-shadow: 0 0 20px rgba(240,236,228,0.08);
 }
 
+/* App-Links zwischen Filmemacher- und Tarifabschnitt.
+   Der sichtbare Abstand nach oben und unten entsteht erst zusammen mit der
+   Polsterung der Nachbarsektion. Damit beide Raender gleich breit sind, ist
+   die obere hier auf PricingSection abgestimmt -- deren Wert springt bei
+   768 px, waehrend die untere wie bei FilmmakersSection mitwaechst. */
+.apps-section {
+  padding: 48px 24px clamp(32px, 4vw, 56px);
+  background: var(--black);
+}
+@media (max-width: 767px) {
+  .apps-section {
+    padding-top: 28px;
+  }
+}
+
+/* Die beiden App-Store-Schaltflaechen. Eigene Klasse statt btn-primary und
+   btn-secondary: die beiden zusammen wuerden einen der Anbieter bevorzugt
+   aussehen lassen. Rot nur als Rand, nicht als Flaeche -- der Abschnitt ist
+   ein Hinweis, kein zweiter Aufruf neben dem Tarifabschnitt darunter. */
+.apps-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+.btn-store {
+  /* Gleiche Breite fuer beide, damit keiner schwerer wiegt. */
+  flex: 0 1 260px;
+  text-align: center;
+  background: transparent;
+  color: var(--warm-white);
+  border: 1px solid rgba(var(--red-rgb), 0.45);
+  padding: 16px 28px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn-store:hover {
+  border-color: var(--red);
+  background: rgba(var(--red-rgb), 0.08);
+  box-shadow: 0 0 18px rgba(var(--red-rgb), 0.25);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .apps-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  /* In der Spalte waere die Basis eine Hoehe. Sie muss weg, sonst haetten die
+     Schaltflaechen 260 px Hoehe statt voller Breite. */
+  .btn-store {
+    flex: 0 0 auto;
+  }
+}
+
 /* Red divider */
 .red-divider {
   height: 1px;

@@ -8,6 +8,7 @@ import PricingSection from '@/components/home/PricingSection'
 import ManifestoSection from '@/components/home/ManifestoSection'
 import LabelMarquee from '@/components/home/LabelMarquee'
 import FilmmakersSection from '@/components/home/FilmmakersSection'
+import AppsSection from '@/components/home/AppsSection'
 import { hasSubscriptionAccess } from '@/lib/access'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -33,6 +34,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ManifestoSection />
       <LabelMarquee />
       <FilmmakersSection />
+      <AppsSection />
       <PricingSection />
       <Footer />
     </main>
