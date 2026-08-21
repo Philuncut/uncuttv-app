@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import MuxPlayer from '@mux/mux-player-react'
 import type MuxPlayerElement from '@mux/mux-player'
 
@@ -78,10 +79,11 @@ export default function FilmPlayer({
   subtitleLanguages = [],
   startTime,
   variant = 'default',
-  playLabel = 'Abspielen',
-  loadingLabel = 'Wird geladen…',
+  playLabel,
+  loadingLabel,
   onPlay,
 }: FilmPlayerProps) {
+  const tDetail = useTranslations('filmDetail')
   const router = useRouter()
   const [token, setToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -429,14 +431,14 @@ export default function FilmPlayer({
       const res = await fetch(`/api/mux/token?playbackId=${encodeURIComponent(playbackId)}&filmId=${encodeURIComponent(filmId)}`)
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setError(data.error ?? 'Kein Zugriff')
+        setError(data.error ?? tDetail('noAccess'))
         return
       }
       const data = await res.json()
       setToken(data.token)
       onPlay?.()
     } catch {
-      setError('Fehler beim Laden')
+      setError(tDetail('playerError'))
     } finally {
       setLoading(false)
     }
@@ -473,7 +475,7 @@ export default function FilmPlayer({
           opacity: loading ? 0.7 : 1,
         }}
       >
-        {loading ? loadingLabel : playLabel}
+        {loading ? (loadingLabel ?? tDetail('playerLoading')) : (playLabel ?? tDetail('play'))}
       </button>
     )
   }

@@ -3,14 +3,23 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { PRICING } from '@/lib/pricing'
+
+/** Wartezeit bis zur automatischen Weiterleitung. Steht im Text und im Timer. */
+const REDIRECT_SECONDS = 5
 
 export default function WelcomePage() {
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? 'de'
+  const t = useTranslations('welcome')
+  // Die beiden Zeilen darunter stehen wortgleich im Hero -- derselbe Schluessel
+  // statt einer zweiten Fassung, die auseinanderlaufen kann.
+  const tHero = useTranslations('hero')
 
   useEffect(() => {
-    const timer = setTimeout(() => router.push(`/${locale}/films`), 5000)
+    const timer = setTimeout(() => router.push(`/${locale}/films`), REDIRECT_SECONDS * 1000)
     return () => clearTimeout(timer)
   }, [locale, router])
 
@@ -45,7 +54,7 @@ export default function WelcomePage() {
             fontFamily: 'var(--font-display)', fontSize: '2.5rem',
             letterSpacing: '0.06em', marginBottom: '16px', color: 'var(--warm-white)',
           }}>
-            WILLKOMMEN BEI<br />
+            {t('title')}<br />
             <span style={{ color: 'var(--red)' }}>UNCUTTV!</span>
           </h1>
 
@@ -53,19 +62,19 @@ export default function WelcomePage() {
             fontSize: '0.95rem', color: 'var(--grey-light)',
             lineHeight: 1.8, marginBottom: '40px',
           }}>
-            Deine 7 Tage Testphase hat begonnen.<br />
-            Kino ohne Kompromisse. Unabhängig.<br />
-            So wie Film sein sollte.
+            {t('trialStarted', { days: PRICING.trialDays })}<br />
+            {tHero('tagline')}<br />
+            {tHero('tagline2')}
           </p>
 
           <Link href={`/${locale}/films`} className="btn-primary" style={{
             display: 'block', textAlign: 'center', fontSize: '1rem', padding: '18px',
           }}>
-            Jetzt Filme entdecken →
+            {t('cta')} →
           </Link>
 
           <p style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--grey)' }}>
-            Du wirst in 5 Sekunden automatisch weitergeleitet...
+            {t('redirectHint', { seconds: REDIRECT_SECONDS })}
           </p>
         </div>
       </div>

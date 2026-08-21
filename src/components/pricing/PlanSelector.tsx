@@ -119,7 +119,7 @@ export default function PlanSelector() {
               transition: 'all 0.2s',
             }}
           >
-            Monatlich
+            {t('planMonthly')}
           </button>
           <button
             onClick={() => setPlan('yearly')}
@@ -137,7 +137,7 @@ export default function PlanSelector() {
               gap: '8px',
             }}
           >
-            Jährlich
+            {t('planYearly')}
             <span
               style={{
                 fontSize: '0.65rem',
@@ -196,8 +196,8 @@ export default function PlanSelector() {
             }}
           >
             {isYearly
-              ? `PRO JAHR · entspricht ${formatPrice(YEARLY_PER_MONTH_CENTS, locale)}/Monat`
-              : `PRO MONAT · ${PRICING.trialDays} Tage kostenlos testen`}
+              ? t('perYear', { price: formatPrice(YEARLY_PER_MONTH_CENTS, locale) })
+              : t('perMonth', { days: PRICING.trialDays })}
           </div>
           {isYearly && (
             <div
@@ -208,7 +208,7 @@ export default function PlanSelector() {
                 letterSpacing: '0.06em',
               }}
             >
-              Du sparst {formatPrice(YEARLY_SAVINGS_CENTS, locale)} im Vergleich zum Monatsabo
+              {t('savingsNote', { amount: formatPrice(YEARLY_SAVINGS_CENTS, locale) })}
             </div>
           )}
         </div>

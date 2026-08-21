@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import type { VoucherErrorCode } from '@/lib/vouchers'
 import { checkVoucherAction, redeemAndGoAction } from './actions'
 
 export default function RedeemForm({ locale, userId }: { locale: string; userId: string }) {
+  const t = useTranslations('redeem')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // Der Schluessel, nicht der Satz: uebersetzt wird erst beim Anzeigen.
+  const [error, setError] = useState<VoucherErrorCode | 'generic' | null>(null)
   const [result, setResult] = useState<{
     filmTitle: string
     filmSlug: string
@@ -30,10 +34,10 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
           code,
         })
       } else {
-        setError(res.error ?? 'Ungültiger Code.')
+        setError(res.errorCode ?? 'unknown')
       }
     } catch {
-      setError('Ein Fehler ist aufgetreten.')
+      setError('generic')
     } finally {
       setLoading(false)
     }
@@ -51,7 +55,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
         result.filmSlug,
         locale
       )
-      if (res?.error) setError(res.error)
+      if (res?.errorCode) setError(res.errorCode)
     } catch {
       // redirect() throws
     } finally {
@@ -68,7 +72,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
             color: 'var(--grey-light)',
             marginBottom: '16px',
           }}>
-            Code gültig. Du hast Zugang zu:
+            {t('valid')}
           </p>
           <p style={{
             fontFamily: 'var(--font-display)',
@@ -87,7 +91,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
               fontSize: '0.82rem',
               color: '#ff6b6b',
             }}>
-              {error}
+              {t(`errors.${error}`)}
             </div>
           )}
           <button
@@ -102,7 +106,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
               opacity: redeemLoading ? 0.7 : 1,
             }}
           >
-            {redeemLoading ? 'Wird eingelöst…' : 'Jetzt ansehen'}
+            {redeemLoading ? t('redeeming') : t('watchNow')}
           </button>
         </div>
       ) : (
@@ -115,13 +119,13 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
             color: 'var(--grey)',
             marginBottom: '8px',
           }}>
-            Gutscheincode
+            {t('label')}
           </label>
           <input
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="z.B. PROMO2024"
+            placeholder={t('placeholder')}
             autoComplete="off"
             style={{
               width: '100%',
@@ -146,7 +150,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
               fontSize: '0.82rem',
               color: '#ff6b6b',
             }}>
-              {error}
+              {t(`errors.${error}`)}
             </div>
           )}
           <button
@@ -159,7 +163,7 @@ export default function RedeemForm({ locale, userId }: { locale: string; userId:
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? 'Wird geprüft…' : 'Code prüfen'}
+            {loading ? t('checking') : t('check')}
           </button>
         </form>
       )}

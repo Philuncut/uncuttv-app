@@ -175,7 +175,7 @@ export function FilmRow({
 
 export default function FilmCatalog({
   films,
-  title = 'Filme',
+  title,
   subtitle,
   topPadding = 100,
   showGenreFilter = true,
@@ -259,7 +259,7 @@ export default function FilmCatalog({
             marginBottom: '8px',
           }}
         >
-          {genreFilter ?? title}
+          {genreFilter ?? title ?? t('sectionAll')}
         </h1>
         {subtitle && !genreFilter && (
           <p style={{ color: 'var(--grey)', fontSize: '0.9rem', marginBottom: '20px' }}>{subtitle}</p>

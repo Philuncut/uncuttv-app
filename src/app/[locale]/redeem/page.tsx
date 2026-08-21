@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { checkVoucher } from '@/lib/vouchers'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import RedeemForm from './RedeemForm'
 
 export default async function RedeemPage({
@@ -9,6 +9,7 @@ export default async function RedeemPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'redeem' })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -61,7 +62,7 @@ export default async function RedeemPage({
             marginBottom: '8px',
             color: 'var(--warm-white)',
           }}>
-            Gutschein einlösen
+            {t('title')}
           </h1>
           <p style={{
             fontSize: '0.82rem',
@@ -69,7 +70,7 @@ export default async function RedeemPage({
             letterSpacing: '0.04em',
             marginBottom: '32px',
           }}>
-            Gib deinen Promo- oder Gutscheincode ein.
+            {t('subtitle')}
           </p>
 
           <RedeemForm locale={locale} userId={user.id} />

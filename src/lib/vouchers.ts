@@ -7,12 +7,29 @@ function getAdminClient(): SupabaseClient {
   )
 }
 
+/**
+ * Schluessel statt Satz. Die Bibliothek laeuft auf dem Server und kennt die
+ * Sprache des Aufrufers nicht -- frueher gab sie fertige deutsche Saetze
+ * zurueck, die auf /en unuebersetzt durchschlugen. Die Zuordnung zum Text
+ * passiert in der Oberflaeche unter messages.redeem.errors.
+ */
+export type VoucherErrorCode =
+  | 'empty'
+  | 'checkFailed'
+  | 'unknown'
+  | 'expired'
+  | 'exhausted'
+  | 'alreadyRedeemed'
+  | 'invalidInput'
+  | 'notFound'
+  | 'redeemFailed'
+
 export interface VoucherResult {
   valid: boolean
   filmId?: string
   filmTitle?: string
   filmSlug?: string
-  error?: string
+  errorCode?: VoucherErrorCode
 }
 
 export interface UserVoucher {
@@ -31,7 +48,7 @@ export async function checkVoucher(code: string, _userId: string): Promise<Vouch
   const supabase = getAdminClient()
   const trimmed = code.trim().toUpperCase()
   if (!trimmed) {
-    return { valid: false, error: 'Bitte Code eingeben.' }
+    return { valid: false, errorCode: 'empty' }
   }
 
   const { data: voucher, error: fetchError } = await supabase
@@ -42,24 +59,24 @@ export async function checkVoucher(code: string, _userId: string): Promise<Vouch
 
   if (fetchError) {
     console.error('Voucher fetch error:', fetchError)
-    return { valid: false, error: 'Fehler beim Prüfen des Codes.' }
+    return { valid: false, errorCode: 'checkFailed' }
   }
 
   if (!voucher) {
-    return { valid: false, error: 'Ungültiger oder unbekannter Code.' }
+    return { valid: false, errorCode: 'unknown' }
   }
 
   const now = new Date().toISOString()
   if (voucher.expires_at && voucher.expires_at < now) {
-    return { valid: false, error: 'Dieser Code ist abgelaufen.' }
+    return { valid: false, errorCode: 'expired' }
   }
 
   if (voucher.max_uses != null && voucher.times_used != null && voucher.times_used >= voucher.max_uses) {
-    return { valid: false, error: 'Dieser Code wurde bereits vollständig eingelöst.' }
+    return { valid: false, errorCode: 'exhausted' }
   }
 
   if (voucher.used_by) {
-    return { valid: false, error: 'Dieser Code wurde bereits eingelöst.' }
+    return { valid: false, errorCode: 'alreadyRedeemed' }
   }
 
   const { data: film } = await supabase
@@ -83,11 +100,11 @@ export async function redeemVoucher(
   code: string,
   userId: string,
   filmId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; errorCode?: VoucherErrorCode }> {
   const supabase = getAdminClient()
   const trimmed = code.trim().toUpperCase()
   if (!trimmed || !userId || !filmId) {
-    return { success: false, error: 'Ungültige Angaben.' }
+    return { success: false, errorCode: 'invalidInput' }
   }
 
   const { data: voucher, error: fetchError } = await supabase
@@ -98,11 +115,11 @@ export async function redeemVoucher(
     .maybeSingle()
 
   if (fetchError || !voucher) {
-    return { success: false, error: 'Code oder Film nicht gefunden.' }
+    return { success: false, errorCode: 'notFound' }
   }
 
   if (voucher.used_by) {
-    return { success: false, error: 'Code wurde bereits eingelöst.' }
+    return { success: false, errorCode: 'alreadyRedeemed' }
   }
 
   const now = new Date().toISOString()
@@ -121,7 +138,7 @@ export async function redeemVoucher(
 
   if (updateError) {
     console.error('Voucher redeem error:', updateError)
-    return { success: false, error: 'Einlösung fehlgeschlagen.' }
+    return { success: false, errorCode: 'redeemFailed' }
   }
 
   return { success: true }

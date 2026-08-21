@@ -50,7 +50,12 @@
       "content": "Exclusive indie content from around the world"
     },
     "checkoutLoading": "Opening …",
-    "checkoutError": "Checkout could not be started. Please try again."
+    "checkoutError": "Checkout could not be started. Please try again.",
+    "planMonthly": "Monthly",
+    "planYearly": "Yearly",
+    "perYear": "PER YEAR · equals {price}/month",
+    "perMonth": "PER MONTH · {days} days free trial",
+    "savingsNote": "You save {amount} compared to the monthly plan"
   },
   "manifesto": {
     "quote": "Independent cinema has the boldest voices in the world — they deserve a stage without filters.",
@@ -123,7 +128,10 @@
     "newReleasesTitle": "New Releases",
     "genresBrowseTitle": "Genres",
     "uncategorized": "Other",
-    "alreadyWatchedBanner": "Already Watched"
+    "alreadyWatchedBanner": "Already Watched",
+    "loadErrorFilms": "Films could not be loaded.",
+    "loadErrorGenres": "Genres could not be loaded.",
+    "loadErrorNew": "New releases could not be loaded."
   },
   "filmDetail": {
     "backToFilms": "Back to films",
@@ -139,7 +147,9 @@
     "language": "Language",
     "genres": "Genres",
     "play": "Play",
-    "playerLoading": "Loading…"
+    "playerLoading": "Loading…",
+    "playerError": "Could not be loaded",
+    "noAccess": "No access"
   },
   "legal": {
     "consent": {
@@ -330,5 +340,50 @@
     "paymentVia": "via {brand} •••• {last4}",
     "paymentCardFallback": "Card",
     "paymentUnknown": "Payment method on file ({type})"
+  },
+  "meta": {
+    "title": "UncutTV – Independent Film Streaming",
+    "description": "Cinema without compromise. Independent. The way film was meant to be.",
+    "ogImageAlt": "UncutTV – Independent Film Streaming"
+  },
+  "welcome": {
+    "title": "WELCOME TO",
+    "trialStarted": "Your {days}-day trial has started.",
+    "cta": "Discover films now",
+    "redirectHint": "You will be redirected automatically in {seconds} seconds …"
+  },
+  "geoBlocked": {
+    "title": "NOT AVAILABLE",
+    "body": "This title is unfortunately not available in Germany due to licensing restrictions.",
+    "whyTitle": "WHY AM I SEEING THIS?",
+    "why1": "UncutTV is an Austrian service.",
+    "why2": "Some titles are subject to country-specific licensing.",
+    "why3": "We are working on releasing more content for Germany.",
+    "toFilms": "Browse films",
+    "toAccount": "My account",
+    "questions": "Questions?"
+  },
+  "redeem": {
+    "title": "Redeem voucher",
+    "subtitle": "Enter your promo or voucher code.",
+    "label": "Voucher code",
+    "placeholder": "e.g. PROMO2024",
+    "check": "Check code",
+    "checking": "Checking …",
+    "valid": "Code valid. You have access to:",
+    "watchNow": "Watch now",
+    "redeeming": "Redeeming …",
+    "errors": {
+      "empty": "Please enter a code.",
+      "checkFailed": "The code could not be checked.",
+      "unknown": "Invalid or unknown code.",
+      "expired": "This code has expired.",
+      "exhausted": "This code has already been fully redeemed.",
+      "alreadyRedeemed": "You have already redeemed this code.",
+      "invalidInput": "Invalid details.",
+      "notFound": "Code or film not found.",
+      "redeemFailed": "Redemption failed.",
+      "generic": "Something went wrong."
+    }
   }
 }

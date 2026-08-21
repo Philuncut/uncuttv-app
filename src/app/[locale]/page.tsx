@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import Footer from '@/components/layout/Footer'
 import Hero from '@/components/home/Hero'
@@ -10,6 +11,11 @@ import { hasSubscriptionAccess } from '@/lib/access'
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
+  // Auch hier, nicht nur im Layout: Next rendert Layout und Seite nebenlaeufig,
+  // die Reihenfolge ist nicht zugesichert. FilmmakersSection ist die einzige
+  // Serverkomponente dieser Seite und haengt daran.
+  setRequestLocale(locale)
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

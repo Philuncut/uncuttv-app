@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function GeoBlockedPage() {
   const params = useParams()
   const locale = (params?.locale as string) ?? 'de'
+  const t = useTranslations('geoBlocked')
 
   return (
     <div style={{
@@ -50,14 +52,14 @@ export default function GeoBlockedPage() {
           letterSpacing: '0.06em', color: 'var(--warm-white)',
           marginBottom: '12px', lineHeight: 1,
         }}>
-          NICHT VERFÜGBAR
+          {t('title')}
         </h1>
 
         <p style={{
           fontSize: '0.88rem', color: 'var(--grey-light)',
           lineHeight: 1.7, marginBottom: '32px',
         }}>
-          Dieser Inhalt ist in Deutschland aufgrund von Lizenzbestimmungen leider nicht verfügbar.
+          {t('body')}
         </p>
 
         <div style={{
@@ -68,11 +70,11 @@ export default function GeoBlockedPage() {
           lineHeight: 1.8,
         }}>
           <div style={{ color: 'var(--grey-light)', marginBottom: '8px', fontSize: '0.72rem', letterSpacing: '0.1em' }}>
-            WARUM WIRD MIR DAS ANGEZEIGT?
+            {t('whyTitle')}
           </div>
-          <div>UncutTV ist ein österreichischer Dienst.</div>
-          <div>Einige Titel unterliegen länderspezifischen Freigaben.</div>
-          <div>Wir arbeiten daran, mehr Inhalte für Deutschland freizugeben.</div>
+          <div>{t('why1')}</div>
+          <div>{t('why2')}</div>
+          <div>{t('why3')}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -81,7 +83,7 @@ export default function GeoBlockedPage() {
             className="btn-primary"
             style={{ textAlign: 'center', display: 'block' }}
           >
-            Zur Filmübersicht
+            {t('toFilms')}
           </Link>
           <Link
             href={`/${locale}/account`}
@@ -95,7 +97,7 @@ export default function GeoBlockedPage() {
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--warm-white)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--grey)')}
           >
-            Mein Konto
+            {t('toAccount')}
           </Link>
         </div>
       </div>
@@ -104,7 +106,7 @@ export default function GeoBlockedPage() {
         marginTop: '32px', fontSize: '0.75rem', color: 'var(--grey)',
         textAlign: 'center',
       }}>
-        Fragen? <a href="mailto:support@uncuttv.com" style={{ color: 'var(--red)', textDecoration: 'none' }}>support@uncuttv.com</a>
+        {t('questions')} <a href="mailto:support@uncuttv.com" style={{ color: 'var(--red)', textDecoration: 'none' }}>support@uncuttv.com</a>
       </p>
 
     </div>

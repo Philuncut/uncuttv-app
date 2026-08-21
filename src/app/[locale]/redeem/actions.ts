@@ -16,7 +16,7 @@ export async function redeemAndGoAction(
 ) {
   const result = await redeemVoucher(code.trim(), userId, filmId)
   if (!result.success) {
-    return { error: result.error }
+    return { errorCode: result.errorCode }
   }
   redirect(`/${locale}/films/${filmSlug}`)
 }

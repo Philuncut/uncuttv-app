@@ -276,7 +276,7 @@ export default async function FilmsPage({
     console.error('Films fetch error:', error)
     return (
       <main style={{ minHeight: '100vh', background: '#0A0A0A', padding: '48px', color: 'var(--warm-white)' }}>
-        <p>Fehler beim Laden der Filme.</p>
+        <p>{t('loadErrorFilms')}</p>
       </main>
     )
   }

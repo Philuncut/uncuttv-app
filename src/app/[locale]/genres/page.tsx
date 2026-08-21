@@ -54,7 +54,7 @@ export default async function GenresPage({
     console.error('Genres page fetch error:', error)
     return (
       <main style={{ minHeight: '100vh', background: '#0A0A0A', padding: '48px', color: 'var(--warm-white)' }}>
-        <p>Fehler beim Laden der Genres.</p>
+        <p>{t('loadErrorGenres')}</p>
       </main>
     )
   }
