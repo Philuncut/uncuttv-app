@@ -73,6 +73,11 @@ const LABELS: Label[] = [
   // bliebe nur das Sechseck uebrig. Von sich aus weiss-grau, laeuft also
   // ungefaerbt mit. Kompakt gebaut, deshalb etwas mehr Hoehe.
   { name: 'New Films Order', file: 'new_films_order.png', keepColor: true, scale: 1.15 },
+  // Gezeichnetes Emblem in Farbe. Weiss gefaerbt zerfaellt es: der Kopf wird
+  // zur Flaeche und die weiss gewordenen Spritzer laufen in die Schrift.
+  // Laeuft deshalb in Originalfarbe -- der goldene Schriftzug traegt auf
+  // Schwarz, der dunkle Teil tritt zurueck.
+  { name: 'Garden of Gore', file: 'gardenofgore.png', keepColor: true },
 ]
 
 /**

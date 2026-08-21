@@ -24,6 +24,9 @@
  *   keep        nichts einfaerben, nur beschneiden und neu komprimieren. Fuer
  *               Logos, die schon hell und nahezu einfarbig sind und in der
  *               Leiste ohne Weissfaerbung laufen (keepColor in LABELS).
+ *               Farbige Logos werden dabei auf 256 Farben gebracht -- bei
+ *               gut 40 px Anzeigehoehe ist das nicht zu sehen und spart bei
+ *               einer gezeichneten Vorlage rund drei Viertel der Datei.
  *
  * --fold        misst nur und gibt die Knickspalte aus, schreibt keine Datei
  *
