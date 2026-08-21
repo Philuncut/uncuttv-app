@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveRequestUser } from '@/lib/api-auth'
 
 /**
  * Obergrenze fuer eine einzelne Buchung, in Sekunden.
@@ -43,23 +42,15 @@ const MAX_BOOKABLE_SECONDS = 60
  * Migration noch nicht eingespielt ist, laeuft hier durch.
  */
 async function recordWatchtimeEvent(params: {
+  admin: SupabaseClient
   userId: string
   filmId: string
   position: number
   playedSeconds: number | null
 }) {
-  const { userId, filmId, position, playedSeconds } = params
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !serviceKey) return
+  const { admin, userId, filmId, position, playedSeconds } = params
 
   try {
-    // Service-Role, weil auf watchtime_events RLS ohne Policy liegt: der
-    // Cookie-gebundene Client des Nutzers kommt dort nicht hinein, und genau
-    // so ist es gewollt.
-    const admin = createAdminClient(url, serviceKey)
-
     const { data: previous } = await admin
       .from('watchtime_events')
       .select('occurred_at, position_seconds')
@@ -98,36 +89,14 @@ async function recordWatchtimeEvent(params: {
   }
 }
 
-/** SSR Supabase client bound to this request’s cookies (read from Request; write via next/headers). */
-async function createSupabaseRouteHandlerClient(request: NextRequest) {
-  const cookieStore = await cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {}
-        },
-      },
-    }
-  )
-}
 
 /** Persist playback progress / completion. Client sends position every ~12s and at 90% / ended. */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseRouteHandlerClient(request)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    // Cookie-Sitzung (Web) oder Bearer-Token (Fire TV, Google Play, webOS).
+    // Die Nutzer-ID kommt ausschliesslich von hier, nie aus dem Koerper --
+    // die Begruendung steht in lib/api-auth.ts.
+    const { user, admin } = await resolveRequestUser(request, 'watchtime')
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -165,7 +134,7 @@ export async function POST(request: NextRequest) {
     const markComplete =
       Boolean(body.completed) || ratioComplete >= 0.9
 
-    const { data: existing, error: selErr } = await supabase
+    const { data: existing, error: selErr } = await admin
       .from('watchtime')
       .select('id, seconds_watched, last_position, completed')
       .eq('user_id', user.id)
@@ -195,7 +164,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (existing?.id) {
-      const { error: upErr } = await supabase.from('watchtime').update(payload).eq('id', existing.id)
+      const { error: upErr } = await admin.from('watchtime').update(payload).eq('id', existing.id)
       if (upErr) {
         console.error('watchtime update:', upErr)
         return NextResponse.json({ error: upErr.message }, { status: 500 })
@@ -207,7 +176,7 @@ export async function POST(request: NextRequest) {
         ...payload,
         watched_at: now,
       }
-      const { error: insErr } = await supabase.from('watchtime').insert(insertRow)
+      const { error: insErr } = await admin.from('watchtime').insert(insertRow)
       if (insErr) {
         console.error('watchtime insert:', insErr)
         return NextResponse.json({ error: insErr.message }, { status: 500 })
@@ -223,6 +192,7 @@ export async function POST(request: NextRequest) {
         : null
 
     await recordWatchtimeEvent({
+      admin,
       userId: user.id,
       filmId,
       position: lp,
