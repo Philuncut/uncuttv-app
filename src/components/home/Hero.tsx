@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -26,14 +27,6 @@ const carouselPosters = [
 
 const MOBILE_LOOP_POSTERS = [...carouselPosters, ...carouselPosters]
 
-const BG_COLS = [
-  'linear-gradient(160deg, #1a0505 0%, #3d0a0a 40%, #0a0a0a 100%)',
-  'linear-gradient(160deg, #050510 0%, #0a102a 40%, #0a0a0a 100%)',
-  'linear-gradient(160deg, #0a0a05 0%, #1a1a05 40%, #0a0a0a 100%)',
-  'linear-gradient(160deg, #100510 0%, #200a20 40%, #0a0a0a 100%)',
-  'linear-gradient(160deg, #05100a 0%, #0a2015 40%, #0a0a0a 100%)',
-]
-
 export default function Hero() {
   const t = useTranslations('hero')
   const pathname = usePathname()
@@ -55,31 +48,40 @@ export default function Hero() {
       padding: isMobile ? '0 20px 48px' : '0 48px 80px',
       overflow: isMobile ? 'hidden' : 'visible',
     }}>
-      {/* Background film strip */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 0,
-        display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: '2px', opacity: 0.35,
-        transform: 'skewX(-2deg) scale(1.05)',
-      }}>
-        {BG_COLS.map((grad, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {[0, 1, 2].map((j) => (
-              <div key={j} style={{
-                flex: 1, background: BG_COLS[(i + j) % BG_COLS.length],
-              }} />
-            ))}
-          </div>
-        ))}
-      </div>
+      {/* Hintergrundbild: Kellerraum mit Roehrenfernseher. Das Motiv sitzt in der
+          rechten Bildhaelfte, deshalb rechtsbuendig ausgerichtet -- links bleibt
+          die ruhige, dunkle Flaeche, auf der der Text steht. */}
+      <Image
+        src="/hero-tv-room.webp"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'right center',
+          zIndex: 0,
+        }}
+      />
 
-      {/* Gradient overlay */}
+      {/* Verlauf und Schleier ueber dem Bild.
+          Desktop: volles Schwarz bis 45 % Breite, danach weich auslaufend, damit
+          rechts der Fernseher sichtbar bleibt.
+          Mobil: deutlich staerker abgedunkelt -- dort liegt der Text zwangslaeufig
+          ueber dem Motiv. */}
       <div style={{
         position: 'absolute', inset: 0, zIndex: 1,
-        background: `
-          linear-gradient(to right, rgba(10,10,10,0.98) 35%, rgba(10,10,10,0.3) 70%, rgba(10,10,10,0.7) 100%),
-          linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 50%)
-        `,
+        background: isMobile
+          ? `
+            linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 55%),
+            linear-gradient(to right, rgba(10,10,10,0.94) 0%, rgba(10,10,10,0.86) 50%, rgba(10,10,10,0.78) 100%),
+            linear-gradient(rgba(10,10,10,0.45), rgba(10,10,10,0.45))
+          `
+          : `
+            linear-gradient(to top, rgba(10,10,10,1) 0%, transparent 50%),
+            linear-gradient(to right, rgba(10,10,10,1) 0%, rgba(10,10,10,1) 45%, rgba(10,10,10,0.7) 62%, rgba(10,10,10,0.25) 80%, rgba(10,10,10,0.1) 100%),
+            linear-gradient(rgba(10,10,10,0.3), rgba(10,10,10,0.3))
+          `,
       }} />
 
       {/* Content */}
