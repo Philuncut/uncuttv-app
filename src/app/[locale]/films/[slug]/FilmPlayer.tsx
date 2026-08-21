@@ -101,6 +101,15 @@ export default function FilmPlayer({
   const playerRef = useRef<MuxPlayerElement | null>(null)
   const lastPeriodicSyncRef = useRef(Date.now())
   const completedSentRef = useRef(false)
+
+  // ── Selbst mitgezaehlte Abspieldauer ──
+  // Die Positionsdifferenz taugt als Abrechnungsgrundlage nur naeherungsweise:
+  // sie verliert den ersten Ping jeder Sitzung und kann Pufferpausen nicht von
+  // Wiedergabe unterscheiden. Hier laeuft stattdessen eine Uhr, die nur waehrend
+  // wirklicher Wiedergabe laeuft. Der Server deckelt den Wert trotzdem gegen die
+  // verstrichene Uhrzeit -- ein Client gilt nicht als vertrauenswuerdig.
+  const playedMsRef = useRef(0)
+  const playingSinceRef = useRef<number | null>(null)
   const localeAppliedRef = useRef(false)
   const durationSecondsRef = useRef<number | null>(
     typeof durationMinutes === 'number' && durationMinutes > 0 ? Math.round(durationMinutes * 60) : null
@@ -122,6 +131,34 @@ export default function FilmPlayer({
       lastPeriodicSyncRef.current = Date.now()
     }
   }, [token])
+
+  const playedFlush = useCallback(() => {
+    if (playingSinceRef.current != null) {
+      const now = Date.now()
+      playedMsRef.current += now - playingSinceRef.current
+      playingSinceRef.current = now
+    }
+  }, [])
+
+  const playedStart = useCallback(() => {
+    if (playingSinceRef.current == null) playingSinceRef.current = Date.now()
+  }, [])
+
+  const playedStop = useCallback(() => {
+    playedFlush()
+    playingSinceRef.current = null
+  }, [playedFlush])
+
+  /**
+   * Nimmt die vollen Sekunden heraus und laesst den Rest stehen, damit ueber
+   * viele Pings hinweg nichts abgeschnitten wird.
+   */
+  const playedTake = useCallback(() => {
+    playedFlush()
+    const secs = Math.floor(playedMsRef.current / 1000)
+    playedMsRef.current -= secs * 1000
+    return secs
+  }, [playedFlush])
 
   const syncWatchtime = useCallback(
     async (opts: { completed: boolean }) => {
@@ -152,14 +189,67 @@ export default function FilmPlayer({
             last_position: cur,
             duration_seconds: dur > 0 ? dur : undefined,
             completed,
+            played_seconds: playedTake(),
           }),
         })
       } catch (e) {
         console.error('watchtime sync failed:', e)
       }
     },
-    [filmId, token]
+    [filmId, token, playedTake]
   )
+
+  /**
+   * Beim Verlassen der Seite bleibt fuer fetch keine Zeit mehr -- der Browser
+   * bricht laufende Anfragen ab. sendBeacon uebergibt die Nachricht dem Browser
+   * und laesst ihn sie nach dem Entladen zustellen.
+   *
+   * Ohne das verfielen die bis zu 12 Sekunden seit dem letzten Ping, und zwar
+   * bei jedem Abbruch -- also gerade bei den Zuschauern, die einen Film nicht
+   * zu Ende sehen.
+   */
+  const beaconWatchtime = useCallback(() => {
+    const el = playerRef.current
+    if (!el || !token) return
+    playedStop()
+    const played = playedTake()
+    const cur = Math.max(0, Math.floor(el.currentTime))
+    if (played <= 0 && cur <= 0) return
+    try {
+      const payload = JSON.stringify({
+        film_id: filmId,
+        last_position: cur,
+        duration_seconds: durationSecondsRef.current ?? undefined,
+        completed: false,
+        played_seconds: played,
+      })
+      navigator.sendBeacon?.(
+        '/api/watchtime',
+        new Blob([payload], { type: 'application/json' })
+      )
+    } catch {
+      // Beim Entladen ist nichts mehr zu retten -- still bleiben.
+    }
+  }, [filmId, token, playedStop, playedTake])
+
+  useEffect(() => {
+    if (!token) return
+    // pagehide statt beforeunload: beforeunload feuert auf iOS und bei
+    // Seitenwechseln im Bfcache nicht zuverlaessig.
+    const onHide = () => beaconWatchtime()
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') beaconWatchtime()
+    }
+    window.addEventListener('pagehide', onHide)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('pagehide', onHide)
+      document.removeEventListener('visibilitychange', onVisibility)
+      // Auch beim Wechsel auf eine andere Seite innerhalb der App: React
+      // raeumt hier auf, ohne dass pagehide feuert.
+      beaconWatchtime()
+    }
+  }, [token, beaconWatchtime])
 
   const handleTimeUpdate = useCallback(() => {
     const el = playerRef.current
@@ -191,11 +281,17 @@ export default function FilmPlayer({
 
   const handleEnded = useCallback(async () => {
     completedSentRef.current = true
+    playedStop()
     await syncWatchtime({ completed: true })
     setTimeout(() => {
       router.push(`/${locale}/films`)
     }, 1500)
-  }, [syncWatchtime, router, locale])
+  }, [syncWatchtime, playedStop, router, locale])
+
+  const handleSeeked = useCallback(() => {
+    const el = playerRef.current
+    if (el && !el.paused) playedStart()
+  }, [playedStart])
 
   const handleLoadedMetadata = useCallback(() => {
     const el = playerRef.current
@@ -510,6 +606,14 @@ export default function FilmPlayer({
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleEnded}
+        /* Die Uhr laeuft nur waehrend wirklicher Wiedergabe. 'playing' deckt
+           auch den Wiederanlauf nach Puffern und nach einem Sprung ab. */
+        onPlay={playedStart}
+        onPlaying={playedStart}
+        onPause={playedStop}
+        onWaiting={playedStop}
+        onSeeking={playedStop}
+        onSeeked={handleSeeked}
       />
 
       {/* ── Custom control overlays (bottom-right) ── */}
