@@ -21,7 +21,11 @@
  *               wechselt dort die Polaritaet. Beide Seiten werden getrennt
  *               gegen ihren eigenen Flaechenton gerechnet. Den Knick findet
  *               man als groessten Sprung im Spaltenmittel -- siehe --fold.
- *   keep        nichts einfaerben, nur beschneiden und neu komprimieren. Fuer
+ *   gray        entsaettigen, Tonwerte behalten. Fuer farbige Logos, die zu
+ *               vielschichtig zum Weissfuellen sind: die Zeichnung bleibt,
+ *               die Farbe geht. Wird dabei leicht angehoben, sonst steht ein
+ *               entsaettigtes Logo dunkler als seine weissen Nachbarn.
+ *   keep        gar nichts aendern, nur beschneiden und neu komprimieren. Fuer
  *               Logos, die schon hell und nahezu einfarbig sind und in der
  *               Leiste ohne Weissfaerbung laufen (keepColor in LABELS).
  *               Farbige Logos werden dabei auf 256 Farben gebracht -- bei
@@ -42,7 +46,7 @@ const foldOnly = argv.includes('--fold')
 const [src, dst, mode = 'cut'] = argv.filter((a) => a !== '--fold')
 
 if (!src || (!dst && !foldOnly)) {
-  console.error('Aufruf: node scripts/prepare-label-logo.mjs <quelle> <ziel> <cut|lum|inv|split:x|keep>')
+  console.error('Aufruf: node scripts/prepare-label-logo.mjs <quelle> <ziel> <cut|lum|inv|split:x|gray|keep>')
   console.error('        node scripts/prepare-label-logo.mjs <quelle> --fold')
   process.exit(1)
 }
@@ -85,6 +89,8 @@ const LO = 0.10, HI = 0.85
 // sind deshalb Abstaende davon und entsprechend kleiner.
 const SPLIT_LO = 0.05, SPLIT_HI = 0.30
 const SPLIT_SKIP = 2 // Spalten direkt am Knick auslassen, dort mischt die Kante
+// Anhebung beim Entsaettigen: Steigung und Sockel auf den Tonwert.
+const GRAY_GAIN = 1.25, GRAY_LIFT = 0.06
 
 let split = null
 if (mode.startsWith('split:')) {
@@ -106,6 +112,12 @@ for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
 
   if (mode === 'keep') {
     out[o] = data[i]; out[o + 1] = data[i + 1]; out[o + 2] = data[i + 2]; out[o + 3] = data[i + 3]
+    continue
+  }
+
+  if (mode === 'gray') {
+    const g = Math.round(Math.max(0, Math.min(1, lumAt(i) * GRAY_GAIN + GRAY_LIFT)) * 255)
+    out[o] = out[o + 1] = out[o + 2] = g; out[o + 3] = data[i + 3]
     continue
   }
 

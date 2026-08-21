@@ -100,8 +100,11 @@ body::before {
   padding: clamp(56px, 8vw, 104px) 0;
   background: var(--black);
 
-  --label-gap: clamp(40px, 6vw, 88px);
-  --label-height: clamp(22px, 4vw, 40px);
+  /* Verdoppelt gegenueber der ersten Fassung: bei 40 px waren die Logos auf
+     dem Schirm zu klein. Der Abstand geht im selben Verhaeltnis mit, sonst
+     kleben die nun doppelt so breiten Logos aneinander. */
+  --label-gap: clamp(80px, 12vw, 176px);
+  --label-height: clamp(44px, 8vw, 80px);
 }
 
 .label-marquee-eyebrow {
@@ -184,29 +187,24 @@ body::before {
   filter: none;
 }
 
-/* Handy und schmale Tablets. Der Desktopzweig bleibt unberuehrt.
-   Hoehe verdoppelt: 22 px waren zu klein, um ein Logo zu erkennen. Der
-   Abstand geht im selben Verhaeltnis mit (bisher das 1,8-fache der Hoehe),
-   sonst kleben die nun doppelt so breiten Logos aneinander.
-   Beide Werte fest statt als clamp: der Desktopzweig rechnet sie aus der
-   Fensterbreite, und mit einer eigenen Kurve waere der Sprung an der
-   Bruchstelle groesser als mit einem festen Wert.
+/* Handy und schmale Tablets -- nur das Tempo.
+   Groesse und Abstand regelt die Kurve oben von selbst: unter 550 px
+   Fensterbreite liegen 8vw unter 44 px und 12vw unter 80 px, es greifen also
+   die Untergrenzen. Die frueheren festen Werte hier waren dieselben Zahlen
+   und haben nur einen Sprung an der Bruchstelle erzeugt.
 
-   Damit ist ein Durchlauf mobil ungefaehr so breit wie auf dem Desktop --
-   bei gleicher Dauer liefe das Band also gleich schnell. Es soll aber
-   flotter wirken, deshalb die kuerzere Dauer. Nur der Faktor steht hier;
-   die Dauer selbst kommt weiter aus der Zahl der Logos.
+   Das Tempo dagegen braucht eine eigene Zahl. Ein Durchlauf ist mobil rund
+   2900 px breit, auf dem Desktop rund 5850 px -- bei gleicher Dauer liefe
+   das Band auf dem Handy also halb so schnell. Der Faktor dreht das um: es
+   laeuft dort mit gut 45 px/s statt der 27 px/s auf dem Desktop.
 
-   Ein Durchlauf ist damit 3199 px breit und bleibt auch auf 375 px
-   Geraetebreite deutlich breiter als das Fenster -- die Wiederholung
-   greift also ohne Luecke, min-width kommt gar nicht erst zum Zug. */
+   Der Faktor haengt an animation-duration und muss vor der
+   prefers-reduced-motion-Regel stehen -- deren animation: none ist eine
+   Kurzschreibweise und setzt die Dauer mit zurueck. */
+
 @media (max-width: 767px) {
-  .label-marquee-section {
-    --label-height: 44px;
-    --label-gap: 80px;
-  }
   .label-marquee-track {
-    animation-duration: calc(var(--marquee-duration, 90s) * 0.6);
+    animation-duration: calc(var(--marquee-duration, 90s) * 0.3);
   }
 }
 

@@ -28,7 +28,7 @@ import { getTranslations } from 'next-intl/server'
  *   Grund), inv (dunkles auf hellem), split:<x> (Motiv laeuft ueber einen
  *   Hell-Dunkel-Knick und wechselt dort die Polaritaet -- die Knickspalte
  *   findet --fold). cut nimmt eine schon passende Datei unveraendert.
- * - Oder das Logo laeuft ungefaerbt mit: keepColor in LABELS, Modus keep im
+ * - Oder das Logo laeuft ungefaerbt mit: keepTone in LABELS, Modus keep im
  *   Skript. Das taugt nur, wenn es von sich aus hell und nahezu einfarbig
  *   ist, sonst faellt es aus der Leiste heraus.
  *
@@ -53,12 +53,13 @@ interface Label {
    */
   scale?: number
   /**
-   * Weissfaerbung ueberspringen. Nur fuer Logos, die ihre Zeichnung im Ton
-   * tragen statt im Alphakanal und dabei von sich aus hell und nahezu
-   * einfarbig sind -- die wuerden weiss gefaerbt zur Flaeche, sehen aber
-   * unveraendert schon so aus, wie die Leiste sie braucht.
+   * Weissfuellung ueberspringen: das Logo behaelt seine Tonwerte. Nur fuer
+   * Logos, die ihre Zeichnung im Ton tragen statt im Alphakanal -- die
+   * wuerden weiss gefuellt zur Flaeche. Die Datei muss dafuer selbst schon
+   * schwarzweiss sein (Modus gray im Aufbereitungsskript), farbig faellt
+   * sie aus der Leiste heraus.
    */
-  keepColor?: boolean
+  keepTone?: boolean
 }
 
 const LABELS: Label[] = [
@@ -72,12 +73,12 @@ const LABELS: Label[] = [
   // Traegt seine Zeichnung im Ton, nicht in der Deckung: weiss gefaerbt
   // bliebe nur das Sechseck uebrig. Von sich aus weiss-grau, laeuft also
   // ungefaerbt mit. Kompakt gebaut, deshalb etwas mehr Hoehe.
-  { name: 'New Films Order', file: 'new_films_order.png', keepColor: true, scale: 1.15 },
-  // Gezeichnetes Emblem in Farbe. Weiss gefaerbt zerfaellt es: der Kopf wird
-  // zur Flaeche und die weiss gewordenen Spritzer laufen in die Schrift.
-  // Laeuft deshalb in Originalfarbe -- der goldene Schriftzug traegt auf
-  // Schwarz, der dunkle Teil tritt zurueck.
-  { name: 'Garden of Gore', file: 'gardenofgore.png', keepColor: true },
+  { name: 'New Films Order', file: 'new_films_order.png', keepTone: true, scale: 1.15 },
+  // Gezeichnetes Emblem. Weiss gefuellt zerfaellt es: der Kopf wird zur
+  // Flaeche und die weiss gewordenen Spritzer laufen in die Schrift.
+  // Deshalb entsaettigt statt gefuellt (Modus gray) -- der Schriftzug bleibt
+  // hell und lesbar, der Kopf tritt als dunkle Form zurueck.
+  { name: 'Garden of Gore', file: 'gardenofgore.png', keepTone: true },
 ]
 
 /**
@@ -102,8 +103,14 @@ const LABELS: Label[] = [
  */
 const MIN_ITEMS_PER_RUN = 16
 
-/** Sekunden, die ein Logo fuer die volle Bandbreite braucht. Kleiner = schneller. */
-const SECONDS_PER_LOGO = 6
+/**
+ * Sekunden, die ein Logo fuer die volle Bandbreite braucht. Kleiner =
+ * schneller. Mit der verdoppelten Logohoehe ist ein Durchlauf doppelt so
+ * breit geworden -- bei der alten Zahl liefe das Band jetzt doppelt so
+ * schnell, und ruhig soll es bleiben. Der mobile Zweig in globals.css zieht
+ * seinen Faktor entsprechend nach, damit dort das Tempo gleich bleibt.
+ */
+const SECONDS_PER_LOGO = 12
 
 export default async function LabelMarquee() {
   const t = await getTranslations('labels')
@@ -126,7 +133,7 @@ export default async function LabelMarquee() {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={i}
-            className={'label-marquee-logo' + (label.keepColor ? ' label-marquee-logo--as-is' : '')}
+            className={'label-marquee-logo' + (label.keepTone ? ' label-marquee-logo--as-is' : '')}
             src={`/labels/${label.file}`}
             alt={isOriginal ? label.name : ''}
             aria-hidden={isOriginal ? undefined : true}
