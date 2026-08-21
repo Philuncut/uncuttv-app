@@ -217,7 +217,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           >
             {t('sectionDelete')}
           </div>
-          <AccountActions locale={locale} />
+          <AccountActions locale={locale} subscriptionActive={hasSubscription && !canceling} />
         </div>
 
         <div style={{ marginTop: '32px', textAlign: 'center' }}>

@@ -21,7 +21,12 @@
  *             die Fassung der Website angeglichen
  * 2026-08-22: Datenschutzerklaerung Abschnitt 8 richtiggestellt -- die
  *             Wiedergabedauer wird nicht anonymisiert, sondern mit dem
- *             Nutzerkonto verknuepft gespeichert
+ *             Nutzerkonto verknuepft gespeichert; im selben Zug ergaenzt,
+ *             was bei einer Kontoloeschung mit den Eintraegen geschieht.
+ *             Zwei Aenderungen am selben Tag, die Fassungskennung kann sie
+ *             nicht unterscheiden -- unkritisch, weil zwischen beiden keine
+ *             Zustimmung gespeichert wurde (geprueft: alle Zeilen in
+ *             consents tragen 2026-08-20).
  */
 export const LEGAL_VERSION = '2026-08-22'
 

@@ -150,6 +150,13 @@ export default function DatenschutzPage() {
             Nutzerbezogene Daten werden dabei nicht übermittelt.
           </p>
           <p style={{ ...textStyle, marginTop: '12px' }}>
+            Löschst du dein Konto, werden die Angaben für „Weiterschauen" gelöscht. Die für
+            die Abrechnung mit den Rechteinhabern erforderlichen Einträge bleiben bestehen,
+            werden dabei aber dauerhaft von deinem Konto getrennt: an die Stelle der
+            Zuordnung tritt ein Zufallswert. Die Einträge lassen sich dir danach nicht mehr
+            zuordnen; die je Film summierten Werte bleiben unverändert.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
             Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
           </p>
         </Section>
