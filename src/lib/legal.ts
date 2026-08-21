@@ -19,8 +19,11 @@
  *             Paragraph 4 in 4.1 bis 4.5 gegliedert, Jahrespreis in 4.2 aufgenommen,
  *             Paragraph 5 und 6 tarifabhaengig gefasst, Paragraph 7 im PDF-Export auf
  *             die Fassung der Website angeglichen
+ * 2026-08-22: Datenschutzerklaerung Abschnitt 8 richtiggestellt -- die
+ *             Wiedergabedauer wird nicht anonymisiert, sondern mit dem
+ *             Nutzerkonto verknuepft gespeichert
  */
-export const LEGAL_VERSION = '2026-08-21'
+export const LEGAL_VERSION = '2026-08-22'
 
 /**
  * signup           - AGB + Datenschutzerklaerung, bei der Registrierung

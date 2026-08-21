@@ -36,7 +36,7 @@ export default function DatenschutzPage() {
           DATENSCHUTZ
         </h1>
         <p style={{ fontSize: '0.82rem', color: 'var(--grey)', marginBottom: '48px' }}>
-          Stand: 7. Juli 2025
+          Stand: 22. August 2026
         </p>
 
         <Section title="1. Allgemeine Hinweise">
@@ -137,9 +137,17 @@ export default function DatenschutzPage() {
 
         <Section title="8. Nutzungsdaten & Watchtime">
           <p style={textStyle}>
-            Zur Abrechnung mit Filmemachern erfassen wir anonymisiert die Wiedergabedauer pro Film
-            (Watchtime). Diese Daten werden ausschließlich intern für die Auszahlungsberechnung genutzt
-            und nicht an Dritte weitergegeben.
+            Wir speichern die Wiedergabedauer und die zuletzt erreichte Abspielposition je Film.
+            Diese Angaben sind mit deinem Nutzerkonto verknüpft.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Sie dienen zwei Zwecken: der Funktion „Weiterschauen", damit du einen Film dort
+            fortsetzen kannst, wo du ihn verlassen hast, und der Abrechnung mit den
+            Rechteinhabern, deren Filme im Katalog stehen.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            An Rechteinhaber geben wir ausschließlich je Film summierte Werte weiter.
+            Nutzerbezogene Daten werden dabei nicht übermittelt.
           </p>
           <p style={{ ...textStyle, marginTop: '12px' }}>
             Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)

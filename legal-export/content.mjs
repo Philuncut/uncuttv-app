@@ -240,7 +240,7 @@ export const AGB = {
 
 export const DATENSCHUTZ = {
   title: 'DATENSCHUTZ',
-  stand: 'Stand: 7. Juli 2025',
+  stand: 'Stand: 22. August 2026',
   sections: [
     {
       title: '1. Allgemeine Hinweise',
@@ -365,7 +365,15 @@ export const DATENSCHUTZ = {
       blocks: [
         {
           type: 'p',
-          text: 'Zur Abrechnung mit Filmemachern erfassen wir anonymisiert die Wiedergabedauer pro Film (Watchtime). Diese Daten werden ausschließlich intern für die Auszahlungsberechnung genutzt und nicht an Dritte weitergegeben.',
+          text: 'Wir speichern die Wiedergabedauer und die zuletzt erreichte Abspielposition je Film. Diese Angaben sind mit deinem Nutzerkonto verknüpft.',
+        },
+        {
+          type: 'p',
+          text: 'Sie dienen zwei Zwecken: der Funktion „Weiterschauen", damit du einen Film dort fortsetzen kannst, wo du ihn verlassen hast, und der Abrechnung mit den Rechteinhabern, deren Filme im Katalog stehen.',
+        },
+        {
+          type: 'p',
+          text: 'An Rechteinhaber geben wir ausschließlich je Film summierte Werte weiter. Nutzerbezogene Daten werden dabei nicht übermittelt.',
         },
         {
           type: 'p',
