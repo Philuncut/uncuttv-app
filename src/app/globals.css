@@ -184,6 +184,32 @@ body::before {
   filter: none;
 }
 
+/* Handy und schmale Tablets. Der Desktopzweig bleibt unberuehrt.
+   Hoehe verdoppelt: 22 px waren zu klein, um ein Logo zu erkennen. Der
+   Abstand geht im selben Verhaeltnis mit (bisher das 1,8-fache der Hoehe),
+   sonst kleben die nun doppelt so breiten Logos aneinander.
+   Beide Werte fest statt als clamp: der Desktopzweig rechnet sie aus der
+   Fensterbreite, und mit einer eigenen Kurve waere der Sprung an der
+   Bruchstelle groesser als mit einem festen Wert.
+
+   Damit ist ein Durchlauf mobil ungefaehr so breit wie auf dem Desktop --
+   bei gleicher Dauer liefe das Band also gleich schnell. Es soll aber
+   flotter wirken, deshalb die kuerzere Dauer. Nur der Faktor steht hier;
+   die Dauer selbst kommt weiter aus der Zahl der Logos.
+
+   Ein Durchlauf ist damit 3199 px breit und bleibt auch auf 375 px
+   Geraetebreite deutlich breiter als das Fenster -- die Wiederholung
+   greift also ohne Luecke, min-width kommt gar nicht erst zum Zug. */
+@media (max-width: 767px) {
+  .label-marquee-section {
+    --label-height: 44px;
+    --label-gap: 80px;
+  }
+  .label-marquee-track {
+    animation-duration: calc(var(--marquee-duration, 90s) * 0.6);
+  }
+}
+
 @keyframes labelMarquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
