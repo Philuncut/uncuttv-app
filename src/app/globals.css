@@ -177,6 +177,12 @@ body::before {
 .label-marquee-logo:hover {
   opacity: 1;
 }
+/* Ausnahme fuer Logos, die ihre Zeichnung im Ton tragen statt in der Deckung
+   und von sich aus hell sind -- die wuerden weiss gefaerbt zur Flaeche.
+   Gesetzt ueber keepColor in LabelMarquee.tsx. */
+.label-marquee-logo--as-is {
+  filter: none;
+}
 
 @keyframes labelMarquee {
   from { transform: translateX(0); }

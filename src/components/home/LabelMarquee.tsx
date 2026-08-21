@@ -8,23 +8,29 @@ import { getTranslations } from 'next-intl/server'
  *    public/, wird also nicht ausgeliefert -- das ist nur das Archiv).
  * 2. Aufbereiten:
  *      node scripts/prepare-label-logo.mjs <quelle> public/labels/<name>.png <modus>
- *    Modus: cut (schon freigestellt) | lum (helles Motiv auf dunklem Grund) |
- *    inv (dunkles Motiv auf hellem Grund). Das Skript faerbt weiss, schneidet
- *    den Rand ab und verkleinert die Datei.
+ *    Welcher Modus, siehe unten. Das Skript schneidet den Rand ab und
+ *    verkleinert die Datei.
  * 3. Unten in LABELS eine Zeile ergaenzen. Das ist die einzige Stelle im Code,
  *    an der Logos stehen -- es gibt keine verstreuten Importe.
  *
  * === Was die Leiste von einer Datei erwartet ===
- * SVG oder PNG, in beiden Faellen freigestellt: die Deckung muss das Motiv
- * beschreiben und sonst nichts. Die Leiste faerbt jedes Logo weiss (siehe
- * .label-marquee-logo in globals.css), eine deckende Flaeche hinter dem Logo
- * wird dabei zum weissen Block und die Schrift darin verschwindet. Genau
- * daran sind zwei der ersten fuenf Lieferungen gescheitert. Ein JPG kann es
- * deshalb grundsaetzlich nicht sein.
+ * SVG oder PNG mit Alphakanal. Ein transparenter Hintergrund allein genuegt
+ * aber nicht: die Leiste faerbt jedes Logo weiss (siehe .label-marquee-logo
+ * in globals.css), es zaehlt also nur die Deckung. Traegt ein Logo seine
+ * Zeichnung im Farbton -- ein Schriftzug auf einer deckenden Karte, ein
+ * Monogramm auf einer Platte --, dann bleibt beim Einfaerben nur die weisse
+ * Flaeche uebrig. Daran ist von den ersten fuenf Lieferungen die Haelfte
+ * zunaechst gescheitert, obwohl alle fuenf sauber freigestellt waren.
+ * Ein JPG kann es entsprechend grundsaetzlich nicht sein.
  *
- * Nicht umrechenbar sind Logos, deren Motiv mal heller und mal dunkler als
- * sein Untergrund ist -- ein Schriftzug etwa, der ueber eine zweifarbige
- * Flaeche laeuft. Dafuer braucht es eine einfarbige Fassung vom Label.
+ * Dagegen hilft eines von beiden:
+ * - Das Skript rechnet den Ton in Deckung um: lum (helles Motiv auf dunklem
+ *   Grund), inv (dunkles auf hellem), split:<x> (Motiv laeuft ueber einen
+ *   Hell-Dunkel-Knick und wechselt dort die Polaritaet -- die Knickspalte
+ *   findet --fold). cut nimmt eine schon passende Datei unveraendert.
+ * - Oder das Logo laeuft ungefaerbt mit: keepColor in LABELS, Modus keep im
+ *   Skript. Das taugt nur, wenn es von sich aus hell und nahezu einfarbig
+ *   ist, sonst faellt es aus der Leiste heraus.
  *
  * Hoehe der Datei: egal, die Leiste setzt die Darstellungshoehe und rechnet
  * die Breite aus dem Seitenverhaeltnis. 150 bis 250 px Motivhoehe reichen.
@@ -46,6 +52,13 @@ interface Label {
    * weil ihre Schrift sich die Hoehe mit dem Bildzeichen teilt.
    */
   scale?: number
+  /**
+   * Weissfaerbung ueberspringen. Nur fuer Logos, die ihre Zeichnung im Ton
+   * tragen statt im Alphakanal und dabei von sich aus hell und nahezu
+   * einfarbig sind -- die wuerden weiss gefaerbt zur Flaeche, sehen aber
+   * unveraendert schon so aus, wie die Leiste sie braucht.
+   */
+  keepColor?: boolean
 }
 
 const LABELS: Label[] = [
@@ -53,13 +66,11 @@ const LABELS: Label[] = [
   // Gestapelt: Zeichnung ueber Schriftzug, beides auf 160 px Breite. Auf
   // Einheitshoehe waere die Schrift darunter nicht mehr zu lesen.
   { name: 'RW Films', file: 'renewiesnerfilms.png', scale: 1.25 },
-
-  // Noch nicht aufgenommen -- die gelieferten Dateien sind Werbebilder, keine
-  // Logos, und lassen sich nicht in eine einfarbige Fassung umrechnen. Beide
-  // liegen unter assets/label-logos-original/. Sobald es weisse, freigestellte
-  // Fassungen gibt, hier eintragen:
-  // { name: 'Illusions Unltd. Films', file: 'illusions.png' },
-  // { name: 'New Films Order', file: 'new_films_order.png' },
+  { name: 'Illusions Unltd. Films', file: 'illusions.png' },
+  // Traegt seine Zeichnung im Ton, nicht in der Deckung: weiss gefaerbt
+  // bliebe nur das Sechseck uebrig. Von sich aus weiss-grau, laeuft also
+  // ungefaerbt mit. Kompakt gebaut, deshalb etwas mehr Hoehe.
+  { name: 'New Films Order', file: 'new_films_order.png', keepColor: true, scale: 1.15 },
 ]
 
 /**
@@ -80,7 +91,7 @@ const LABELS: Label[] = [
  * MIN_ITEMS_PER_RUN regelt daneben nur noch die Dichte: mit zwei Labels stuenden
  * sonst zwei Logos allein auf der ganzen Breite und es saehe leer aus statt
  * nach einem Band. Ein Durchlauf enthaelt die Liste deshalb so oft, bis er
- * mindestens so viele Logos hat -- bei zwei Labels also achtmal.
+ * mindestens so viele Logos hat -- bei vier Labels also viermal.
  */
 const MIN_ITEMS_PER_RUN = 16
 
@@ -102,13 +113,13 @@ export default async function LabelMarquee() {
       {run.map((label, i) => {
         // Nur der erste Satz im ersten Durchlauf traegt den Namen. Alle
         // Wiederholungen sind fuer Vorlesewerkzeuge stumm, sonst haette man
-        // jedes Label sechzehnmal.
+        // jedes Label achtmal.
         const isOriginal = runIndex === 0 && i < LABELS.length
         return (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={i}
-            className="label-marquee-logo"
+            className={'label-marquee-logo' + (label.keepColor ? ' label-marquee-logo--as-is' : '')}
             src={`/labels/${label.file}`}
             alt={isOriginal ? label.name : ''}
             aria-hidden={isOriginal ? undefined : true}
