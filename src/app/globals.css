@@ -138,10 +138,25 @@ body::before {
 
 .label-marquee-track {
   display: flex;
-  align-items: center;
   width: max-content;
   will-change: transform;
   animation: labelMarquee var(--marquee-duration, 90s) linear infinite;
+}
+
+/* Ein Durchlauf. min-width haelt ihn mindestens fensterbreit, damit rechts
+   auch auf einem grossen Schirm nichts fehlt -- Hoehe und Abstand sind durch
+   clamp() gedeckelt und wachsen dort nicht mehr mit.
+   space-around ist dabei die einzige brauchbare Verteilung des Ueberschusses:
+   sie legt um jedes Logo gleich viel Luft, an den Enden also je die Haelfte.
+   Ueber die Nahtstelle zwischen den beiden Durchlaeufen treffen zwei solche
+   Haelften aufeinander und ergeben genau den Abstand, der auch innen steht.
+   Mit space-evenly oder space-between waere die Naht sichtbar. */
+.label-marquee-run {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-width: 100vw;
 }
 /* Anhalten, solange die Maus ueber dem Band steht. */
 .label-marquee:hover .label-marquee-track {
@@ -152,7 +167,7 @@ body::before {
   flex: none;
   height: var(--label-height);
   width: auto;
-  margin-right: var(--label-gap);
+  margin: 0 calc(var(--label-gap) / 2);
   /* Macht jedes Logo weiss, unabhaengig von seiner Eigenfarbe. */
   filter: brightness(0) invert(1);
   opacity: 0.6;

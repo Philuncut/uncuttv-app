@@ -52,8 +52,7 @@ const LABELS: Label[] = [
   { name: 'Unearthed Films', file: 'unearthed.png' },
   // Gestapelt: Zeichnung ueber Schriftzug, beides auf 160 px Breite. Auf
   // Einheitshoehe waere die Schrift darunter nicht mehr zu lesen.
-  { name: 'René Wiesner Films', file: 'renewiesnerfilms.png', scale: 1.25 },
-  { name: 'UncutTV', file: 'uncuttv.png' },
+  { name: 'RW Films', file: 'renewiesnerfilms.png', scale: 1.25 },
 
   // Noch nicht aufgenommen -- die gelieferten Dateien sind Werbebilder, keine
   // Logos, und lassen sich nicht in eine einfarbige Fassung umrechnen. Beide
@@ -68,17 +67,22 @@ const LABELS: Label[] = [
  * halbe Spurbreite -- in dem Moment steht Durchlauf zwei exakt dort, wo
  * Durchlauf eins begonnen hat, und die Wiederholung ist nahtlos.
  *
- * Damit das aufgeht, darf zwischen den Logos kein `gap` stehen: die Spur haette
- * dann eine Luecke weniger als die zwei Durchlaeufe zusammen brauchen, und die
- * halbe Spurbreite waere um eine halbe Luecke daneben. Der Abstand haengt
- * deshalb als margin-right an jedem Logo, auch am letzten.
+ * Damit rechts nichts fehlt, muss ein Durchlauf mindestens so breit sein wie
+ * das Fenster. Das kann die Anzahl der Logos allein nicht sichern: Hoehe und
+ * Abstand sind durch clamp() nach oben gedeckelt, ein Durchlauf hoert also ab
+ * etwa 1470 px Fensterbreite auf mitzuwachsen, waehrend das Fenster weiter
+ * waechst. Auf einem grossen Schirm liefe die Leiste sonst leer. Jeder
+ * Durchlauf hat deshalb min-width: 100vw (siehe .label-marquee-run) und
+ * verteilt ueberschuessigen Platz mit space-around -- das ist die einzige
+ * Verteilung, bei der der Abstand ueber die Nahtstelle hinweg derselbe bleibt
+ * wie innerhalb des Durchlaufs.
  *
- * Bei nur zwei oder drei Logos waere ein Durchlauf schmaler als der Bildschirm
- * und rechts entstuende eine sichtbare Luecke. Ein Durchlauf enthaelt deshalb
- * die Liste so oft, bis er mindestens MIN_ITEMS_PER_RUN Logos hat -- bei den
- * derzeit drei Labels also viermal.
+ * MIN_ITEMS_PER_RUN regelt daneben nur noch die Dichte: mit zwei Labels stuenden
+ * sonst zwei Logos allein auf der ganzen Breite und es saehe leer aus statt
+ * nach einem Band. Ein Durchlauf enthaelt die Liste deshalb so oft, bis er
+ * mindestens so viele Logos hat -- bei zwei Labels also achtmal.
  */
-const MIN_ITEMS_PER_RUN = 12
+const MIN_ITEMS_PER_RUN = 16
 
 /** Sekunden, die ein Logo fuer die volle Bandbreite braucht. Kleiner = schneller. */
 const SECONDS_PER_LOGO = 6
@@ -90,7 +94,33 @@ export default async function LabelMarquee() {
 
   const repeats = Math.max(1, Math.ceil(MIN_ITEMS_PER_RUN / LABELS.length))
   const run = Array.from({ length: repeats }, () => LABELS).flat()
-  const track = [...run, ...run]
+
+  // Beide Durchlaeufe sind Zeichen fuer Zeichen gleich -- nur deshalb geht die
+  // Verschiebung um die halbe Spurbreite ohne Sprung auf.
+  const renderRun = (runIndex: number) => (
+    <div className="label-marquee-run" key={runIndex}>
+      {run.map((label, i) => {
+        // Nur der erste Satz im ersten Durchlauf traegt den Namen. Alle
+        // Wiederholungen sind fuer Vorlesewerkzeuge stumm, sonst haette man
+        // jedes Label sechzehnmal.
+        const isOriginal = runIndex === 0 && i < LABELS.length
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={i}
+            className="label-marquee-logo"
+            src={`/labels/${label.file}`}
+            alt={isOriginal ? label.name : ''}
+            aria-hidden={isOriginal ? undefined : true}
+            style={label.scale ? { height: `calc(var(--label-height) * ${label.scale})` } : undefined}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        )
+      })}
+    </div>
+  )
 
   return (
     <section className="label-marquee-section" aria-label={t('aria')}>
@@ -105,25 +135,8 @@ export default async function LabelMarquee() {
              Logos gleich schnell laeuft. Die Bewegung selbst macht CSS. */
           style={{ ['--marquee-duration' as string]: `${run.length * SECONDS_PER_LOGO}s` }}
         >
-          {track.map((label, i) => {
-            // Nur der erste Satz traegt den Namen. Alle Wiederholungen sind fuer
-            // Vorlesewerkzeuge stumm, sonst haette man jedes Label viermal.
-            const isOriginal = i < LABELS.length
-            return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                className="label-marquee-logo"
-                src={`/labels/${label.file}`}
-                alt={isOriginal ? label.name : ''}
-                aria-hidden={isOriginal ? undefined : true}
-                style={label.scale ? { height: `calc(var(--label-height) * ${label.scale})` } : undefined}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-              />
-            )
-          })}
+          {renderRun(0)}
+          {renderRun(1)}
         </div>
       </div>
     </section>
