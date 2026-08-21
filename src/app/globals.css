@@ -56,6 +56,20 @@ body::before {
   z-index: 1000;
 }
 
+/* Hero-Hintergrundbild: erst ab Tablet-Breite.
+   Auf dem Handy liegen zwischen Posterreihe und Schriftzug nur 46 px freie
+   Flaeche, darunter steht durchgehend Text bis kurz ueber die Unterkante. Der
+   Schirm des Fernsehers braucht ein Drittel der Bildhoehe -- er passt dort
+   nicht hin, ohne hinter der Schrift zu liegen. Statt ihn unter 90 % Schwarz zu
+   begraben, bleibt auf dem Handy schwarzer Grund.
+   Bewusst als Media Query und nicht ueber das isMobile-Flag: das greift schon
+   beim ersten Bildaufbau, waehrend das Flag erst nach der Hydration steht und
+   das Bild vorher kurz aufblitzen wuerde. */
+.hero-bg { display: block; }
+@media (max-width: 767px) {
+  .hero-bg { display: none; }
+}
+
 /* Carousel animation */
 @keyframes carouselScroll {
   0%   { transform: translateX(0); }

@@ -60,12 +60,12 @@ export default function Hero() {
           und der Schirm liefe hinter die Poster. Der Ueberstand nach unten wird
           von der aeusseren Box abgeschnitten, weil die Sektion selbst
           overflow: visible hat und das Bild sonst in den Abschnitt darunter
-          liefe. Mobil bleibt es bei Sektionshoehe -- dort ist das Bild ohnehin
-          fast vollstaendig abgedunkelt. */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden' }}>
+          liefe. Unter 768 px wird die Box ueber .hero-bg ganz ausgeblendet, die
+          Begruendung steht dort. */}
+      <div className="hero-bg" style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
-          height: isMobile ? '100%' : '1400px',
+          height: '1400px',
         }}>
           <Image
             src="/hero-tv-room.webp"
@@ -85,7 +85,9 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Verlauf und Schleier ueber dem Bild.
+      {/* Verlauf und Schleier ueber dem Bild. Wirksam ab Tablet-Breite -- auf dem
+          Handy laeuft der mobile Zweig ueber schwarzen Grund und aendert nichts,
+          er bleibt nur stehen, falls das Bild dort einmal zurueckkehrt.
           Desktop: volles Schwarz bis 45 % Breite, danach weich auslaufend, damit
           rechts der Fernseher sichtbar bleibt.
           Mobil: deutlich staerker abgedunkelt -- dort liegt der Text zwangslaeufig
