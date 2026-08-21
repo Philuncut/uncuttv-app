@@ -12,7 +12,11 @@ const carouselPosters = [
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Blood_Feast_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/borndead2.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/fakenews.jpg',
-  'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Fist_of_Jesus_UncutTV_Artwork.jpg',
+  // Kommt erst spaeter auf die Plattform. Wieder aufnehmen heisst: Kommentar weg.
+  // Die Liste haengt nicht an der Datenbank, das Veroeffentlichungskennzeichen
+  // des Datensatzes greift hier also nicht -- deshalb muss der Titel hier
+  // eigens heraus.
+  // 'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Fist_of_Jesus_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/gorenography.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/Headless_UncutTV_Artwork.jpg',
   'https://xmqxnwhszgsijmhdtrhg.supabase.co/storage/v1/object/public/posters/La_Petite_Mort_2_Nasty_Tapes_UncutTV_Artwork.jpg',
