@@ -24,7 +24,12 @@ export default function PricingSection() {
     <section
       id="pricing"
       style={{
-        padding: isMobile ? '48px 20px' : '100px 48px',
+        // Oben und unten getrennt, weil beide Seiten an eine Nachbarsektion
+        // grenzen und sich der sichtbare Abstand erst dort vervollstaendigt:
+        // oben mit der unteren Polsterung von FilmmakersSection, unten mit der
+        // oberen des Footers. Symmetrisch gesetzt summierte sich beides zu
+        // einer leeren Flaeche.
+        padding: isMobile ? '28px 20px 36px' : '48px 48px 56px',
         textAlign: 'center',
       }}
     >
