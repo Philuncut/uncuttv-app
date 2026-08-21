@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import LabelMarqueeDrag from './LabelMarqueeDrag'
 
 /**
  * Durchlaufende Logoleiste der Labels, deren Filme im Katalog sind.
@@ -153,7 +154,11 @@ export default async function LabelMarquee() {
         <span>{t('eyebrow')}</span>
       </div>
 
-      <div className="label-marquee">
+      {/* Die Huelle ist eine Clientkomponente -- sie macht das Band mit dem
+          Finger verschiebbar. Die Durchlaeufe gehen als children hinein und
+          bleiben damit serverseitig gerendert: Logoliste, Bilder und
+          Uebersetzung landen nicht im Bundle. */}
+      <LabelMarqueeDrag>
         <div
           className="label-marquee-track"
           /* Dauer aus der Anzahl, damit das Band unabhaengig von der Zahl der
@@ -163,7 +168,7 @@ export default async function LabelMarquee() {
           {renderRun(0)}
           {renderRun(1)}
         </div>
-      </div>
+      </LabelMarqueeDrag>
     </section>
   )
 }

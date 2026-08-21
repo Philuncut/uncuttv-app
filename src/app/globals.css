@@ -133,6 +133,10 @@ body::before {
 
 .label-marquee {
   overflow: hidden;
+  /* Senkrechtes Scrollen und Zoomen bleiben beim Browser, das waagrechte
+     Ziehen uebernimmt LabelMarqueeDrag. Die Entscheidung faellt damit in der
+     Plattform und nicht in einer eigenen Heuristik. */
+  touch-action: pan-y pinch-zoom;
   /* Weiches Auslaufen nach beiden Seiten, damit kein Logo hart an der Kante
      abgeschnitten wirkt. */
   mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
@@ -161,9 +165,15 @@ body::before {
   justify-content: space-around;
   min-width: 100vw;
 }
-/* Anhalten, solange die Maus ueber dem Band steht. */
-.label-marquee:hover .label-marquee-track {
-  animation-play-state: paused;
+/* Anhalten, solange die Maus ueber dem Band steht.
+   Nur wo es eine Maus gibt, und nicht direkt nach einer Beruehrung: auf einem
+   Geraet mit Maus und Touchscreen bleibt :hover nach dem Wischen an dem
+   Element haengen und wuerde das Band anhalten, obwohl der Finger weg ist.
+   Die Klasse setzt LabelMarqueeDrag, die Begruendung steht dort. */
+@media (hover: hover) {
+  .label-marquee:not(.label-marquee--touch):hover .label-marquee-track {
+    animation-play-state: paused;
+  }
 }
 
 .label-marquee-logo {
@@ -198,9 +208,9 @@ body::before {
    das Band auf dem Handy also halb so schnell. Der Faktor dreht das um: es
    laeuft dort mit gut 45 px/s statt der 27 px/s auf dem Desktop.
 
-   Der Faktor haengt an animation-duration und muss vor der
-   prefers-reduced-motion-Regel stehen -- deren animation: none ist eine
-   Kurzschreibweise und setzt die Dauer mit zurueck. */
+   Der Faktor haengt an animation-duration und kommt der
+   prefers-reduced-motion-Regel nicht in die Quere: die setzt nur noch
+   animation-play-state. */
 
 @media (max-width: 767px) {
   .label-marquee-track {
@@ -213,12 +223,15 @@ body::before {
   to   { transform: translateX(-50%); }
 }
 
-/* Wer Bewegung abbestellt hat, bekommt die Logos stehend. Die zweite Haelfte
-   der Spur liegt dann ausserhalb des sichtbaren Bereichs und wird abgeschnitten. */
+/* Wer Bewegung abbestellt hat, bekommt die Logos stehend.
+   Angehalten statt abgeschaltet: eine angehaltene Animation steht bei Zeit
+   null, sieht also aus wie gar keine -- aber sie existiert, und ihre Uhr
+   braucht LabelMarqueeDrag, damit sich das Band trotzdem mit dem Finger
+   verschieben laesst. Angeworfen wird es danach nicht, der Schwung laeuft
+   aus und dann steht es wieder. */
 @media (prefers-reduced-motion: reduce) {
   .label-marquee-track {
-    animation: none;
-    transform: none;
+    animation-play-state: paused;
   }
 }
 
