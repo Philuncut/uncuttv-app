@@ -66,6 +66,8 @@ const LABELS: Label[] = [
   // Gestapelt: Zeichnung ueber Schriftzug, beides auf 160 px Breite. Auf
   // Einheitshoehe waere die Schrift darunter nicht mehr zu lesen.
   { name: 'RW Films', file: 'renewiesnerfilms.png', scale: 1.25 },
+  // Eigenproduktionen. Steht bewusst mitten in der Reihe, nicht vorne.
+  { name: 'UncutTV', file: 'uncuttv.png' },
   { name: 'Illusions Unltd. Films', file: 'illusions.png' },
   // Traegt seine Zeichnung im Ton, nicht in der Deckung: weiss gefaerbt
   // bliebe nur das Sechseck uebrig. Von sich aus weiss-grau, laeuft also
