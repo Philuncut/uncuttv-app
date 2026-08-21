@@ -39,7 +39,7 @@ export default function AGBPage() {
           Allgemeine Geschäftsbedingungen der UncutTV GmbH
         </p>
         <p style={{ fontSize: '0.78rem', color: 'var(--grey)', marginBottom: '48px' }}>
-          Stand: 7. Juli 2025
+          Stand: 21. August 2026
         </p>
 
         <Section title="1. Geltungsbereich">
@@ -75,21 +75,58 @@ export default function AGBPage() {
           <p style={textStyle}>
             Die Nutzung von UncutTV erfolgt im Abonnement. Es gelten folgende Konditionen:
           </p>
+
+          <h3 style={subheadStyle}>4.1 Testphase</h3>
           <ul style={listStyle}>
             <li>7 Tage kostenlose Testphase für Neukunden</li>
+          </ul>
+
+          <h3 style={subheadStyle}>4.2 Preise</h3>
+          <ul style={listStyle}>
             <li>Nach Ablauf der Testphase: €19,90 pro Monat</li>
-            <li>Monatlich kündbar, keine Mindestlaufzeit</li>
-            <li>Automatische Verlängerung um jeweils einen Monat</li>
+            <li>Jahresabo: €200,00 pro Jahr</li>
             <li>Alle Preise inkl. gesetzlicher MwSt.</li>
           </ul>
-          <p style={{ ...textStyle, marginTop: '12px' }}>
+
+          <h3 style={subheadStyle}>4.3 Laufzeit und Verlängerung</h3>
+          <ul style={listStyle}>
+            <li>
+              Monatsabo: monatlich kündbar, keine Mindestlaufzeit. Jahresabo: feste Laufzeit
+              von zwölf Monaten, siehe Ziffer 4.5.
+            </li>
+            <li>
+              Monatsabo: automatische Verlängerung um jeweils einen Monat. Jahresabo: siehe
+              Ziffer 4.5.
+            </li>
+          </ul>
+
+          <h3 style={subheadStyle}>4.4 Preisänderungen</h3>
+          <p style={textStyle}>
             Preisänderungen werden mindestens 30 Tage im Voraus per E-Mail angekündigt.
+          </p>
+
+          <h3 style={subheadStyle}>4.5 Laufzeit und Kündigung des Jahresabos</h3>
+          <p style={textStyle}>
+            Das Jahresabo wird für eine feste Laufzeit von zwölf Monaten abgeschlossen. Das
+            Entgelt von 200,00 € ist für die gesamte Laufzeit im Voraus zu entrichten. Eine
+            ordentliche Kündigung während der Laufzeit ist ausgeschlossen.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Du kannst das Jahresabo spätestens einen Monat vor Ablauf der zwölf Monate zum
+            Laufzeitende kündigen. Kündigst du nicht, verlängert sich das Abonnement auf
+            unbestimmte Zeit und kann von dir jederzeit mit einer Frist von einem Monat
+            gekündigt werden. Nach der Verlängerung erfolgt die Abrechnung monatlich zum
+            jeweils gültigen Monatspreis.
+          </p>
+          <p style={{ ...textStyle, marginTop: '12px' }}>
+            Dein gesetzliches Rücktrittsrecht bleibt hiervon unberührt.
           </p>
         </Section>
 
         <Section title="5. Zahlung">
           <p style={textStyle}>
-            Die Zahlung erfolgt monatlich im Voraus per Kreditkarte oder SEPA-Lastschrift über
+            Die Zahlung erfolgt im Voraus – beim Monatsabo monatlich, beim Jahresabo für die
+            gesamte Laufzeit von zwölf Monaten – per Kreditkarte oder SEPA-Lastschrift über
             unseren Zahlungsdienstleister Stripe. Bei fehlgeschlagener Zahlung behalten wir uns
             vor, den Zugang zur Plattform vorübergehend zu sperren. Stripe versucht die Zahlung
             in diesem Fall automatisch erneut.
@@ -99,7 +136,8 @@ export default function AGBPage() {
         <Section title="6. Kündigung">
           <p style={textStyle}>
             Das Abonnement kann jederzeit zum Ende des laufenden Abrechnungszeitraums gekündigt
-            werden. Die Kündigung erfolgt über den Bereich „Mein Konto" auf der Plattform.
+            werden. Für das Jahresabo gilt abweichend Ziffer 4.5. Die Kündigung erfolgt über den
+            Bereich „Mein Konto" auf der Plattform.
             Nach der Kündigung hast du bis zum Ende des bezahlten Zeitraums weiterhin Zugang
             zu allen Inhalten.
           </p>

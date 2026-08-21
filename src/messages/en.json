@@ -197,7 +197,7 @@
   },
   "subscribe": {
     "title": "COMPLETE YOUR SUBSCRIPTION",
-    "subtitle": "You need an active subscription to access all films. The first seven days are free, after that you can cancel at the end of any month.",
+    "subtitle": "You need an active subscription to access all films. The first seven days are free — after that you choose between the monthly and the annual plan.",
     "voucherHint": "Got a voucher code? <redeem>Redeem it here</redeem>."
   },
   "paymentFailed": {

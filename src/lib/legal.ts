@@ -15,8 +15,12 @@
  * sich unabhaengig von den AGB aendern koennen.
  *
  * 2026-08-20: finaler Wortlaut der Registrierungs-Checkbox (vorher Platzhalter)
+ * 2026-08-21: AGB Ziffer 4.5 (Laufzeit und Kuendigung des Jahresabos) ergaenzt,
+ *             Paragraph 4 in 4.1 bis 4.5 gegliedert, Jahrespreis in 4.2 aufgenommen,
+ *             Paragraph 5 und 6 tarifabhaengig gefasst, Paragraph 7 im PDF-Export auf
+ *             die Fassung der Website angeglichen
  */
-export const LEGAL_VERSION = '2026-08-20'
+export const LEGAL_VERSION = '2026-08-21'
 
 /**
  * signup           - AGB + Datenschutzerklaerung, bei der Registrierung

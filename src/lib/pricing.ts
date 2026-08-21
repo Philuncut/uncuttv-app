@@ -24,6 +24,16 @@ export const PRICING = {
    * den Betrag eines Preisobjekts nicht nachtraeglich aendern: eine
    * Preisaenderung heisst dort neues Preisobjekt, neue ID in der Umgebung,
    * und hier derselbe neue Betrag.
+   *
+   * ACHTUNG, zweite Fundstelle ausserhalb dieser Datei: der Betrag steht als
+   * fester Text in den AGB, Ziffer 4.2 und 4.5 -- und zwar an ZWEI Stellen,
+   * die uebereinstimmen muessen:
+   *   src/app/de/agb/page.tsx   (die Seite)
+   *   legal-export/content.mjs  (daraus wird AGB.pdf erzeugt)
+   * Bewusst nicht von hier abgeleitet: der Wortlaut der AGB ist anwaltlich
+   * freigegeben, eine Codeaenderung darf ihn nicht still verschieben. Wer
+   * yearlyCents aendert, zieht beide Stellen von Hand nach und erzeugt die
+   * PDF neu (node legal-export/generate-pdfs.mjs).
    */
   yearlyCents: 20000,
   /** Kostenlose Testphase, gilt fuer beide Tarife (siehe Checkout-Route). */

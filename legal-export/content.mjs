@@ -9,7 +9,7 @@
 export const AGB = {
   title: 'AGB',
   subtitle: 'Allgemeine Geschäftsbedingungen der UncutTV GmbH',
-  stand: 'Stand: 7. Juli 2025 · Vorabversion – noch nicht rechtsverbindlich geprüft',
+  stand: 'Stand: 21. August 2026',
   sections: [
     {
       title: '1. Geltungsbereich',
@@ -45,19 +45,45 @@ export const AGB = {
           type: 'p',
           text: 'Die Nutzung von UncutTV erfolgt im Abonnement. Es gelten folgende Konditionen:',
         },
+        { type: 'h3', text: '4.1 Testphase' },
+        {
+          type: 'ul',
+          items: ['7 Tage kostenlose Testphase für Neukunden'],
+        },
+        { type: 'h3', text: '4.2 Preise' },
         {
           type: 'ul',
           items: [
-            '7 Tage kostenlose Testphase für Neukunden',
             'Nach Ablauf der Testphase: €19,90 pro Monat',
-            'Monatlich kündbar, keine Mindestlaufzeit',
-            'Automatische Verlängerung um jeweils einen Monat',
+            'Jahresabo: €200,00 pro Jahr',
             'Alle Preise inkl. gesetzlicher MwSt.',
           ],
         },
+        { type: 'h3', text: '4.3 Laufzeit und Verlängerung' },
+        {
+          type: 'ul',
+          items: [
+            'Monatsabo: monatlich kündbar, keine Mindestlaufzeit. Jahresabo: feste Laufzeit von zwölf Monaten, siehe Ziffer 4.5.',
+            'Monatsabo: automatische Verlängerung um jeweils einen Monat. Jahresabo: siehe Ziffer 4.5.',
+          ],
+        },
+        { type: 'h3', text: '4.4 Preisänderungen' },
         {
           type: 'p',
           text: 'Preisänderungen werden mindestens 30 Tage im Voraus per E-Mail angekündigt.',
+        },
+        { type: 'h3', text: '4.5 Laufzeit und Kündigung des Jahresabos' },
+        {
+          type: 'p',
+          text: 'Das Jahresabo wird für eine feste Laufzeit von zwölf Monaten abgeschlossen. Das Entgelt von 200,00 € ist für die gesamte Laufzeit im Voraus zu entrichten. Eine ordentliche Kündigung während der Laufzeit ist ausgeschlossen.',
+        },
+        {
+          type: 'p',
+          text: 'Du kannst das Jahresabo spätestens einen Monat vor Ablauf der zwölf Monate zum Laufzeitende kündigen. Kündigst du nicht, verlängert sich das Abonnement auf unbestimmte Zeit und kann von dir jederzeit mit einer Frist von einem Monat gekündigt werden. Nach der Verlängerung erfolgt die Abrechnung monatlich zum jeweils gültigen Monatspreis.',
+        },
+        {
+          type: 'p',
+          text: 'Dein gesetzliches Rücktrittsrecht bleibt hiervon unberührt.',
         },
       ],
     },
@@ -66,7 +92,7 @@ export const AGB = {
       blocks: [
         {
           type: 'p',
-          text: 'Die Zahlung erfolgt monatlich im Voraus per Kreditkarte oder SEPA-Lastschrift über unseren Zahlungsdienstleister Stripe. Bei fehlgeschlagener Zahlung behalten wir uns vor, den Zugang zur Plattform vorübergehend zu sperren. Stripe versucht die Zahlung in diesem Fall automatisch erneut.',
+          text: 'Die Zahlung erfolgt im Voraus – beim Monatsabo monatlich, beim Jahresabo für die gesamte Laufzeit von zwölf Monaten – per Kreditkarte oder SEPA-Lastschrift über unseren Zahlungsdienstleister Stripe. Bei fehlgeschlagener Zahlung behalten wir uns vor, den Zugang zur Plattform vorübergehend zu sperren. Stripe versucht die Zahlung in diesem Fall automatisch erneut.',
         },
       ],
     },
@@ -75,20 +101,83 @@ export const AGB = {
       blocks: [
         {
           type: 'p',
-          text: 'Das Abonnement kann jederzeit zum Ende des laufenden Abrechnungszeitraums gekündigt werden. Die Kündigung erfolgt über den Bereich „Mein Konto" auf der Plattform. Nach der Kündigung hast du bis zum Ende des bezahlten Zeitraums weiterhin Zugang zu allen Inhalten.',
+          text: 'Das Abonnement kann jederzeit zum Ende des laufenden Abrechnungszeitraums gekündigt werden. Für das Jahresabo gilt abweichend Ziffer 4.5. Die Kündigung erfolgt über den Bereich „Mein Konto" auf der Plattform. Nach der Kündigung hast du bis zum Ende des bezahlten Zeitraums weiterhin Zugang zu allen Inhalten.',
         },
       ],
     },
     {
-      title: '7. Widerrufsrecht',
+      title: '7. Rücktrittsrecht (Widerrufsrecht)',
       blocks: [
+        { type: 'h3', text: '7.1 Rücktrittsrecht' },
         {
           type: 'p',
-          text: 'Als Verbraucher steht dir grundsätzlich ein 14-tägiges Widerrufsrecht zu. Mit der Registrierung und dem Start der kostenlosen Testphase stimmst du zu, dass die Dienstleistung sofort beginnt. Das Widerrufsrecht erlischt mit Beginn der Dienstleistungserbringung, sofern du der vorzeitigen Ausführung ausdrücklich zugestimmt hast.',
+          text: 'Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen von diesem Vertrag zurückzutreten. Die Rücktrittsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.',
+        },
+        { type: 'h3', text: '7.2 Ausübung des Rücktrittsrechts' },
+        {
+          type: 'p',
+          text: 'Um dein Rücktrittsrecht auszuüben, musst du uns mittels einer eindeutigen Erklärung über deinen Entschluss, von diesem Vertrag zurückzutreten, informieren. Die Erklärung kannst du per E-Mail oder Post an uns richten:',
+        },
+        {
+          type: 'box',
+          lines: [
+            'UncutTV GmbH',
+            'Kalchgruben 4/11',
+            '6094 Axams',
+            'Österreich',
+            'E-Mail: office@uncuttv.at',
+          ],
         },
         {
           type: 'p',
-          text: 'Widerrufsadresse: UncutTV GmbH, Kalchgruben 4/11, 6094 Axams – office@uncuttv.at',
+          text: 'Du kannst dafür das unten stehende Muster-Rücktrittsformular verwenden, das jedoch nicht vorgeschrieben ist. Zur Wahrung der Rücktrittsfrist reicht es aus, dass du die Mitteilung über die Ausübung des Rücktrittsrechts vor Ablauf der Rücktrittsfrist absendest.',
+        },
+        { type: 'h3', text: '7.3 Vorzeitiges Erlöschen des Rücktrittsrechts' },
+        {
+          type: 'p',
+          text: 'Bei Verträgen über die Bereitstellung digitaler Inhalte und digitaler Dienstleistungen erlischt dein Rücktrittsrecht vorzeitig, wenn',
+        },
+        {
+          type: 'ul',
+          items: [
+            'du ausdrücklich verlangt hast, dass wir mit der Vertragserfüllung vor Ablauf der Rücktrittsfrist beginnen,',
+            'du zur Kenntnis genommen hast, dass du dadurch dein Rücktrittsrecht verlierst, und',
+            'wir mit der Vertragserfüllung begonnen haben.',
+          ],
+        },
+        {
+          type: 'p',
+          text: 'Beide Erklärungen holen wir im Bestellvorgang ausdrücklich von dir ein und bestätigen sie dir zusammen mit der Vertragsbestätigung.',
+        },
+        { type: 'h3', text: '7.4 Folgen des Rücktritts' },
+        {
+          type: 'p',
+          text: 'Wenn du von diesem Vertrag zurücktrittst, erstatten wir dir alle Zahlungen, die wir von dir erhalten haben, unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag, an dem die Mitteilung über deinen Rücktritt bei uns eingegangen ist. Für die Rückzahlung verwenden wir dasselbe Zahlungsmittel, das du bei der ursprünglichen Transaktion eingesetzt hast, es sei denn, es wurde ausdrücklich etwas anderes vereinbart. In keinem Fall werden dir wegen der Rückzahlung Entgelte berechnet.',
+        },
+        {
+          type: 'p',
+          text: 'Hast du verlangt, dass die Dienstleistung während der Rücktrittsfrist beginnen soll, so hast du uns einen angemessenen Betrag zu zahlen, der dem Anteil der bis zum Zeitpunkt deines Rücktritts bereits erbrachten Leistungen im Vergleich zum Gesamtumfang der vertraglich vereinbarten Leistungen entspricht.',
+        },
+        {
+          type: 'box',
+          lines: [
+            'Muster-Rücktrittsformular',
+            '',
+            '(Wenn du den Vertrag widerrufen willst, fülle bitte dieses Formular aus und sende es zurück.)',
+            '',
+            'An: UncutTV GmbH, Kalchgruben 4/11, 6094 Axams, Österreich',
+            'E-Mail: office@uncuttv.at',
+            '',
+            'Hiermit trete ich / treten wir (*) von dem von mir / uns (*) abgeschlossenen Vertrag über die Erbringung der folgenden Dienstleistung zurück:',
+            '',
+            'Bestellt am (*) / erhalten am (*):',
+            'Name des / der Verbraucher(s):',
+            'Anschrift des / der Verbraucher(s):',
+            'Unterschrift des / der Verbraucher(s) (nur bei Mitteilung auf Papier):',
+            'Datum:',
+            '',
+            '(*) Unzutreffendes streichen.',
+          ],
         },
       ],
     },

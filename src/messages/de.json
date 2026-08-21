@@ -197,7 +197,7 @@
   },
   "subscribe": {
     "title": "ABO ABSCHLIESSEN",
-    "subtitle": "Für den Zugang zu allen Filmen brauchst du ein aktives Abo. Die ersten sieben Tage sind kostenlos, danach kannst du jederzeit zum Monatsende kündigen.",
+    "subtitle": "Für den Zugang zu allen Filmen brauchst du ein aktives Abo. Die ersten sieben Tage sind kostenlos — danach wählst du zwischen Monats- und Jahresabo.",
     "voucherHint": "Du hast einen Gutscheincode? <redeem>Hier einlösen</redeem>."
   },
   "paymentFailed": {

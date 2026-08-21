@@ -139,6 +139,11 @@ function writeSection(doc, docTitle, section, state) {
   for (const block of section.blocks) {
     if (block.type === 'p') {
       writeParagraph(doc, docTitle, block.text, state)
+    } else if (block.type === 'h3') {
+      // Nummerierte Unterabschnitte (4.1, 7.2 ...). Fett und in Textgroesse,
+      // damit sie sich von der Abschnittsueberschrift absetzen, die klein und
+      // gesperrt in Grau steht.
+      writeParagraph(doc, docTitle, block.text, state, { bold: true })
     } else if (block.type === 'ul') {
       writeList(doc, docTitle, block.items, state)
     } else if (block.type === 'box') {
