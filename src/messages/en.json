@@ -36,8 +36,8 @@
   "apps": {
     "title": "On your TV and on the go.",
     "text": "Get the app and watch wherever you like.",
-    "googlePlay": "Google Play",
-    "fireTv": "Amazon Fire TV",
+    "googlePlayAlt": "Get UncutTV on Google Play",
+    "fireTvAlt": "Get UncutTV for Amazon Fire TV",
     "soon": "Apps for LG and Samsung are in development."
   },
   "pricing": {

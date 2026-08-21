@@ -377,6 +377,9 @@ body::before {
 .apps-section {
   padding: 48px 24px clamp(32px, 4vw, 56px);
   background: var(--black);
+  /* Gleiche Hoehe fuer beide Badges, die Breite kommt aus dem
+     Seitenverhaeltnis -- so wird keines gestreckt. */
+  --badge-height: clamp(40px, 4vw, 48px);
 }
 @media (max-width: 767px) {
   .apps-section {
@@ -384,38 +387,37 @@ body::before {
   }
 }
 
-/* Die beiden App-Store-Schaltflaechen. Eigene Klasse statt btn-primary und
-   btn-secondary: die beiden zusammen wuerden einen der Anbieter bevorzugt
-   aussehen lassen. Rot nur als Rand, nicht als Flaeche -- der Abschnitt ist
-   ein Hinweis, kein zweiter Aufruf neben dem Tarifabschnitt darunter. */
+/* Die beiden App-Store-Badges. Ausgeliefert wie geliefert: keine Farbe, kein
+   Zuschnitt, keine Verzerrung -- gesetzt wird nur die Hoehe, die Breite folgt.
+
+   Die helle Flaeche darunter ist noetig, weil der Fire-TV-Schriftzug die
+   dunkle Fassung ist und auf Schwarz nicht zu lesen waere. Beide bekommen
+   dieselbe, sonst wirkte einer der Anbieter anders gewichtet. Sie ist
+   zugleich der von beiden Anbietern verlangte Schutzabstand ringsum. */
 .apps-buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 16px;
 }
-.btn-store {
-  /* Gleiche Breite fuer beide, damit keiner schwerer wiegt. */
-  flex: 0 1 260px;
-  text-align: center;
-  background: transparent;
-  color: var(--warm-white);
-  border: 1px solid rgba(var(--red-rgb), 0.45);
-  padding: 16px 28px;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
+.badge-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--warm-white);
+  border-radius: 10px;
+  padding: 14px 22px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.btn-store:hover {
-  border-color: var(--red);
-  background: rgba(var(--red-rgb), 0.08);
-  box-shadow: 0 0 18px rgba(var(--red-rgb), 0.25);
+.badge-link:hover {
   transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(240, 236, 228, 0.2);
+}
+.badge-link img {
+  display: block;
+  height: var(--badge-height);
+  width: auto;
 }
 
 @media (max-width: 767px) {
@@ -423,10 +425,9 @@ body::before {
     flex-direction: column;
     gap: 12px;
   }
-  /* In der Spalte waere die Basis eine Hoehe. Sie muss weg, sonst haetten die
-     Schaltflaechen 260 px Hoehe statt voller Breite. */
-  .btn-store {
-    flex: 0 0 auto;
+  /* Volle Breite, das Badge bleibt darin mittig. */
+  .badge-link {
+    width: 100%;
   }
 }
 

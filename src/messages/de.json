@@ -36,8 +36,8 @@
   "apps": {
     "title": "Auf dem Fernseher und unterwegs.",
     "text": "Hol dir die App und schau, wo du willst.",
-    "googlePlay": "Google Play",
-    "fireTv": "Amazon Fire TV",
+    "googlePlayAlt": "UncutTV bei Google Play herunterladen",
+    "fireTvAlt": "UncutTV für Amazon Fire TV herunterladen",
     "soon": "Apps für LG und Samsung sind in Entwicklung."
   },
   "pricing": {

@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 /**
  * App-Links zwischen Filmemacher- und Tarifabschnitt.
@@ -8,18 +8,61 @@ import { getTranslations } from 'next-intl/server'
  * stehen, regelt .apps-buttons in globals.css -- so geht fuer diesen Abschnitt
  * kein Javascript an den Browser.
  *
- * Vorerst mit Textschaltflaechen. Google und Amazon geben fuer ihre Badges
- * feste Vorgaben, die man weder nachbauen noch abwandeln darf; sobald die
- * Bilddateien vorliegen, treten sie an die Stelle der Beschriftungen.
+ * === Die Badges ===
+ * Google und Amazon geben fuer ihre Badges feste Vorgaben: nicht verzerren,
+ * nicht einfaerben, nicht beschneiden. Beide werden deshalb unveraendert
+ * ausgeliefert, auf gleicher Hoehe und mit width: auto -- die Breite ergibt
+ * sich aus dem Seitenverhaeltnis, gestreckt wird nichts. Die Originale liegen
+ * unter assets/store-badges-original/; in public/badges/ steht dieselbe
+ * Grafik, nur ohne den mitgelieferten Leerrand. Der Schutzabstand kommt
+ * stattdessen aus der Polsterung von .badge-link.
+ *
+ * Der Fire-TV-Schriftzug ist die dunkle Fassung fuer helle Hintergruende --
+ * auf dem Schwarz der Seite waeren "amazon" und "TV" nicht zu lesen. Beide
+ * Badges stehen deshalb auf einer hellen Flaeche, und zwar auf derselben,
+ * damit keiner der beiden Anbieter anders gewichtet wirkt. Kaeme von Amazon
+ * die weisse Fassung, koennten beide direkt auf Schwarz stehen.
+ *
+ * === Sprache ===
+ * badge nennt die Datei je Sprache. Vom Google-Badge liegt bisher nur die
+ * englische Fassung vor, deutsch bekommt sie deshalb ebenfalls -- sobald
+ * "JETZT BEI Google Play" da ist, ist es eine Zeile. Der Fire-TV-Schriftzug
+ * traegt keinen Text und gilt fuer beide Sprachen.
  */
 
-const STORES = [
-  { key: 'googlePlay', href: 'https://play.google.com/store/apps/details?id=at.uncuttv.app' },
-  { key: 'fireTv', href: 'https://www.amazon.de/UncutTV-GmbH/dp/B0DSK736VN' },
-] as const
+type Locale = 'de' | 'en'
+
+interface Store {
+  key: 'googlePlay' | 'fireTv'
+  href: string
+  /** Dateiname in public/badges/ je Sprache. */
+  badge: Record<Locale, string>
+  /** Groesse der Datei, damit vor dem Laden kein Platz nachrutscht. */
+  width: number
+  height: number
+}
+
+const STORES: Store[] = [
+  {
+    key: 'googlePlay',
+    href: 'https://play.google.com/store/apps/details?id=at.uncuttv.app',
+    // TODO: de auf 'googleplay-de.png' umstellen, sobald die deutsche Fassung da ist
+    badge: { de: 'googleplay-en.png', en: 'googleplay-en.png' },
+    width: 811,
+    height: 241,
+  },
+  {
+    key: 'fireTv',
+    href: 'https://www.amazon.de/UncutTV-GmbH/dp/B0DSK736VN',
+    badge: { de: 'firetv.png', en: 'firetv.png' },
+    width: 576,
+    height: 122,
+  },
+]
 
 export default async function AppsSection() {
   const t = await getTranslations('apps')
+  const locale = ((await getLocale()) === 'en' ? 'en' : 'de') satisfies Locale
 
   return (
     /* Polsterung in globals.css statt hier: sie muss oben denselben Sprung bei
@@ -61,12 +104,23 @@ export default async function AppsSection() {
           {STORES.map((store) => (
             <a
               key={store.key}
-              className="btn-store"
+              className="badge-link"
               href={store.href}
               target="_blank"
               rel="noopener"
             >
-              {t(store.key)}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/badges/${store.badge[locale]}`}
+                // Der Handlungsaufruf des Badges, nicht seine Gattung: wer sich
+                // die Seite vorlesen laesst, hoert, wohin der Link fuehrt.
+                alt={t(`${store.key}Alt`)}
+                width={store.width}
+                height={store.height}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
             </a>
           ))}
         </div>
