@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { onlyPublished } from '@/lib/films'
 import { enrichFilmsWithWatchState, fetchUserWatchFilmStateMap } from '@/lib/watch-film-cards'
 import { FilmRow, type FilmCardData } from '../films/FilmCatalog'
 
@@ -43,10 +44,11 @@ export default async function GenresPage({
   } = await supabase.auth.getUser()
   const watchMap = user ? await fetchUserWatchFilmStateMap(supabase, user.id) : new Map()
 
-  let query = supabase
-    .from('films')
-    .select('id, title, slug, poster_url, trailer_playback_id, year, duration_minutes, genres, is_published, blocked_in, allowed_in')
-    .eq('is_published', true)
+  const query = onlyPublished(
+    supabase
+      .from('films')
+      .select('id, title, slug, poster_url, trailer_playback_id, year, duration_minutes, genres, is_published, blocked_in, allowed_in')
+  )
 
   const { data: rows, error } = await query.order('title')
 

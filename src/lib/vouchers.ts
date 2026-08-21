@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { onlyPublished } from '@/lib/films'
 
 function getAdminClient(): SupabaseClient {
   return createClient(
@@ -79,17 +80,25 @@ export async function checkVoucher(code: string, _userId: string): Promise<Vouch
     return { valid: false, errorCode: 'alreadyRedeemed' }
   }
 
-  const { data: film } = await supabase
-    .from('films')
-    .select('id, title, slug')
+  // Ein Gutschein auf einen noch nicht veroeffentlichten Film liesse sich
+  // zwar einloesen, der Film waere danach aber nicht abspielbar -- die
+  // Detailseite leitet ihn weg. Besser hier abweisen und der Code bleibt
+  // unverbraucht, bis der Film online geht.
+  const { data: film } = await onlyPublished(
+    supabase.from('films').select('id, title, slug')
+  )
     .eq('id', voucher.film_id)
-    .single()
+    .maybeSingle()
+
+  if (!film) {
+    return { valid: false, errorCode: 'notFound' }
+  }
 
   return {
     valid: true,
     filmId: voucher.film_id,
-    filmTitle: film?.title ?? undefined,
-    filmSlug: film?.slug ?? undefined,
+    filmTitle: film.title ?? undefined,
+    filmSlug: film.slug ?? undefined,
   }
 }
 
@@ -163,6 +172,9 @@ export async function getUserVouchers(userId: string): Promise<UserVoucher[]> {
 
   if (!rows?.length) return []
 
+  // Absichtlich ohne publishedFilms: das ist die eigene Einloesehistorie des
+  // Nutzers, keine oeffentliche Liste. Wird ein Film spaeter zurueckgezogen,
+  // soll sein bereits eingeloester Gutschein nicht ohne Titel dastehen.
   const filmIds = [...new Set(rows.map((r) => r.film_id))]
   const { data: films } = await supabase
     .from('films')

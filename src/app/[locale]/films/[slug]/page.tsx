@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { onlyPublished } from '@/lib/films'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -61,13 +62,14 @@ export default async function FilmSlugPage({
     redirect(`/${locale}/auth/login?redirect=/${locale}/films/${slug}`)
   }
 
-  const { data: film, error: filmError } = await supabase
-    .from('films')
-    .select(
-      'id, title, original_title, slug, mux_playback_id, trailer_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, original_language, subtitle_languages, allowed_in, blocked_in'
-    )
+  const { data: film, error: filmError } = await onlyPublished(
+    supabase
+      .from('films')
+      .select(
+        'id, title, original_title, slug, mux_playback_id, trailer_playback_id, poster_url, backdrop_url, description, description_en, short_description, short_description_en, director, film_cast, country, year, duration_minutes, genres, language, original_language, subtitle_languages, allowed_in, blocked_in'
+      )
+  )
     .eq('slug', slug)
-    .eq('is_published', true)
     .maybeSingle()
 
   console.log('[FilmSlugPage] slug:', JSON.stringify(slug))

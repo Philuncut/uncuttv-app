@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { onlyPublished } from '@/lib/films'
 import {
   applyWatchStateToFilm,
   enrichFilmsWithWatchState,
@@ -171,12 +172,13 @@ export default async function FilmsPage({
   }
 
   // Featured (Movie of the Month)
-  let featuredQuery = supabase
-    .from('films')
-    .select(
-      'id, title, slug, poster_url, backdrop_url, trailer_playback_id, short_description, short_description_en, genres, is_published, blocked_in, allowed_in, is_featured'
-    )
-    .eq('is_published', true)
+  const featuredQuery = onlyPublished(
+    supabase
+      .from('films')
+      .select(
+        'id, title, slug, poster_url, backdrop_url, trailer_playback_id, short_description, short_description_en, genres, is_published, blocked_in, allowed_in, is_featured'
+      )
+  )
     .eq('is_featured', true)
     .limit(1)
   const { data: featuredRow } = await featuredQuery.maybeSingle()
@@ -200,10 +202,7 @@ export default async function FilmsPage({
     : null
 
   // New (last 6 by created_at)
-  let newQuery = supabase
-    .from('films')
-    .select(`${CARD_SELECT}, created_at`)
-    .eq('is_published', true)
+  const newQuery = onlyPublished(supabase.from('films').select(`${CARD_SELECT}, created_at`))
   const { data: newRows, error: newErr } = await newQuery
     .order('created_at', { ascending: false })
     .limit(6)
@@ -248,10 +247,7 @@ export default async function FilmsPage({
       const candidateIds = sortedByWatch.map(([id]) => id).slice(0, 80)
 
       if (candidateIds.length) {
-        const { data: tr } = await supabase
-          .from('films')
-          .select(CARD_SELECT)
-          .eq('is_published', true)
+        const { data: tr } = await onlyPublished(supabase.from('films').select(CARD_SELECT))
           .in('id', candidateIds)
         const orderMap = new Map(candidateIds.map((id, i) => [id, i]))
         const allowedRows = (tr ?? [])
@@ -269,7 +265,7 @@ export default async function FilmsPage({
   }
 
   // All films (catalog grid)
-  let allQuery = supabase.from('films').select(CARD_SELECT).eq('is_published', true)
+  const allQuery = onlyPublished(supabase.from('films').select(CARD_SELECT))
   const { data: rows, error } = await allQuery.order('title')
 
   if (error) {

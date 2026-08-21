@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { onlyPublished } from '@/lib/films'
 import Mux from '@mux/mux-node'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
@@ -75,11 +76,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing playbackId' }, { status: 400 })
   }
 
-  // Territory geoblocking (server-side, prevents geo bypass via direct token calls)
-  if (filmId && country) {
-    const { data: film } = await adminDb
-      .from('films')
-      .select('id, allowed_in, blocked_in')
+  // Veroeffentlichung und Territorium serverseitig, damit ein direkter Aufruf
+  // mit bekannter Playback-ID an beidem nicht vorbeikommt.
+  //
+  // Die Abfrage haengt nur noch am Film, nicht mehr zusaetzlich am Land: war
+  // kein Land bekannt, fand vorher ueberhaupt keine Pruefung statt, und ein
+  // noch nicht veroeffentlichter Film liess sich abspielen. Das Territorium
+  // wird weiterhin nur geprueft, wenn ein Land vorliegt.
+  if (filmId) {
+    const { data: film } = await onlyPublished(
+      adminDb.from('films').select('id, allowed_in, blocked_in')
+    )
       .eq('id', filmId)
       .maybeSingle()
 
@@ -87,7 +94,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Film not found' }, { status: 403 })
     }
 
-    if (!isFilmAllowedForCountry(film, country)) {
+    if (country && !isFilmAllowedForCountry(film, country)) {
       return NextResponse.json({ error: 'No access in your territory' }, { status: 403 })
     }
   }
