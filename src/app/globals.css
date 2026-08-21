@@ -96,8 +96,12 @@ body::before {
    Abstand als margin statt gap steht in LabelMarquee.tsx. */
 .label-marquee-section {
   /* Weniger Luft als die Abschnitte darueber und darunter: die Leiste ist ein
-     Uebergang zwischen Manifest und Filmemacher-Abschnitt, kein eigenes Kapitel. */
-  padding: clamp(56px, 8vw, 104px) 0;
+     Uebergang zwischen Manifest und Filmemacher-Abschnitt, kein eigenes Kapitel.
+     Nach unten noch einmal deutlich weniger als nach oben: der rote Strich der
+     Filmemacher-Ueberschrift soll kurz unter den Logos ansetzen. Die Haelfte
+     dieses Abstands steht hier, die andere als obere Polsterung in
+     FilmmakersSection -- beide zusammen ergeben ihn erst. */
+  padding: clamp(56px, 8vw, 104px) 0 clamp(24px, 3vw, 44px);
   background: var(--black);
 
   /* Verdoppelt gegenueber der ersten Fassung: bei 40 px waren die Logos auf

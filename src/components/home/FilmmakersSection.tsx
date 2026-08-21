@@ -21,10 +21,13 @@ export default async function FilmmakersSection() {
   return (
     <section
       style={{
-        // Deutlich mehr Luft als in der USP-Sektion (dort 100px), und auf dem
-        // schwarzen Grund statt auf --anthrazit wie das Manifest darueber:
+        // Nach unten deutlich mehr Luft als in der USP-Sektion (dort 100px),
+        // und auf dem schwarzen Grund statt auf --anthrazit wie das Manifest:
         // der Wechsel trennt die beiden ruhigen Abschnitte voneinander.
-        padding: 'clamp(88px, 14vw, 176px) 24px',
+        // Oben dagegen wenig: darueber steht die Logoleiste, und der rote
+        // Strich soll kurz unter den Logos ansetzen. Die andere Haelfte dieses
+        // Abstands ist die untere Polsterung von .label-marquee-section.
+        padding: 'clamp(24px, 3vw, 44px) 24px clamp(88px, 14vw, 176px)',
         background: 'var(--black)',
       }}
     >
