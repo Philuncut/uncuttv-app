@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { hasSubscriptionAccess } from '@/lib/access'
+import { hasComplimentaryMembership, hasSubscriptionAccess } from '@/lib/access'
 
 /**
  * Alle Seiten, die denselben Filmkatalog zeigen und deshalb dasselbe Gate
@@ -56,6 +56,13 @@ export async function proxy(request: NextRequest) {
   }
 
   let hasAccess = await hasSubscriptionAccess(supabase, user.id)
+
+  // Gratis-Mitgliedschaft eines Rechteinhabers: dritter Zugangsweg neben Abo
+  // und Gutschein. Der Cookie-Client traegt das Nutzer-Token, auth.uid() ist
+  // hier also gesetzt.
+  if (!hasAccess) {
+    hasAccess = await hasComplimentaryMembership(supabase)
+  }
 
   if (!hasAccess) {
     const { data: vouchers } = await supabase

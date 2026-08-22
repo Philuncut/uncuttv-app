@@ -45,3 +45,52 @@ export async function hasSubscriptionAccess(
 
   return Boolean(data && data.length > 0)
 }
+
+/**
+ * Gratis-Mitgliedschaft eines Rechteinhabers.
+ *
+ * Kein eigenes Feld und kein Abo-Eintrag: die Datenbank rechnet den Zustand
+ * aus den Lizenzen -- aktiv, solange mindestens eine Lizenz dieses
+ * Rechteinhabers laeuft. Laeuft die letzte ab, endet der Zugang im selben
+ * Moment, ohne dass irgendwo etwas umgestellt werden muss.
+ *
+ * Bewusst NICHT in hasSubscriptionAccess() hineingezogen: die Funktion
+ * beantwortet die Frage nach dem Abo und soll das weiter tun. Die
+ * Mitgliedschaft ist ein dritter Zugangsweg neben Abo und Gutschein und
+ * steht deshalb daneben.
+ *
+ * Diese Fassung arbeitet ueber auth.uid() und taugt nur mit einem
+ * Nutzer-Token -- Cookie-Client oder Bearer-Token. Fuer Aufrufe mit dem
+ * Service-Role-Client gibt es hasComplimentaryMembershipFor().
+ */
+export async function hasComplimentaryMembership(
+  supabase: SupabaseClient
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc('has_complimentary_membership')
+
+  if (error) {
+    console.error('hasComplimentaryMembership:', error.message)
+    return false
+  }
+  return data === true
+}
+
+/**
+ * Dasselbe fuer einen genannten Nutzer.
+ *
+ * Noetig ueberall dort, wo mit dem Service-Role-Client gefragt wird: dort ist
+ * auth.uid() null, und die Fassung oben gaebe immer false zurueck -- ein
+ * Rechteinhaber saehe den Katalog und bekaeme trotzdem kein Abspieltoken.
+ */
+export async function hasComplimentaryMembershipFor(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc('membership_active_for', { p_user: userId })
+
+  if (error) {
+    console.error('hasComplimentaryMembershipFor:', error.message)
+    return false
+  }
+  return data === true
+}

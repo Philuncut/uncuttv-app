@@ -3,7 +3,7 @@ import { onlyPublished } from '@/lib/films'
 import Mux from '@mux/mux-node'
 import { userHasVoucherForFilm } from '@/lib/vouchers'
 import { resolveRequestUser } from '@/lib/api-auth'
-import { hasSubscriptionAccess } from '@/lib/access'
+import { hasComplimentaryMembershipFor, hasSubscriptionAccess } from '@/lib/access'
 
 const mux = new Mux({
   tokenId: process.env.MUX_TOKEN_ID!,
@@ -40,7 +40,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const hasSubscription = await hasSubscriptionAccess(adminDb, user.id)
+  // adminDb ist der Service-Role-Client -- auth.uid() ist hier null. Deshalb
+  // die Fassung mit Nutzerkennung, sonst waere die Mitgliedschaft hier immer
+  // false und der Rechteinhaber bekaeme kein Abspieltoken.
+  const hasSubscription =
+    (await hasSubscriptionAccess(adminDb, user.id)) ||
+    (await hasComplimentaryMembershipFor(adminDb, user.id))
 
   const playbackId = req.nextUrl.searchParams.get('playbackId')
   const filmId = req.nextUrl.searchParams.get('filmId')
